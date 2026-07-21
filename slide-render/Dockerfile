@@ -1,0 +1,29 @@
+# slide-render — Marp + Chromium + Thai fonts. One image; not in the engine base.
+FROM node:20-bookworm-slim
+
+# Chromium (Marp renders PDF + PNG via it) + Thai fonts (fallback to @font-face in theme)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      chromium fonts-thai-tlwg fonts-noto-core fontconfig ca-certificates tini \
+    && rm -rf /var/lib/apt/lists/*
+
+# Marp uses the system Chromium (skip its bundled download).
+ENV CHROME_PATH=/usr/bin/chromium \
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    MARP_BIN=marp \
+    NODE_ENV=production
+
+WORKDIR /app
+COPY package.json ./
+RUN npm install --omit=dev && npm install -g @marp-team/marp-cli@4
+
+COPY server.js ./
+COPY themes ./themes
+# themes/fonts/*.ttf also installed system-wide (fc fallback beside the @font-face)
+RUN cp themes/fonts/*.ttf /usr/share/fonts/truetype/ && fc-cache -f
+
+EXPOSE 8080
+# tini reaps zombie Chromium procs; chromium needs --no-sandbox in a container
+# (isolation comes from the container + no-network render, see README security note).
+ENV CHROMIUM_FLAGS="--no-sandbox --disable-dev-shm-usage"
+ENTRYPOINT ["/usr/bin/tini","--"]
+CMD ["node","server.js"]

@@ -137,7 +137,11 @@ Plugin นี้ install ได้เลยผ่าน local marketplace (`.cla
 > marketplace root กับ plugin เป็นโฟลเดอร์เดียวกัน (ตัว `thai-book-production/` นี้เอง).
 > compiler สไลด์ใช้ `pyyaml` — ถ้าเครื่องไหนไม่มี: `pip install pyyaml --break-system-packages`.
 
-## สถานะ (v1.7.0 — RELEASE)
+## สถานะ (v1.8.0 — RELEASE)
+- ✅ **สไลด์ design-first ผ่าน Marp + CSS** (ทางเลือกใหม่ แทน python-pptx/soffice ที่ดีไซน์ห่วย + พังบน macOS):
+  `slides_yaml2marp.py` แปลง chNN.yaml → Marp-md (ครบ 12 types, theme thai-tech navy/teal/gold) →
+  service `slide-render/` (Marp+Chromium+Thai fonts, `POST /slides` → pdf+png). **frontend→Rust→API เท่านั้น**;
+  PPTX/soffice ยังเป็น fallback (offline / ต้องการ editable pptx)
 - ✅ **`kind: book | mini-book | article`** (ใน `book.yaml → book:`) — spectrum 3 ระดับ:
 
   | | chapters | บทที่ N | TOC | approval | back-matter | MEDIA |

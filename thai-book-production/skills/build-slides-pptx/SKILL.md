@@ -30,11 +30,34 @@ description: >
 | build output | `build/` |
 
 
-# Build Slides PPTX — Standalone Renderer
+# Build Slides — Marp render (preferred) or standalone PPTX (fallback)
 
-Renders `media/slides/chNN.yaml` (the compiled slide build artifact) into a branded `.pptx`.
-**No external `yaml2pptx.py` / template repo needed** — the whole design lives in
-`scripts/slides2pptx.py` and the bundled fonts.
+Renders `media/slides/chNN.yaml` into slide artifacts. **Two paths:**
+
+## ⭐ Preferred: Marp render (design-first, no LibreOffice)
+Design lives in a **CSS theme** rendered by Chromium — far better looking than python-pptx,
+and it drops the flaky `soffice` step (fixes macOS). Two steps:
+
+1. **Compile** `chNN.yaml → Marp markdown` (maps all 12 slide types to the `thai-tech` theme):
+   ```bash
+   python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-slides-pptx/scripts/slides_yaml2marp.py \
+     {slides}/chNN.yaml -o {build}/slides/chNN.marp.md
+   ```
+2. **Render** via the `slide-render` service (Marp + Chromium + Thai fonts) → `chNN.pdf` +
+   per-slide PNGs. **Do NOT call the API from a shell in the frontend** — the render goes
+   through the thClaws engine (which holds the gateway token). When the engine exposes the
+   built-in **`RenderSlides`** tool, call that with the marp-md + any `{{image:}}`/`{{screenshot:}}`
+   files; it relays to `slide-render` and writes `{build}/slides/preview/chNN/slide-*.png`.
+   Until then, POST the marp-md to `$SLIDE_RENDER_API/slides` **from the engine's own bash**
+   (backend-initiated, token injected server-side) and unzip `deck.pdf` + `slides/*.png`.
+
+Service + theme + API contract: `slide-render/` (sibling of this plugin). The 12-type ↔ Marp-md
+mapping is `scripts/slides_yaml2marp.py`.
+
+## Fallback: standalone PPTX (offline / no render service)
+When no `slide-render` API is reachable (offline, or an editable `.pptx` is required), use the
+bundled `scripts/slides2pptx.py` (python-pptx) + `slides2preview.py` (soffice→pdf→png) below.
+The whole PPTX design lives in `slides2pptx.py` and the bundled fonts — no external repo needed.
 
 ## Inputs & output
 - Input: `{slides}/chNN.yaml` (produced by `create-book-yaml` → `slides_md2yaml.py`).
