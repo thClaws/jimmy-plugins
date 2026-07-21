@@ -1,0 +1,14 @@
+{
+  "name": "thaigpt",
+  "owner": {
+    "name": "Jimmy",
+    "email": "jimmy@pinnshop.com"
+  },
+  "plugins": [
+    {
+      "name": "thai-book-production",
+      "source": "./",
+      "description": "End-to-end technical/tutorial book production pipeline for Claude Cowork — outline, references, chapter writing, content & language QC, apparatus, Markdown-authored slides compiled to the video YAML pipeline, translation, and epub/PDF build. Thai-first; keeps technical terms in English."
+    }
+  ]
+}

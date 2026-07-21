@@ -1,0 +1,133 @@
+---
+name: generate-image
+description: >
+  Generate content figures for the book with Pinn.ai (mcp__pinn-ai__text2image, default model
+  google/nano-banana-2 which renders Thai + English text) — the LLM authors the prompt at
+  generation time from the figure's caption and chapter context. Produces CONTENT-COMMUNICATING
+  figures (`{{image:...}}`): infographics, diagrams, flowcharts, charts/graphs, comparison tables,
+  and annotated illustrations with on-image labels — NOT abstract art, and NOT real UI screenshots
+  (those are `{{screenshot:...}}`, handled by mockup-screenshot). Use when the user asks to
+  "สร้างรูป", "generate image", "ทำภาพประกอบ", "ทำ infographic", "ทำไดอะแกรม/แผนภูมิ/กราฟ",
+  "gen ภาพ AI", "make illustrations/diagrams", or when the router reaches the MEDIA stage and
+  generated figures are still `needed`.
+---
+
+## Paths (thai-book-production layout)
+
+หนึ่ง working folder = หนังสือหนึ่งเล่ม Resolve ทุก path จาก `book.yaml → layout:` ที่ root
+ของ folder — **ห้าม hardcode** ถ้าไม่มี `book.yaml` แปลว่าไม่ได้อยู่ใน book folder ให้ให้
+`book-router` scaffold ก่อน ค่า default:
+
+| what | path |
+|------|------|
+| chapters | `chapters/chNN.md` |
+| outline | `outline/outline.md`, `outline/plan.md` |
+| references | `refs/docs/`, `refs/blogs/` |
+| slides | `media/slides/chNN.slides.md` → `chNN.yaml` |
+| screenshots (จริง, จับจากโปรแกรม) | `media/screenshots/` (+ `inventory.json`) |
+| generated (AI, Pinn.ai) | `media/generated/` (+ `inventory.json`) |
+| reports (QC ทุกชนิด) | `reports/chNN.audit.md`, `reports/chNN.proofread.md`, `reports/chNN.yaml-audit.md` |
+| apparatus | `apparatus/glossary.md`, `apparatus/index.md` |
+| translations | `translations/<lang>/chapters/chNN.md` |
+| assets | `assets/` |
+| build output | `build/` |
+
+
+# Generate Image — Content Figures (Pinn.ai)
+
+Two image kinds in this book, kept in **separate folders**:
+- **screenshot** — real captures of the app UI → `{screenshots}/*.png`, referenced `{{screenshot:file|caption}}`.
+  Precious, hand-captured (or UI mockups via `mockup-screenshot`). **This skill never touches these.**
+- **generated** — AI figures → `{generated}/<id>.png`, referenced `{{image:id|caption}}`.
+  Regenerable. **This skill owns these.**
+
+## Make figures that TEACH, not decoration
+
+The default model `google/nano-banana-2` **renders legible text in both Thai and English** and is
+strong at **infographics, diagrams, flowcharts, charts/graphs, comparison tables, timelines, concept
+maps, and annotated illustrations**. Use that. **Every generated figure should communicate the
+chapter's content as concretely as possible — NOT abstract mood art.** A reader should learn
+something from the picture alone.
+
+Prefer, in order:
+1. **Diagram / flowchart** — steps, pipelines, how something works (boxes + arrows + labels).
+2. **Comparison** — before/after, A vs B, old way vs Cowork (two labeled columns).
+3. **Infographic** — a labeled scene or breakdown of a feature with callouts and short text.
+4. **Chart / graph** — when the chapter has numbers or trends (bar, line, simple stats).
+5. **Annotated illustration** — a concrete scene with labels pointing at the important parts.
+
+Only fall back to a purely illustrative "hero" image when the concept truly has no structure to show.
+**Put real, correctly-spelled text INTO the image** (Thai headings + English technical terms, step
+numbers, labels) wherever it aids understanding — that is the point of using nano-banana-2.
+
+## Config (from `book.yaml → style.image_gen`)
+- `model` (default `google/nano-banana-2`) — Pinn.ai model_id. Confirm/choose with
+  `mcp__pinn-ai__list_models` (capability `create_image`).
+- `aspect_ratio` (default `16:9`).
+- `art_style` — house visual system prepended to **every** prompt so the whole book looks like one
+  set: an **informative infographic** look (flat vector, house palette, clear labeled diagrams,
+  legible Thai + English typography). Keep it consistent; don't drift per image.
+
+## Registry — `{generated}/inventory.json`
+```json
+{
+  "generated": [
+    {
+      "id": "ch01-chatbot-vs-cowork",
+      "chapter": 1,
+      "caption": "ไดอะแกรมเปรียบเทียบแชตบอตทั่วไป vs Cowork (ทำงานกับไฟล์จริง)",
+      "prompt": "",                     // filled with the FINAL prompt actually used (incl. on-image text)
+      "model": "google/nano-banana-2",
+      "aspect_ratio": "16:9",
+      "file": "ch01-chatbot-vs-cowork.png",
+      "status": "needed"                // needed | generated
+    }
+  ]
+}
+```
+
+## Process
+1. Resolve paths + `style.image_gen` from `book.yaml`. Read `{generated}/inventory.json` (create
+   `{ "generated": [] }` if absent).
+2. **Discover work.** Union of:
+   - entries with `status: needed` in the registry, and
+   - every `{{image:<id>|<caption>}}` placeholder found in `{chapters}/*.md` that has no registry
+     entry yet → add one (`status: needed`, caption from the placeholder, `chapter` from the file).
+   Report any placeholder whose id duplicates a `{{screenshot:...}}` (they must not collide).
+3. **For each needed image, author the prompt (LLM, at generation time):**
+   - Read the caption + the surrounding paragraph(s) in the chapter for the actual teaching point.
+   - **Pick the figure type** that explains it best (diagram / comparison / infographic / chart /
+     annotated illustration — see "Make figures that TEACH" above). Content clarity beats decoration.
+   - Compose the prompt with `art_style` **first**, then describe the **layout** (boxes, arrows,
+     columns, icons, data points) AND the **exact on-image text to render**. nano-banana-2 renders
+     Thai + English, so give the literal strings: Thai headings/labels, English technical terms
+     (Cowork, Plugin, MCP…), step numbers, short callouts. Keep on-image text short and legible.
+   - **Spell every Thai (and English) string correctly** — it becomes part of the book. If a chart
+     shows numbers, state the exact values and axis labels in the prompt.
+   - The prompt body may be written in English (models parse it best) while the **text to be drawn
+     inside the image is quoted verbatim** in whatever language it should appear.
+   - Avoid: real public figures, brand logos, copyrighted characters, and tiny unreadable paragraphs
+     of text (use a few clear labels, not walls of text).
+4. **Generate:**
+   ```
+   mcp__pinn-ai__text2image(prompt=<authored>, model=<style.image_gen.model>,
+                             aspect_ratio=<style.image_gen.aspect_ratio>)
+   ```
+5. **Save.** Download the returned full-resolution link to `{generated}/<id>.png`
+   (e.g. `curl -L -o "{generated}/<id>.png" "<download-url>"`).
+6. **Update the registry entry:** set `status: generated`, `file: <id>.png`, and store the **final
+   prompt used** in `prompt` (so it's reproducible / editable next run).
+7. **Present** each result to the user with the download link, and offer variations/edits
+   (per Pinn.ai usage). Batch: process all needed images, then summarize id → status.
+
+## Regeneration
+- Re-run only regenerates `status: needed`. To redo one, set that entry back to `needed` (or the
+  user says "regenerate ch01-hero") and run again — overwrites `<id>.png`.
+- Because generated images are regenerable, they can be git-ignored; the registry `prompt` is the
+  real source of truth for each figure.
+
+## Guardrails
+- Only ever writes under `{generated}/` and its `inventory.json`. Never touches `{screenshots}/`.
+- Keep one consistent `art_style` across the book — visual coherence matters more than per-image flair.
+- Present the download link for every generated image; get user sign-off before wide regeneration.
+- If Pinn.ai is unavailable, report which ids are still `needed` and stop — don't silently skip.

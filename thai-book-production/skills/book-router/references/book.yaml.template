@@ -1,0 +1,77 @@
+# book.yaml — manifest ต่อหนังสือ 1 เล่ม (single source of truth)
+# ทุก skill อ่าน layout: จากไฟล์นี้เพื่อ resolve path — ห้าม hardcode
+
+book:
+  slug: my-book                 # ใช้เป็นชื่อไฟล์ build เช่น my-book.epub
+  title: ""                     # ชื่อเต็มบนปก
+  subtitle: ""
+  author: ""
+  publisher: ""
+  language: th                  # ISO 639-1
+  keep_english_terms: true      # คงศัพท์เทคนิคเป็นอังกฤษ
+
+# path config — ทุกค่าสัมพันธ์กับ folder root; แก้ที่นี่ที่เดียวมีผลทั้ง pipeline
+layout:
+  outline: outline              # outline/outline.md, outline/plan.md
+  refs_docs: refs/docs
+  refs_blogs: refs/blogs
+  chapters: chapters            # chapters/chNN.md
+  chapter_pattern: "ch{NN}.md"
+  slides: media/slides          # source: chNN.slides.md (แก้มือ) → build: chNN.yaml (compile)
+  slides_src_pattern: "ch{NN}.slides.md"
+  slides_build_pattern: "ch{NN}.yaml"
+  screenshots: media/screenshots   # ภาพจริงจับจากโปรแกรม + inventory.json ({{screenshot:...}})
+  generated: media/generated       # ภาพ AI (Pinn.ai) + inventory.json ({{image:...}})
+  apparatus: apparatus          # apparatus/glossary.md, apparatus/index.md
+  translations: translations    # translations/<lang>/chapters/chNN.md
+  assets: assets
+  reports: reports              # reports/chNN.<audit|proofread|yaml-audit>.md
+  build: build
+
+# ทะเบียนบท — book-router ใช้กำหนด scope + คำนวณ state
+# page_target ใช้โดย audit-chapter (ตรวจความหนา ±20%)
+chapters:
+  - id: 1
+    part: ""
+    title: ""
+    page_target: 15
+  # - id: 2
+  #   ...
+
+# เป้าหมาย output
+targets:
+  epub: true
+  pdf: false
+  translations: []              # เช่น [en] เพื่อสร้างฉบับอังกฤษ
+
+style:
+  fonts: [Sarabun]
+  index_locator: section        # section (anchor) | page  — page ต้อง build ก่อน
+  image_gen:                    # generate-image (Pinn.ai) อ่านค่านี้ — คุมสไตล์ให้ทั้งเล่มเหมือนกัน
+    model: google/nano-banana-2      # model_id จาก mcp__pinn-ai__list_models (capability create_image)
+    aspect_ratio: "16:9"        # 1:1 | 16:9 | 9:16 | 4:3 | 3:4 | 3:2 | 2:3
+    art_style: "clean modern infographic style, flat vector, soft teal & navy palette with warm accent, clear labeled diagrams/icons, legible Thai and English typography, content-first (not abstract)"
+  tts:                          # generate-tts (Pinn.ai) อ่านค่านี้
+    voice: Charon               # เสียงพากย์ default (ชาย/informative)
+    model: google/gemini-3.1-flash-tts
+    style_hint: ""              # เช่น "Say warmly, like a friendly trainer:"
+  # pptx_theme:                 # (optional) override สไตล์ PPTX — inline dict หรือ path ไป theme.json
+  #   palette: { teal: "0F766E", gold: "CA8A04" }
+  #   fonts:   { heading: Prompt, body: Sarabun }
+  #   sizes:   { title: 34 }
+
+# toolchain — override ได้ที่นี่ (default ตาม Decisions log ใน SPEC §8)
+cover:
+  tool: nano-banana             # nano-banana (AI, default) | canva | programmatic
+  aspect: "3:4"                 # สัดส่วนปก AI: 3:4 | 2:3 | 9:16
+  frame: flat                   # flat (ปกตรง + รอยสัน + เงา) | bleed (เต็มขอบ ไม่มีขอบขาว)
+  art_style: "modern clean tech, flat vector with subtle neon glow, deep navy + teal + gold, legible Thai+English"
+  motif: ""                     # เช่น "glowing teal node diagram of AI agents"
+  epub_px: [1600, 2560]         # front cover สำหรับ epub
+  print_trim_mm: [152, 229]     # 6x9in — ใช้เมื่อทำฉบับพิมพ์
+  bleed_mm: 3
+  paper_thickness_mm: 0.0572    # ใช้คำนวณสันปก: spine = pages × ค่านี้
+build:
+  epub_engine: pandoc           # pandoc
+  pdf_engine: xelatex           # xelatex (Thai-safe) | weasyprint | none
+  validate: [epubcheck]         # ตรวจ epub หลัง build
