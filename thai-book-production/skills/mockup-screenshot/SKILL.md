@@ -22,7 +22,7 @@ description: >
 | references | `refs/docs/`, `refs/blogs/` |
 | slides | `media/slides/chNN.yaml` |
 | screenshots (จริง, จับจากโปรแกรม) | `media/screenshots/` (+ `inventory.json`) |
-| generated (AI, Pinn.ai) | `media/generated/` (+ `inventory.json`) |
+| generated (AI, built-in TextToImage) | `media/generated/` (+ `inventory.json`) |
 | reports (QC ทุกชนิด) | `reports/chNN.audit.md`, `reports/chNN.proofread.md`, `reports/chNN.yaml-audit.md` |
 | apparatus | `apparatus/glossary.md`, `apparatus/index.md` |
 | translations | `translations/<lang>/chapters/chNN.md` |
@@ -39,7 +39,7 @@ chapter writing to proceed before real screenshots are captured.
 kind: UI captures of the app, living in `{screenshots}/` (`media/screenshots/`). It produces stand-in
 mockups until the real capture exists. It does **NOT** handle AI illustrations — those are the
 **generated** kind (`{{image:...}}`, `media/generated/`) and belong to the `generate-image` skill
-(Pinn.ai). Never write into `{generated}/` from here.
+(built-in TextToImage). Never write into `{generated}/` from here.
 
 ## What It Does
 

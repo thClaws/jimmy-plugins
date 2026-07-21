@@ -24,7 +24,7 @@ description: >
 | chapters | `chapters/chNN.md` |
 | slides | `media/slides/chNN.slides.md` → `chNN.yaml` (build artifact) |
 | screenshots (จริง, จับจากโปรแกรม) | `media/screenshots/` (+ `inventory.json`) |
-| generated (AI, Pinn.ai) | `media/generated/` (+ `inventory.json`) |
+| generated (AI, built-in TextToImage) | `media/generated/` (+ `inventory.json`) |
 | **slides pptx (output)** | `build/slides/chNN.pptx` |
 | reports (QC ทุกชนิด) | `reports/chNN.audit.md`, `reports/chNN.proofread.md`, `reports/chNN.yaml-audit.md` |
 | build output | `build/` |

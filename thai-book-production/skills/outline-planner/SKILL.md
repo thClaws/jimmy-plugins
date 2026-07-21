@@ -16,7 +16,7 @@ description: สร้างชุดวางแผนหนังสือ tec
 | references | `refs/docs/`, `refs/blogs/` |
 | slides | `media/slides/chNN.yaml` |
 | screenshots (จริง, จับจากโปรแกรม) | `media/screenshots/` (+ `inventory.json`) |
-| generated (AI, Pinn.ai) | `media/generated/` (+ `inventory.json`) |
+| generated (AI, built-in TextToImage) | `media/generated/` (+ `inventory.json`) |
 | reports (QC ทุกชนิด) | `reports/chNN.audit.md`, `reports/chNN.proofread.md`, `reports/chNN.yaml-audit.md` |
 | apparatus | `apparatus/glossary.md`, `apparatus/index.md` |
 | translations | `translations/<lang>/chapters/chNN.md` |

@@ -48,7 +48,7 @@ QC          audit-chapter → proofread → fix-chapter        (loops per chapte
             → ✋ HUMAN: adjust content · capture real screenshots to replace mockups
 MEDIA       create-book-yaml (slide layout + VO script) → audit-yaml
             → build-slides-pptx/slides2preview (render slide images — deterministic)
-            → generate-tts (Pinn.ai text2speech — per-slide WAV)
+            → generate-tts (built-in TextToSpeech — per-slide WAV)
             → build-chapter-video (ffmpeg: slide video → chapter video — deterministic)
 APPARATUS   index-glossary
 LOCALIZE    translate
@@ -121,7 +121,7 @@ Priority (ตรงกับ workflow: init → seed refs → manifest → outli
 7. Audit report has open CRITICAL/MAJOR → **fix-chapter**, then **proofread**
    (คนปรับเนื้อหาเองได้ตลอดช่วงนี้ — router แค่ตรวจ state ใหม่)
 8. Unresolved images: `{{screenshot:...}}` without a file → **mockup-screenshot**;
-   `{{image:id}}` with registry `status: needed` → **generate-image** (Pinn.ai)
+   `{{image:id}}` with registry `status: needed` → **generate-image** (built-in TextToImage)
 9. **HUMAN GATE — real screenshots:** chapter clean but inventory still has
    `status: mockup` entries → remind the human to capture real screenshots and replace
    the mockup files (same filename), then mark `status: real`. Slides/video may proceed
@@ -131,7 +131,7 @@ Priority (ตรงกับ workflow: init → seed refs → manifest → outli
 11. Slides YAML clean but no pptx / slide images (or older than the YAML) →
    **build-slides-pptx** (`slides2preview.py` — pptx + PDF + per-slide PNGs, deterministic)
 12. Slide images ready but `{build}/audio/chNN/` incomplete → **generate-tts**
-   (Pinn.ai text2speech ต่อสไลด์จาก notes, deterministic naming)
+   (built-in TextToSpeech ต่อสไลด์จาก notes, deterministic naming)
 13. Slide images + TTS ready but no `{build}/video/chNN.mp4` → **build-chapter-video**
    (`slides2video.py` — ffmpeg: ภาพ+เสียงต่อสไลด์ → ต่อเป็นวิดีโอทั้งบท, deterministic)
 14. Chapters + media done → book-level: **index-glossary** → **translate** (if

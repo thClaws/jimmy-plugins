@@ -36,7 +36,7 @@ slides:
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `type` | string | Yes | Slide layout type (see below) |
-| `notes` | string | No | Speaker notes. Used as TTS input by `generate-tts` (Pinn.ai). Multi-line with `\|` block scalar |
+| `notes` | string | No | Speaker notes. Used as TTS input by `generate-tts` (built-in TextToSpeech). Multi-line with `\|` block scalar |
 | `broll` | list | No | B-roll visual metadata for video production (see B-Roll section) |
 
 ---
@@ -439,7 +439,7 @@ python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-slides-pptx/scripts/slides2preview.py
   contact sheet, `chNN-image.pptx` (font-proof)
 
 ### YAML notes → TTS audio (`generate-tts` skill)
-- Per-slide `notes:` → `mcp__pinn-ai__text2speech` → `build/audio/chNN/slide-NN.wav` + manifest
+- Per-slide `notes:` → `TextToSpeech` → `build/audio/chNN/slide-NN.wav` + manifest
 - Voice/model configured in `book.yaml → style.tts`
 
 ### Slide images + audio → chapter video (`build-chapter-video`)

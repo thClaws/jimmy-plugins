@@ -26,7 +26,7 @@ triggers:
 | slides (source, ตรวจ+แก้ที่นี่) | `media/slides/chNN.slides.md` |
 | slides (build artifact) | `media/slides/chNN.yaml` (regenerate เท่านั้น ห้ามแก้มือ) |
 | screenshots (จริง, จับจากโปรแกรม) | `media/screenshots/` (+ `inventory.json`) |
-| generated (AI, Pinn.ai) | `media/generated/` (+ `inventory.json`) |
+| generated (AI, built-in TextToImage) | `media/generated/` (+ `inventory.json`) |
 | reports (QC ทุกชนิด) | `reports/chNN.audit.md`, `reports/chNN.proofread.md`, `reports/chNN.yaml-audit.md` |
 | apparatus | `apparatus/glossary.md`, `apparatus/index.md` |
 | translations | `translations/<lang>/chapters/chNN.md` |

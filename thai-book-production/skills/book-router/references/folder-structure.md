@@ -29,7 +29,7 @@
 │   ├── screenshots/             ← ภาพจริงจับจากโปรแกรม ({{screenshot:...}})
 │   │   ├── inventory.json       ← registry ภาพจริง (list/mockup-screenshot)
 │   │   └── *.png
-│   └── generated/               ← ภาพ AI สร้างด้วย Pinn.ai ({{image:...}})
+│   └── generated/               ← ภาพ AI สร้างด้วย built-in TextToImage ({{image:...}})
 │       ├── inventory.json       ← registry ภาพ AI (id, caption, prompt, model, status) — generate-image
 │       └── <id>.png
 │
@@ -67,7 +67,7 @@
 - translation: `translations/<lang>/chapters/ch{NN}.md` (lang = ISO 639-1: en, ja, …)
 - ภาพจริง (screenshot): ไฟล์ `.png` ใน `media/screenshots/` — อ้างในบทด้วย `{{screenshot:ไฟล์|คำอธิบาย}}`
 - ภาพ AI (generated): ไฟล์ `<id>.png` ใน `media/generated/` — อ้างในบทด้วย `{{image:id|คำอธิบาย}}`
-  โดย `generate-image` (Pinn.ai) เป็นตัวสร้าง; LLM แต่ง prompt ตอน generate
+  โดย `generate-image` (built-in TextToImage) เป็นตัวสร้าง; LLM แต่ง prompt ตอน generate
 - ทุก path config อยู่ใน `book.yaml → layout:` — ค่าข้างบนคือ default หากไม่ override
 
 ## การตรวจว่าอยู่ใน book folder หรือไม่

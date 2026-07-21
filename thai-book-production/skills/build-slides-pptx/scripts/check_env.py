@@ -34,7 +34,7 @@ RECOMMENDED = [
 ]
 # (cmd, stage, required_for_stage?)
 EXTERNAL = [
-    ("curl", "generate-image (ดาวน์โหลดภาพจาก Pinn.ai)"),
+    ("curl", "optional — media downloads (built-in tools write files directly)"),
     ("soffice", "slides2preview.py (แปลง .pptx เป็น PDF เพื่อพรีวิว/font-proof)"),
     ("pdftoppm", "slides2preview.py (แตก PDF เป็น PNG รายสไลด์ — poppler-utils)"),
     ("fc-match", "slides2preview.py (ด่านตรวจฟอนต์ก่อนเรนเดอร์ — fontconfig)"),

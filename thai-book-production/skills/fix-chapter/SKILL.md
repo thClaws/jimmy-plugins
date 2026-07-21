@@ -21,7 +21,7 @@ description: >
 | references | `refs/docs/`, `refs/blogs/` |
 | slides | `media/slides/chNN.yaml` |
 | screenshots (จริง, จับจากโปรแกรม) | `media/screenshots/` (+ `inventory.json`) |
-| generated (AI, Pinn.ai) | `media/generated/` (+ `inventory.json`) |
+| generated (AI, built-in TextToImage) | `media/generated/` (+ `inventory.json`) |
 | reports (QC ทุกชนิด) | `reports/chNN.audit.md`, `reports/chNN.proofread.md`, `reports/chNN.yaml-audit.md` |
 | apparatus | `apparatus/glossary.md`, `apparatus/index.md` |
 | translations | `translations/<lang>/chapters/chNN.md` |
@@ -171,7 +171,7 @@ Now rewrite the chapter applying ALL planned fixes. Follow these rules:
 - **Concrete examples** — every concept should have a practical example
 - **Screenshot format** (real UI): `{{screenshot:filename.png|คำอธิบายภาษาไทย}}`
 - **AI illustration format** (concept art): `{{image:ch-id|คำอธิบายภาษาไทย}}` — resolved by
-  `generate-image` (Pinn.ai); id is kebab-case, no `.png`. Don't reuse an id across both kinds.
+  `generate-image` (built-in TextToImage); id is kebab-case, no `.png`. Don't reuse an id across both kinds.
 - **ONLY use screenshot filenames that exist in `media/screenshots/` (per inventory.json)** — never invent filenames
 
 ### For Thin Chapters (under 5,000 words)

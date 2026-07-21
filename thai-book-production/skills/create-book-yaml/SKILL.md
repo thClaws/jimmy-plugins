@@ -25,7 +25,7 @@ description: >
 | slides (source, แก้มือ) | `media/slides/chNN.slides.md` |
 | slides (build artifact) | `media/slides/chNN.yaml` (compile จาก .slides.md) |
 | screenshots (จริง, จับจากโปรแกรม) | `media/screenshots/` (+ `inventory.json`) |
-| generated (AI, Pinn.ai) | `media/generated/` (+ `inventory.json`) |
+| generated (AI, built-in TextToImage) | `media/generated/` (+ `inventory.json`) |
 | reports (QC ทุกชนิด) | `reports/chNN.audit.md`, `reports/chNN.proofread.md`, `reports/chNN.yaml-audit.md` |
 | apparatus | `apparatus/glossary.md`, `apparatus/index.md` |
 | translations | `translations/<lang>/chapters/chNN.md` |
@@ -55,7 +55,7 @@ This skill converts book chapter Markdown files into a video lesson. Each chapte
 ในโหมด "generate แล้วจูนต่อ": skill นี้ generate `.slides.md` จากบท → ผู้ใช้จูน `.slides.md`
 → compile เป็น `.yaml` The compiled YAML is rendered by:
 - **`build-slides-pptx`** (in-plugin, standalone) — `chNN.yaml` → branded `.pptx` (no external repo)
-- **`generate-tts`** (in-plugin, Pinn.ai text2speech) — per-slide voice-over WAV จาก notes
+- **`generate-tts`** (in-plugin, built-in TextToSpeech) — per-slide voice-over WAV จาก notes
 - **`build-chapter-video`** (in-plugin, ffmpeg) — สไลด์+เสียง → วิดีโอทั้งบท
 
 ## Project Folder Structure
