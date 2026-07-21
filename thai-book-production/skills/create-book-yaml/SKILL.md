@@ -185,6 +185,10 @@ ALL image placeholders of BOTH kinds** (`{{screenshot:...}}` and `{{image:...}}`
 comment at the top of your notes. Then ensure every item becomes a `type: screenshot` slide with the
 correct `screenshot:` field, at the position it appears in the chapter.
 
+> Only the `{{...}}` placeholders count. Ignore any `<!-- gen-preview:<id> -->` comment and the
+> `![...](...)` line after it — those are review-only previews generate-image adds beside a
+> `{{image:...}}`, NOT separate images. One slide per placeholder, never per preview.
+
 Map the placeholder to the `screenshot:` filename:
 - `{{screenshot:file.png|...}}` → `screenshot: "file.png"` (append `.png` if missing) — resolves to
   `media/screenshots/`.

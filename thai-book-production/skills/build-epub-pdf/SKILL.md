@@ -48,7 +48,10 @@ Compile the whole book into shippable files. Last stage in the pipeline.
 ## Assembly order
 1. Collect chapters in registry order from `{chapters}/chNN.md` + front matter (title
    page, copyright, auto-TOC) + back matter (`{apparatus}/glossary.md`, `index.md`).
-2. Resolve **both** image placeholders and inline the real files:
+2. **Strip review previews first:** delete every `<!-- gen-preview:<id> -->` marker and the
+   `![...](...)` line immediately after it (these are review-only aids generate-image inserts beside
+   the `{{image:}}` placeholder). Do this before resolving placeholders so the figure isn't embedded
+   twice. Then resolve **both** image placeholders and inline the real files:
    - `{{screenshot:file.png|cap}}` → `{screenshots}/file.png` (real capture, or a mockup from
      mockup-screenshot)
    - `{{image:id|cap}}` → `{generated}/<id>.png` (AI illustration from generate-image)

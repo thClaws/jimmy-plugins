@@ -62,7 +62,7 @@ BUILD       cover-design  →  build-epub-pdf
 | create-book-yaml | media | ✅ MD authoring → compile YAML (gen .slides.md → chNN.yaml) |
 | audit-yaml | media | ✅ ตรวจ/แก้ที่ .slides.md → recompile YAML |
 | mockup-screenshot | media | ✅ ภาพจริง (`{{screenshot:}}`) เท่านั้น |
-| generate-image | media | ✅ ภาพ AI content-first (Pinn.ai nano-banana-2 `{{image:}}`) — infographic/diagram, ตัวอักษรไทย+อังกฤษในภาพ |
+| generate-image | media | ✅ ภาพ AI content-first (Pinn.ai nano-banana-2 `{{image:}}`) — infographic/diagram, ตัวอักษรไทย+อังกฤษในภาพ; แทรก `![]()` preview ใต้ placeholder (คง placeholder) ให้รีวิวใน .md |
 | build-slides-pptx | media | ✅ standalone .pptx + **slides2preview** (font-proof: pptx→pdf→png→contact→image-pptx) |
 | generate-tts | media | ✅ เสียงพากย์ต่อสไลด์ (Pinn.ai text2speech) → build/audio + manifest |
 | build-chapter-video | media | ✅ deterministic ffmpeg: ภาพสไลด์+เสียง → build/video/chNN.mp4 |
@@ -144,7 +144,10 @@ Plugin นี้ install ได้เลยผ่าน local marketplace (`.cla
 > marketplace root กับ plugin เป็นโฟลเดอร์เดียวกัน (ตัว `thai-book-production/` นี้เอง).
 > compiler สไลด์ใช้ `pyyaml` — ถ้าเครื่องไหนไม่มี: `pip install pyyaml --break-system-packages`.
 
-## สถานะ (v1.2.0 — RELEASE)
+## สถานะ (v1.3.0 — RELEASE)
+- ✅ **generate-image preview** — หลัง gen ภาพ แทรก `![]()` (มี marker `<!-- gen-preview:id -->`) ใต้
+  `{{image:id}}` placeholder ให้รีวิวภาพใน chapter .md ได้ทันที **โดยคง placeholder ไว้**; build-epub-pdf
+  strip preview ก่อน resolve → ไม่ render ซ้ำ; create-book-yaml มองข้าม preview (นับเฉพาะ `{{...}}`)
 - ✅ **init-book** — intake wizard แยกจาก book-router: เคาะ metadata + targets (epub/pdf/แปล) +
   style ภาพ/เสียง + ปก ตั้งแต่ต้น แล้ว scaffold; book-router เหลือหน้าที่ state+routing ล้วน (delegate scaffold)
 - ✅ **thClaws-ready**: manifest ประกาศ MCP `pinn-ai` (`https://pinn.ai/mcp`, OAuth) อัตโนมัติ +

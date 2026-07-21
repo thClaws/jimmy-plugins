@@ -117,7 +117,24 @@ numbers, labels) wherever it aids understanding — that is the point of using n
    (e.g. `curl -L -o "{generated}/<id>.png" "<download-url>"`).
 6. **Update the registry entry:** set `status: generated`, `file: <id>.png`, and store the **final
    prompt used** in `prompt` (so it's reproducible / editable next run).
-7. **Present** each result to the user with the download link, and offer variations/edits
+7. **Insert a review preview into the chapter markdown — keep the placeholder.** So the author can
+   see the figure while reading `{chapters}/chNN.md` in a normal markdown preview, add a standard
+   markdown image right after the `{{image:id|caption}}` line, tagged with an HTML-comment marker:
+   ```
+   {{image:ch01-foo|caption}}
+   <!-- gen-preview:ch01-foo -->
+   ![caption](../media/generated/ch01-foo.png)
+   ```
+   - **Never remove or edit the `{{image:id|caption}}` placeholder** — it is the source of truth the
+     pipeline (create-book-yaml, build-epub-pdf) keys off. The preview is an *addition* beside it.
+   - The `<!-- gen-preview:<id> -->` marker makes the preview auto-managed. On regeneration, find the
+     existing `gen-preview:<id>` block (the comment + its `![...]` line) and **replace it in place** —
+     never append a second copy.
+   - Compute the image path **relative to the chapter file** (default layout →
+     `../media/generated/<id>.png`; derive from `layout.generated` vs `layout.chapters` if customized).
+   - This preview is review-only. `build-epub-pdf` strips every `gen-preview` block before resolving
+     the placeholder, so the figure is embedded exactly once — no double image.
+8. **Present** each result to the user with the download link, and offer variations/edits
    (per Pinn.ai usage). Batch: process all needed images, then summarize id → status.
 
 ## Regeneration
@@ -127,7 +144,9 @@ numbers, labels) wherever it aids understanding — that is the point of using n
   real source of truth for each figure.
 
 ## Guardrails
-- Only ever writes under `{generated}/` and its `inventory.json`. Never touches `{screenshots}/`.
+- Writes under `{generated}/` + its `inventory.json`, and may add/refresh **only** its own
+  `<!-- gen-preview:<id> -->` block in `{chapters}/chNN.md` right after the matching `{{image:id}}`
+  placeholder. **Never** edits the placeholder itself, the chapter prose, or `{screenshots}/`.
 - Keep one consistent `art_style` across the book — visual coherence matters more than per-image flair.
 - Present the download link for every generated image; get user sign-off before wide regeneration.
 - If Pinn.ai is unavailable, report which ids are still `needed` and stop — don't silently skip.

@@ -1,6 +1,6 @@
 {
   "name": "thai-book-production",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "End-to-end technical/tutorial book production pipeline for Claude Cowork — reference gathering, outline (with human approval gate), chapter writing with AI figures (Pinn.ai nano-banana-2) and mockup screenshots, content/language QC, Markdown-authored slides compiled to YAML, standalone PPTX/slide-image rendering, per-slide TTS (Pinn.ai), deterministic chapter video assembly (ffmpeg), glossary/index, translation, AI cover design, and epub/PDF build. Thai-first, keeps technical terms in English.",
   "author": {
     "name": "Jimmy",
