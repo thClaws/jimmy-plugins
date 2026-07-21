@@ -6,6 +6,7 @@ book:
   kind: book                    # book (default) | article
                                 #   article = เอกสารบทเดียว: ไม่มี "บทที่ N", ไม่มีสารบัญ (TOC),
                                 #   ไม่มี back-matter (glossary/index/appendix) — pipeline สั้นลง
+                                #   *แต่ยังสร้างสไลด์ + เสียงพากย์ + วิดีโอ (MEDIA) ได้เต็มเหมือนหนังสือ
   title: ""                     # ชื่อเต็มบนปก (article: ใช้เป็นหัวเรื่องบทความ)
   subtitle: ""
   author: ""

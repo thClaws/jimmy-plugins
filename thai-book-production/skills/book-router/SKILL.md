@@ -66,8 +66,13 @@ title), and the tail collapses — **SKIP APPARATUS entirely** (`index-glossary`
 has no glossary/index/appendix), and `build-epub-pdf` emits **no auto-TOC and no back-matter**.
 It also **skips the outline-approval human gate** — an article is short, so it flows straight
 to writing (PLAN's refs/outline are optional and need no `{outline}/APPROVED.md`). So an
-article's route is: (PLAN, light/optional — no approval) → WRITE → QC → (MEDIA if the user
-wants slides/video) → (LOCALIZE if translating) → BUILD. Everything else is identical.
+article's route is: (PLAN, light/optional — no approval) → WRITE → QC → (MEDIA if wanted) →
+(LOCALIZE if translating) → BUILD. Everything else is identical.
+
+**MEDIA works the same for an article.** An article still has one `ch01.md`, so the full media
+chain runs on it: **create-book-yaml** (slides + VO script) → **build-slides-pptx**/slides2preview
+(slide images) → **generate-tts** (per-slide voice-over) → **build-chapter-video** (the article's
+slide video). So "ทำสไลด์/วิดีโอจากบทความนี้" is fully supported — don't treat article as text-only.
 
 ## Step 1 — Build the state table
 
