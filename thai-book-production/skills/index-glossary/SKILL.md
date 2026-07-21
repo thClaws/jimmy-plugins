@@ -33,9 +33,12 @@ description: >
 
 Compile the glossary and index from all finished chapters. Book-level, run late.
 
-**Guard — book only.** If `book.yaml → book.kind` is `article`, **STOP**: an article has no
-back-matter (glossary/index/appendix). Report "kind: article — ไม่มี apparatus, ข้าม" and hand
-back to book-router (next: translate/cover/build).
+**Guard — kind.** Read `book.yaml → book.kind`:
+- **`article`** → **STOP**: an article has no back-matter. Report "kind: article — ไม่มี apparatus, ข้าม"
+  and hand back to book-router (next: translate/cover/build).
+- **`mini-book`** → back-matter is **optional**; only proceed if the user explicitly asked for a
+  glossary/index. Otherwise report "mini-book — apparatus เป็น optional, ข้าม (ถ้าต้องการค่อยสั่ง)" and hand back.
+- **`book`** (or unset) → proceed normally.
 
 Resolve paths from `book.yaml → layout:`. Read chapters from `{chapters}/`, write to
 `{apparatus}/glossary.md` and `{apparatus}/index.md`. Run once in-scope chapters are final.

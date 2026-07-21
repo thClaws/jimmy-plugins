@@ -6,8 +6,9 @@ description: >
   BEGIN a new piece and there is no `book.yaml` yet: "เริ่มหนังสือใหม่", "สร้างหนังสือใหม่",
   "สร้างโปรเจกต์หนังสือ", "ตั้งโปรเจกต์หนังสือใหม่", "init a book", "start a new book",
   "create a book project", "scaffold a book", **"สร้างบทความ", "เขียนบทความ", "write an article",
-  "new article"** (→ sets `kind: article`: single doc, no "บทที่"/TOC/appendix). It interviews
-  for the whole-project decisions that drive the pipeline (kind book|article, metadata, chapter
+  "new article"** (→ `kind: article`), **"มินิบุ๊ก", "mini-book", "เล่มเล็ก 3-5 บท", "หนังสือสั้นๆ"**
+  (→ `kind: mini-book`, ≤5 บท). It interviews for the whole-project decisions that drive the
+  pipeline (kind book|mini-book|article, metadata, chapter
   scope, output targets epub/pdf/translations, image & voice style, cover approach), writes `book.yaml` from the template,
   creates the directory skeleton, then hands off to get-book-ref to seed references. If a
   `book.yaml` already exists in the folder, do NOT re-init — route to book-router instead.
@@ -38,10 +39,15 @@ Ask compactly, in Thai. Insist only on the essentials; offer sensible defaults f
 everything else and let the user accept them in one go.
 
 **Essential (must ask):**
-- `book.kind` — **`book` (default) | `article`**. If the user says "บทความ" / "article" /
-  "เขียนบทความ" / "เอกสารสั้น" → set **`article`**: a single-doc piece with **no "บทที่ N"
-  heading, no TOC, no back-matter (glossary/index/appendix)** and a shorter pipeline. Otherwise
-  `book`. This drives how init/router/write/build behave — set it right up front.
+- `book.kind` — **`book` (default) | `mini-book` | `article`**. Pick from intent:
+  - **`article`** — "บทความ" / "article" / "เอกสารสั้น": single doc, **no "บทที่ N"/TOC/back-matter**,
+    skips outline-approval.
+  - **`mini-book`** — "มินิบุ๊ก" / "mini-book" / "เล่มเล็ก" / "เล่มบาง" / "หนังสือสั้นๆ 3-5 บท": a small
+    book of **3–5 chapters (hard cap 5)** — keeps "บทที่ N" + TOC + outline-approval, but back-matter
+    (glossary/index/appendix) is **optional (default: skip)**.
+  - **`book`** — full book, many chapters, everything.
+  All three still support MEDIA (slides/TTS/video). Set kind right up front — it drives
+  init/router/write/build.
 - `book.title` — ชื่อเต็มบนปก (article: หัวเรื่องบทความ). Derive `book.slug` from it (kebab-case
   ASCII, for build filenames เช่น `my-book.epub`); confirm the slug.
 - `book.author`
@@ -50,10 +56,12 @@ everything else and let the user accept them in one go.
 - **Chapter scope** → initial `chapters:` registry.
   - **`kind: article`** → exactly **one** entry (`id: 1`, `title` = the article title). Don't
     interview for multiple chapters; an article is one document.
+  - **`kind: mini-book`** → ask for **3–5 chapters (hard cap 5)**. If the user proposes more than 5,
+    say a mini-book is capped at 5 and offer to either trim or switch to `kind: book`.
   - **`kind: book`** → ask for the chapter list (id + title) or, if unknown, start with one
     placeholder `id: 1` and note it can grow later.
-  - Set a `page_target` per chapter (default 15; an article is often shorter — suggest ~5–10) —
-    audit-chapter checks thickness ±20% against it.
+  - Set a `page_target` per chapter (default 15; article often ~5–10) — audit-chapter checks
+    thickness ±20% against it.
 - **Output targets** (`targets:`) — these steer the whole pipeline, so decide now:
   - `epub` (default `true`)
   - `pdf` (default `false`) — needs `xelatex`; note the extra toolchain

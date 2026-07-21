@@ -60,19 +60,27 @@ real source material, draft the outline, then fetch targeted refs for any gaps t
 outline exposes. WRITE→QC repeat per chapter; APPARATUS onward are book-level, run once
 near the end.
 
-**Read `book.kind` (default `book`) and adapt.** When **`kind: article`** the piece is a
-single document: exactly one chapter, **no "บทที่ N"** (write-book-chapter uses the article
-title), and the tail collapses — **SKIP APPARATUS entirely** (`index-glossary` — an article
-has no glossary/index/appendix), and `build-epub-pdf` emits **no auto-TOC and no back-matter**.
-It also **skips the outline-approval human gate** — an article is short, so it flows straight
-to writing (PLAN's refs/outline are optional and need no `{outline}/APPROVED.md`). So an
-article's route is: (PLAN, light/optional — no approval) → WRITE → QC → (MEDIA if wanted) →
-(LOCALIZE if translating) → BUILD. Everything else is identical.
+**Read `book.kind` (default `book`) and adapt.** Three kinds on a spectrum:
 
-**MEDIA works the same for an article.** An article still has one `ch01.md`, so the full media
-chain runs on it: **create-book-yaml** (slides + VO script) → **build-slides-pptx**/slides2preview
-(slide images) → **generate-tts** (per-slide voice-over) → **build-chapter-video** (the article's
-slide video). So "ทำสไลด์/วิดีโอจากบทความนี้" is fully supported — don't treat article as text-only.
+| behavior | `article` | `mini-book` | `book` (default) |
+|---|---|---|---|
+| chapters | exactly 1 | **3–5 (hard cap 5)** | many |
+| "บทที่ N" heading | no (article title) | yes | yes |
+| TOC in build | no | yes | yes |
+| outline-approval gate | **skip** | keep | keep |
+| back-matter (glossary/index) | none | **optional (default skip)** | yes |
+| MEDIA (slides/TTS/video) | **yes** | **yes** | **yes** |
+
+- **article** route: (PLAN light/optional — no `APPROVED.md`) → WRITE → QC → (MEDIA) → (LOCALIZE) → BUILD.
+- **mini-book** route: same as book but **cap chapters at 5** — if the `chapters:` registry has >5,
+  warn the user (trim, or switch to `kind: book`). Apparatus (`index-glossary`) is **optional**:
+  run it only if the user asks; otherwise skip straight to translate/cover/build.
+- **book** route: the full canonical pipeline above, unchanged.
+
+**MEDIA runs the same for every kind.** Each chapter (`chNN.md` — for an article that's the single
+`ch01`) goes through **create-book-yaml** → **build-slides-pptx**/slides2preview → **generate-tts**
+→ **build-chapter-video**. So slides/video are fully supported for article and mini-book too —
+never treat them as text-only.
 
 ## Step 1 — Build the state table
 
@@ -152,8 +160,9 @@ Priority (ตรงกับ workflow: init → seed refs → manifest → outli
    (`slides2video.py` — ffmpeg: ภาพ+เสียงต่อสไลด์ → ต่อเป็นวิดีโอทั้งบท, deterministic)
 14. Chapters + media done → book-level: **index-glossary** → **translate** (if
    `targets.translations` non-empty) → **cover-design** → **build-epub-pdf**
-   - **`book.kind: article` → SKIP index-glossary** (no back-matter); go straight to
-     translate (if any) → cover-design → build-epub-pdf.
+   - **`kind: article` → SKIP index-glossary** (no back-matter); go straight to translate → cover → build.
+   - **`kind: mini-book` → index-glossary is OPTIONAL** (default skip); run only if the user asks,
+     else go straight to translate → cover → build.
 
 State the recommendation in one line, then offer handoff: "จะให้เริ่ม <stage> เลยไหม".
 

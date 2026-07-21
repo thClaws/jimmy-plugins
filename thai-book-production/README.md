@@ -137,12 +137,18 @@ Plugin นี้ install ได้เลยผ่าน local marketplace (`.cla
 > marketplace root กับ plugin เป็นโฟลเดอร์เดียวกัน (ตัว `thai-book-production/` นี้เอง).
 > compiler สไลด์ใช้ `pyyaml` — ถ้าเครื่องไหนไม่มี: `pip install pyyaml --break-system-packages`.
 
-## สถานะ (v1.6.2 — RELEASE)
-- ✅ **`kind: book | article`** (ใน `book.yaml → book:`) — พูดว่า "สร้างบทความ" → init-book set
-  `kind: article`: เอกสารบทเดียว **ไม่มี "บทที่ N" / สารบัญ / back-matter (glossary/index/appendix)**,
-  pipeline สั้นลง (book-router ข้าม APPARATUS, index-glossary skip, build-epub-pdf ตัด `--toc`+back-matter,
-  write-book-chapter ใช้หัวเรื่องบทความแทน "บทที่"); `book` (default) = พฤติกรรมเดิมทุกอย่าง
-  - **v1.6.1:** article **ข้าม outline-approval gate** ด้วย (สั้น → เขียนเลย ไม่ต้องรอ `APPROVED.md`)
+## สถานะ (v1.7.0 — RELEASE)
+- ✅ **`kind: book | mini-book | article`** (ใน `book.yaml → book:`) — spectrum 3 ระดับ:
+
+  | | chapters | บทที่ N | TOC | approval | back-matter | MEDIA |
+  |---|---|---|---|---|---|---|
+  | **article** | 1 | ✗ | ✗ | ข้าม | ✗ | ✅ |
+  | **mini-book** | **3–5 (cap 5)** | ✓ | ✓ | ✓ | optional (default ข้าม) | ✅ |
+  | **book** (default) | หลายบท | ✓ | ✓ | ✓ | ✓ | ✅ |
+
+  - พูด "สร้างบทความ" → article · "มินิบุ๊ก/เล่มเล็ก 3-5 บท" → mini-book · อื่นๆ → book
+  - **v1.6.1:** article ข้าม outline-approval gate · **v1.6.2:** ทุก kind ทำสไลด์/เสียง/วิดีโอ (MEDIA) ได้เต็ม
+  - **v1.7.0:** เพิ่ม `mini-book` (cap 5 บท, back-matter optional); `book` (default) = พฤติกรรมเดิมทุกอย่าง
   - **v1.6.2:** article ทำ **สไลด์ + เสียง + วิดีโอ (MEDIA)** ได้เต็มเหมือนหนังสือ (ch01 → create-book-yaml→pptx→tts→video)
 - ✅ **เสียง → built-in `TextToSpeech`; ตัด Pinn.ai/MCP ออกหมด** — generate-tts เลิกใช้
   `mcp__pinn-ai__text2speech` ใช้ tool ในตัว engine (Gemini `gemini-3.1-flash-tts-preview`) แทน;

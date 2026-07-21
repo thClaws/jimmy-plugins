@@ -41,8 +41,9 @@ This skill produces or improves chapters for the Thai-language book about Claude
 ## Document kind (book vs article)
 
 Read `book.yaml → book.kind` (default `book`).
-- **`book`** → the doc is a chapter: open with a chapter heading (e.g. `# บทที่ N: <title>`),
-  and target the per-chapter size below.
+- **`book`** or **`mini-book`** → the doc is a chapter: open with a chapter heading
+  (e.g. `# บทที่ N: <title>`), and target the per-chapter size below. (mini-book = a small book
+  of 3–5 chapters; chapters behave identically, there are just fewer of them.)
 - **`article`** → single standalone piece: open with the **article title only**
   (`# <book.title>`) — **never "บทที่ N"** — and write it as one cohesive article (intro →
   body sections → wrap-up), typically shorter (aim for `page_target` ≈ 5–10 pages). No

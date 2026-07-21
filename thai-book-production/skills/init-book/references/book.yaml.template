@@ -3,10 +3,12 @@
 
 book:
   slug: my-book                 # ใช้เป็นชื่อไฟล์ build เช่น my-book.epub
-  kind: book                    # book (default) | article
-                                #   article = เอกสารบทเดียว: ไม่มี "บทที่ N", ไม่มีสารบัญ (TOC),
-                                #   ไม่มี back-matter (glossary/index/appendix) — pipeline สั้นลง
-                                #   *แต่ยังสร้างสไลด์ + เสียงพากย์ + วิดีโอ (MEDIA) ได้เต็มเหมือนหนังสือ
+  kind: book                    # book (default) | mini-book | article
+                                #   article   = เอกสารบทเดียว: ไม่มี "บทที่ N"/สารบัญ/back-matter, ข้าม outline-approval
+                                #   mini-book = เล่มเล็ก 3–5 บท (สูงสุด 5): มี "บทที่ N" + สารบัญ + outline-approval
+                                #               แต่ back-matter (glossary/index/appendix) เป็น optional (default: ข้าม)
+                                #   book      = เล่มเต็ม หลายบท ครบทุกส่วน
+                                #   *ทุก kind สร้างสไลด์ + เสียงพากย์ + วิดีโอ (MEDIA) ได้เต็ม
   title: ""                     # ชื่อเต็มบนปก (article: ใช้เป็นหัวเรื่องบทความ)
   subtitle: ""
   author: ""
