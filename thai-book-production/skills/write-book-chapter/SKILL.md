@@ -38,6 +38,17 @@ This skill produces or improves chapters for the Thai-language book about Claude
 
 **Target book size: 300+ pages (~75,000 words total).** With 13 chapters, each chapter should be roughly **5,000-7,000 words** (about 20-30 pages). This is a real, substantial book — not a pamphlet. Each section needs depth: explanations, real-world scenarios, step-by-step walkthroughs, multiple examples, tips, and warnings.
 
+## Document kind (book vs article)
+
+Read `book.yaml → book.kind` (default `book`).
+- **`book`** → the doc is a chapter: open with a chapter heading (e.g. `# บทที่ N: <title>`),
+  and target the per-chapter size below.
+- **`article`** → single standalone piece: open with the **article title only**
+  (`# <book.title>`) — **never "บทที่ N"** — and write it as one cohesive article (intro →
+  body sections → wrap-up), typically shorter (aim for `page_target` ≈ 5–10 pages). No
+  cross-chapter framing ("ในบทก่อนหน้า…"). Everything else (screenshots/`{{image:}}`, tone,
+  QC) is identical.
+
 ## Mode Detection — Writer vs Editor
 
 **FIRST**, check if the target chapter file already exists at `chapters/ch{NN}.md`.

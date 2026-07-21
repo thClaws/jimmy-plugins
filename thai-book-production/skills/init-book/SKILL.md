@@ -1,13 +1,14 @@
 ---
 name: init-book
 description: >
-  Start a brand-new book project — the intake wizard that scaffolds a fresh working
-  folder for the thai-book-production pipeline. Use this skill when the user wants to
-  BEGIN a new book and there is no `book.yaml` yet: "เริ่มหนังสือใหม่", "สร้างหนังสือใหม่",
+  Start a brand-new book OR article project — the intake wizard that scaffolds a fresh
+  working folder for the thai-book-production pipeline. Use this skill when the user wants to
+  BEGIN a new piece and there is no `book.yaml` yet: "เริ่มหนังสือใหม่", "สร้างหนังสือใหม่",
   "สร้างโปรเจกต์หนังสือ", "ตั้งโปรเจกต์หนังสือใหม่", "init a book", "start a new book",
-  "create a book project", "scaffold a book". It interviews for the whole-book decisions
-  that drive the pipeline (metadata, chapter scope, output targets epub/pdf/translations,
-  book-wide image & voice style, cover approach), writes `book.yaml` from the template,
+  "create a book project", "scaffold a book", **"สร้างบทความ", "เขียนบทความ", "write an article",
+  "new article"** (→ sets `kind: article`: single doc, no "บทที่"/TOC/appendix). It interviews
+  for the whole-project decisions that drive the pipeline (kind book|article, metadata, chapter
+  scope, output targets epub/pdf/translations, image & voice style, cover approach), writes `book.yaml` from the template,
   creates the directory skeleton, then hands off to get-book-ref to seed references. If a
   `book.yaml` already exists in the folder, do NOT re-init — route to book-router instead.
 ---
@@ -37,14 +38,22 @@ Ask compactly, in Thai. Insist only on the essentials; offer sensible defaults f
 everything else and let the user accept them in one go.
 
 **Essential (must ask):**
-- `book.title` — ชื่อเต็มบนปก. Derive `book.slug` from it (kebab-case ASCII, for build
-  filenames เช่น `my-book.epub`); confirm the slug.
+- `book.kind` — **`book` (default) | `article`**. If the user says "บทความ" / "article" /
+  "เขียนบทความ" / "เอกสารสั้น" → set **`article`**: a single-doc piece with **no "บทที่ N"
+  heading, no TOC, no back-matter (glossary/index/appendix)** and a shorter pipeline. Otherwise
+  `book`. This drives how init/router/write/build behave — set it right up front.
+- `book.title` — ชื่อเต็มบนปก (article: หัวเรื่องบทความ). Derive `book.slug` from it (kebab-case
+  ASCII, for build filenames เช่น `my-book.epub`); confirm the slug.
 - `book.author`
 - `book.language` — default `th`. Keep `keep_english_terms: true` (คงศัพท์เทคนิคอังกฤษ)
   unless the user says otherwise.
-- **Chapter scope** → initial `chapters:` registry. Ask for the chapter list (id + title)
-  or, if unknown, start with one placeholder `id: 1` and note it can grow later. Set a
-  `page_target` per chapter (default 15) — audit-chapter checks thickness ±20% against it.
+- **Chapter scope** → initial `chapters:` registry.
+  - **`kind: article`** → exactly **one** entry (`id: 1`, `title` = the article title). Don't
+    interview for multiple chapters; an article is one document.
+  - **`kind: book`** → ask for the chapter list (id + title) or, if unknown, start with one
+    placeholder `id: 1` and note it can grow later.
+  - Set a `page_target` per chapter (default 15; an article is often shorter — suggest ~5–10) —
+    audit-chapter checks thickness ±20% against it.
 - **Output targets** (`targets:`) — these steer the whole pipeline, so decide now:
   - `epub` (default `true`)
   - `pdf` (default `false`) — needs `xelatex`; note the extra toolchain
@@ -66,9 +75,11 @@ user override selectively.
 ## Step 2 — Write `book.yaml` + scaffold
 
 1. Copy `references/book.yaml.template` to `<folder>/book.yaml` and fill in every value
-   gathered above. Leave unset optional fields at their template defaults. Do not
-   hardcode paths — the `layout:` block stays as the template defines it.
-2. Create the directory skeleton (from folder-structure.md):
+   gathered above — **including `book.kind`** (`book` default, or `article`). Leave unset
+   optional fields at their template defaults. Do not hardcode paths — the `layout:` block
+   stays as the template defines it. For `kind: article`, `chapters:` holds exactly one entry.
+2. Create the directory skeleton (from folder-structure.md). For `kind: article` you may skip
+   `apparatus/` (no back-matter) but it's harmless to leave it empty:
    ```
    outline/  refs/docs/  refs/blogs/  chapters/  media/slides/
    media/screenshots/  media/generated/  apparatus/  translations/  assets/  reports/  build/
@@ -78,10 +89,10 @@ user override selectively.
 
 ## Step 3 — Confirm & hand off
 
-Show a one-screen summary: title/slug, author, language, chapter count, targets, and the
-image/voice/cover choices. Then route to the first pipeline stage:
+Show a one-screen summary: **kind (book/article)**, title/slug, author, language, chapter
+count, targets, and the image/voice/cover choices. Then route to the first pipeline stage:
 
-> โครงหนังสือพร้อมแล้ว — เริ่ม **get-book-ref** เพื่อดึงเอกสารอ้างอิงหลักก่อนวาง outline ไหม
+> โครงเริ่ม (book/บทความ) พร้อมแล้ว — เริ่ม **get-book-ref** เพื่อดึงเอกสารอ้างอิงหลักก่อนวาง outline ไหม
 
 Hand off; do not start fetching refs yourself. From here on, **book-router** owns state
 and routing.

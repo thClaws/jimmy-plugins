@@ -3,7 +3,10 @@
 
 book:
   slug: my-book                 # ใช้เป็นชื่อไฟล์ build เช่น my-book.epub
-  title: ""                     # ชื่อเต็มบนปก
+  kind: book                    # book (default) | article
+                                #   article = เอกสารบทเดียว: ไม่มี "บทที่ N", ไม่มีสารบัญ (TOC),
+                                #   ไม่มี back-matter (glossary/index/appendix) — pipeline สั้นลง
+  title: ""                     # ชื่อเต็มบนปก (article: ใช้เป็นหัวเรื่องบทความ)
   subtitle: ""
   author: ""
   publisher: ""

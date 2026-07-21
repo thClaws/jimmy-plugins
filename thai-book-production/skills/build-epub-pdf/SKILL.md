@@ -34,12 +34,15 @@ Compile the whole book into shippable files. Last stage in the pipeline.
 
 ## Preconditions (verify first)
 - All in-scope chapters written, content-audited clean, proofread
-- Glossary + index generated (index-glossary)
-- Cover ready (cover-design) — at least front cover for epub
+- Glossary + index generated (index-glossary) — **book only; skip for `kind: article`**
+- Cover ready (cover-design) — at least front cover for epub (optional for an article)
 - Front matter (title page, copyright, TOC) and back matter assembled
 
 ## Config (from `book.yaml`)
 - `book.slug` → output filename; `book.title/subtitle/author/publisher/language` → metadata.
+- **`book.kind`** (default `book`) → when **`article`**: **omit `--toc`** (no table of contents),
+  assemble **no back-matter** (skip glossary/index/appendix), and it's a single `ch01.md`. The
+  cover is optional for an article (build without `--epub-cover-image` if none).
 - `targets.epub` / `targets.pdf` → which artifacts to build.
 - `build.epub_engine` (default `pandoc`), `build.pdf_engine` (`xelatex` | `weasyprint` | `none`),
   `build.validate` (default `[epubcheck]`).
@@ -48,6 +51,8 @@ Compile the whole book into shippable files. Last stage in the pipeline.
 ## Assembly order
 1. Collect chapters in registry order from `{chapters}/chNN.md` + front matter (title
    page, copyright, auto-TOC) + back matter (`{apparatus}/glossary.md`, `index.md`).
+   **If `book.kind: article`:** just the single `ch01.md` + a minimal title/author front —
+   **no auto-TOC, no back-matter**. (Drop `--toc` in the pandoc calls below.)
 2. **Strip review previews first:** delete every `<!-- gen-preview:<id> -->` marker and the
    `![...](...)` line immediately after it (these are review-only aids generate-image inserts beside
    the `{{image:}}` placeholder). Do this before resolving placeholders so the figure isn't embedded

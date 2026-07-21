@@ -60,6 +60,13 @@ real source material, draft the outline, then fetch targeted refs for any gaps t
 outline exposes. WRITE→QC repeat per chapter; APPARATUS onward are book-level, run once
 near the end.
 
+**Read `book.kind` (default `book`) and adapt.** When **`kind: article`** the piece is a
+single document: exactly one chapter, **no "บทที่ N"** (write-book-chapter uses the article
+title), and the tail collapses — **SKIP APPARATUS entirely** (`index-glossary` — an article
+has no glossary/index/appendix), and `build-epub-pdf` emits **no auto-TOC and no back-matter**.
+So an article's route is: PLAN → WRITE → QC → (MEDIA if the user wants slides/video) →
+(LOCALIZE if translating) → BUILD. Everything else is identical.
+
 ## Step 1 — Build the state table
 
 Resolve paths from `layout:`. For each chapter in the `chapters:` registry, find the
@@ -136,6 +143,8 @@ Priority (ตรงกับ workflow: init → seed refs → manifest → outli
    (`slides2video.py` — ffmpeg: ภาพ+เสียงต่อสไลด์ → ต่อเป็นวิดีโอทั้งบท, deterministic)
 14. Chapters + media done → book-level: **index-glossary** → **translate** (if
    `targets.translations` non-empty) → **cover-design** → **build-epub-pdf**
+   - **`book.kind: article` → SKIP index-glossary** (no back-matter); go straight to
+     translate (if any) → cover-design → build-epub-pdf.
 
 State the recommendation in one line, then offer handoff: "จะให้เริ่ม <stage> เลยไหม".
 
