@@ -55,10 +55,11 @@ State the computed spine/wrap size to the author before rendering.
 
 ## Generation path — `cover.tool`
 
-### `nano-banana` (Pinn.ai — DEFAULT, AI cover art with on-cover text)
-Use `mcp__pinn-ai__text2image`, model **`google/nano-banana-2`** (renders Thai + English text),
-`aspect_ratio` = `cover.aspect` (default `3:4`). The LLM authors the prompt from the book's title/
-subtitle/author + subject + `cover.art_style`/`cover.motif`.
+### `nano-banana` (built-in TextToImage — DEFAULT, AI cover art with on-cover text)
+Use the built-in **`TextToImage`** tool, model **`flash`** (Gemini nano-banana — renders Thai +
+English text), `aspect_ratio` = `cover.aspect` (default `3:4`), `size` `2K`. Needs `imageToolsEnabled:
+true` + a provider key/gateway. The LLM authors the prompt from the book's title/subtitle/author +
+subject + `cover.art_style`/`cover.motif`.
 
 **House cover look — proven prompt recipe (flat front, not a 3D mockup).** Build the prompt from
 these mandatory pieces:
@@ -70,12 +71,13 @@ these mandatory pieces:
   teal node/diagram for a technical book). House palette: navy / teal / gold accents.
 - **On-cover text — take the strings from `book.yaml`** (`title`, `subtitle`, `author`, optional
   tagline/label), NOT hardcoded. Put **one line per bullet, each wrapped in quotes**, top→bottom
-  (nano-banana-2 renders Thai + English). The exact set of lines is per book — a cover might be just
+  (nano-banana renders Thai + English). The exact set of lines is per book — a cover might be just
   title + author, or title + subtitle + tagline + author. Illustrative example (do not reuse literally):
   `"<label>"` / `"<TITLE>"` / `"<thai subtitle>"` / `"<thai tagline>"` / `"<author>"`.
 - **Always end the prompt with:** `"All text must be crisp, correctly spelled, no garbled text."`
-- Then download the returned full-res image to `{assets}/cover-front.png`
-  (`curl -L -o {assets}/cover-front.png "<url>"`) and store the final prompt in the build report.
+- `TextToImage` writes the file under `output/img-…`; **move** it to `{assets}/cover-front.png`
+  (`mv "<output/img-… path>" {assets}/cover-front.png`, transcode to PNG if needed) and store the
+  final prompt in the build report.
 - Print wrap (spine + back) still uses canva/programmatic.
 
 **Prompt skeleton:**

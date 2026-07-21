@@ -47,9 +47,10 @@ targets:
 style:
   fonts: [Sarabun]
   index_locator: section        # section (anchor) | page  — page ต้อง build ก่อน
-  image_gen:                    # generate-image (Pinn.ai) อ่านค่านี้ — คุมสไตล์ให้ทั้งเล่มเหมือนกัน
-    model: google/nano-banana-2      # model_id จาก mcp__pinn-ai__list_models (capability create_image)
-    aspect_ratio: "16:9"        # 1:1 | 16:9 | 9:16 | 4:3 | 3:4 | 3:2 | 2:3
+  image_gen:                    # generate-image (built-in TextToImage) อ่านค่านี้ — คุมสไตล์ทั้งเล่มให้เหมือนกัน
+    model: flash                # flash (Gemini nano-banana, default) | pro | gpt-image-2 | qwen-image-2.0
+    aspect_ratio: "16:9"        # 1:1 | 3:4 | 4:3 | 9:16 | 16:9
+    size: "2K"                  # 512 | 1K | 2K  (2K = print-quality)
     art_style: "clean modern infographic style, flat vector, soft teal & navy palette with warm accent, clear labeled diagrams/icons, legible Thai and English typography, content-first (not abstract)"
   tts:                          # generate-tts (Pinn.ai) อ่านค่านี้
     voice: Charon               # เสียงพากย์ default (ชาย/informative)
@@ -62,7 +63,7 @@ style:
 
 # toolchain — override ได้ที่นี่ (default ตาม Decisions log ใน SPEC §8)
 cover:
-  tool: nano-banana             # nano-banana (AI, default) | canva | programmatic
+  tool: nano-banana             # nano-banana (AI via built-in TextToImage/Gemini, default) | canva | programmatic
   aspect: "3:4"                 # สัดส่วนปก AI: 3:4 | 2:3 | 9:16
   frame: flat                   # flat (ปกตรง + รอยสัน + เงา) | bleed (เต็มขอบ ไม่มีขอบขาว)
   art_style: "modern clean tech, flat vector with subtle neon glow, deep navy + teal + gold, legible Thai+English"

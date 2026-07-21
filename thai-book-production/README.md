@@ -62,12 +62,12 @@ BUILD       cover-design  →  build-epub-pdf
 | create-book-yaml | media | ✅ MD authoring → compile YAML (gen .slides.md → chNN.yaml) |
 | audit-yaml | media | ✅ ตรวจ/แก้ที่ .slides.md → recompile YAML |
 | mockup-screenshot | media | ✅ ภาพจริง (`{{screenshot:}}`) เท่านั้น |
-| generate-image | media | ✅ ภาพ AI content-first (Pinn.ai nano-banana-2 `{{image:}}`) — infographic/diagram, ตัวอักษรไทย+อังกฤษในภาพ; แทรก `![]()` preview ใต้ placeholder (คง placeholder) ให้รีวิวใน .md |
+| generate-image | media | ✅ ภาพ AI content-first (built-in `TextToImage` / Gemini nano-banana `{{image:}}`) — infographic/diagram, ตัวอักษรไทย+อังกฤษในภาพ; แทรก `![]()` preview ใต้ placeholder (คง placeholder) ให้รีวิวใน .md |
 | build-slides-pptx | media | ✅ standalone .pptx + **slides2preview** (font-proof: pptx→pdf→png→contact→image-pptx) |
 | generate-tts | media | ✅ เสียงพากย์ต่อสไลด์ (Pinn.ai text2speech) → build/audio + manifest |
 | build-chapter-video | media | ✅ deterministic ffmpeg: ภาพสไลด์+เสียง → build/video/chNN.mp4 |
 | translate | localize | ✅ เขียนเต็ม (TM + preserve non-prose) |
-| cover-design | build | ✅ nano-banana-2 (ปกตรง+รอยสัน+ชื่อไทยบนปก) + Canva/programmatic |
+| cover-design | build | ✅ built-in `TextToImage` (Gemini nano-banana; ปกตรง+รอยสัน+ชื่อไทยบนปก) + Canva/programmatic |
 | build-epub-pdf | build | ✅ เขียนเต็ม (Pandoc epub + xelatex pdf + epubcheck) |
 
 ทุก skill มีส่วน **## Paths** ที่ชี้ไปยัง `book.yaml → layout:` — path เดิมแบบ `book/chapters/`
@@ -76,12 +76,14 @@ BUILD       cover-design  →  build-epub-pdf
 
 ## Requirements
 
-- **Pinn.ai MCP connector** — ใช้โดย `generate-image` + `cover-design` (`text2image`,
-  nano-banana-2) และ `generate-tts` (`text2speech`) ต้องมีบัญชี/credits ของตัวเอง
-  ใน **thClaws** plugin นี้ **ประกาศ server `pinn-ai` (`https://pinn.ai/mcp`) ให้อัตโนมัติ**
-  ในตัว manifest — ผู้ใช้เพียง authorize ครั้งเดียว (ดู "ติดตั้ง & auth ใน thClaws").
-  ใน Claude Cowork/Claude Code ต้องเชื่อม connector เอง ถ้ายังไม่ auth: ภาพ AI จะค้างสถานะ
-  `needed`, ปกใช้ Canva/programmatic แทนได้, TTS จะรายงานว่าขาดแล้วหยุด
+- **ภาพ AI = built-in `TextToImage`** (ใช้โดย `generate-image` + `cover-design`) — เปิดด้วย
+  `imageToolsEnabled: true` ใน `.thclaws/settings.json` + provider key (`GEMINI_API_KEY`/
+  `GOOGLE_API_KEY` หรือ `OPENAI_API_KEY`) หรือ thClaws Gateway key. **ไม่ต้องใช้ Pinn.ai สำหรับภาพ**
+  ถ้ายังไม่เปิด: ภาพ AI จะค้างสถานะ `needed`, ปกใช้ Canva/programmatic แทนได้
+- **Pinn.ai MCP connector — เฉพาะ TTS** (`generate-tts` → `text2speech`; ไม่มี built-in TTS ใน
+  engine) ต้องมีบัญชี/credits ของตัวเอง ใน **thClaws** plugin นี้ **ประกาศ server `pinn-ai`
+  (`https://pinn.ai/mcp`) ให้อัตโนมัติ** ในตัว manifest — ผู้ใช้เพียง authorize ครั้งเดียว
+  (ดู "ติดตั้ง & auth ใน thClaws"). ถ้ายังไม่ auth: TTS จะรายงานว่าขาดแล้วหยุด
 - **Python libs**: `pyyaml`, `python-pptx`, `Pillow` — ตรวจด้วย
   `skills/build-slides-pptx/scripts/check_env.py` (บอกคำสั่ง pip ให้เมื่อขาด)
 - **CLI (เฉพาะเฟสที่ใช้)**: `soffice` + `pdftoppm` + `fc-match` (render/preview สไลด์),
@@ -99,15 +101,19 @@ thClaws อ่าน Claude Code plugin format ได้ตรงๆ (`.claude-p
 #   หรือจาก local git repo:  /plugin install /path/to/thai-book-production
 #   เจาะ subpath จาก monorepo:  <git-url>#<branch>:<subpath>
 
-# 2) ⚠ restart thClaws — MCP server (pinn-ai) spawn ตอน startup เท่านั้น
+# 2) ภาพ AI = built-in TextToImage → เปิดใน .thclaws/settings.json + มี provider key/gateway
+#    { "imageToolsEnabled": true }   (+ GEMINI_API_KEY/GOOGLE_API_KEY หรือ OPENAI_API_KEY หรือ gateway)
+
+# 3) ⚠ restart thClaws — MCP server (pinn-ai, ใช้เฉพาะ TTS) spawn ตอน startup เท่านั้น
 /quit        # แล้วเปิด thclaws ใหม่
 
-# 3) authorize pinn-ai ครั้งเดียว (เปิด browser → วาง API key pk_... บนหน้า pinn.ai)
+# 4) authorize pinn-ai ครั้งเดียว — สำหรับ generate-tts (เปิด browser → วาง API key pk_... บนหน้า pinn.ai)
 /mcp reauth pinn-ai
 ```
 
-เสร็จแล้ว `generate-image` / `cover-design` / `generate-tts` เรียก `mcp__pinn-ai__*` ได้เลย
-token เก็บฝั่ง pinn.ai (ไม่อยู่ใน plugin), thClaws refresh ให้อัตโนมัติ ไม่ต้อง auth ซ้ำ
+เสร็จแล้ว `generate-image` / `cover-design` ใช้ built-in `TextToImage` ได้ทันที (ไม่ผ่าน pinn-ai) ส่วน
+`generate-tts` เรียก `mcp__pinn-ai__text2speech` — token เก็บฝั่ง pinn.ai (ไม่อยู่ใน plugin),
+thClaws refresh ให้อัตโนมัติ ไม่ต้อง auth ซ้ำ
 
 **เกร็ด**
 - `/mcp` (ไม่มี arg) — ดูรายชื่อ MCP + สถานะ auth เช็คว่า `pinn-ai` ขึ้นและ authed แล้วหรือยัง
@@ -144,7 +150,11 @@ Plugin นี้ install ได้เลยผ่าน local marketplace (`.cla
 > marketplace root กับ plugin เป็นโฟลเดอร์เดียวกัน (ตัว `thai-book-production/` นี้เอง).
 > compiler สไลด์ใช้ `pyyaml` — ถ้าเครื่องไหนไม่มี: `pip install pyyaml --break-system-packages`.
 
-## สถานะ (v1.3.0 — RELEASE)
+## สถานะ (v1.4.0 — RELEASE)
+- ✅ **ภาพ AI → built-in `TextToImage`** — generate-image + cover-design เลิกใช้ Pinn.ai MCP,
+  ใช้ tool ในตัว engine (Gemini `flash`/nano-banana, `pro`, gpt-image-2, qwen) เปิดด้วย
+  `imageToolsEnabled: true` + provider key/gateway; ไฟล์เขียนที่ `output/…` แล้ว move ไป `media/generated/`.
+  Pinn.ai เหลือใช้เฉพาะ `generate-tts` (ไม่มี built-in TTS)
 - ✅ **generate-image preview** — หลัง gen ภาพ แทรก `![]()` (มี marker `<!-- gen-preview:id -->`) ใต้
   `{{image:id}}` placeholder ให้รีวิวภาพใน chapter .md ได้ทันที **โดยคง placeholder ไว้**; build-epub-pdf
   strip preview ก่อน resolve → ไม่ render ซ้ำ; create-book-yaml มองข้าม preview (นับเฉพาะ `{{...}}`)
@@ -152,7 +162,7 @@ Plugin นี้ install ได้เลยผ่าน local marketplace (`.cla
   style ภาพ/เสียง + ปก ตั้งแต่ต้น แล้ว scaffold; book-router เหลือหน้าที่ state+routing ล้วน (delegate scaffold)
 - ✅ **thClaws-ready**: manifest ประกาศ MCP `pinn-ai` (`https://pinn.ai/mcp`, OAuth) อัตโนมัติ +
   README มีขั้นตอนติดตั้ง & auth สำหรับ thClaws (`/plugin install` → restart → `/mcp reauth pinn-ai`)
-- ✅ ครบ 19 skills — ครอบ workflow เต็ม: init→refs→manifest→outline→✋approve→บท+ภาพ→✋ภาพจริง→สไลด์+VO→render→TTS→วิดีโอ→ปก (nano-banana-2)→epub/pdf
+- ✅ ครบ 19 skills — ครอบ workflow เต็ม: init→refs→manifest→outline→✋approve→บท+ภาพ→✋ภาพจริง→สไลด์+VO→render→TTS→วิดีโอ→ปก (built-in TextToImage)→epub/pdf
 - ✅ decisions 10 ข้อเคาะแล้ว (ดู SPEC §8 Decisions log)
 - ✅ **PPTX renderer standalone**: `build-slides-pptx` + `scripts/slides2pptx.py` (python-pptx) —
   chNN.yaml → branded .pptx ไม่พึ่ง repo นอก, ครบ 12 slide type, ฟอนต์ Prompt+Sarabun bundle, custom theme ได้
@@ -164,6 +174,6 @@ Plugin นี้ install ได้เลยผ่าน local marketplace (`.cla
   - **compiler จริง (tested):** `skills/create-book-yaml/scripts/slides_md2yaml.py`
     รองรับครบ 12 slide type, fail ดังพร้อมชี้ slide ที่ผิด, `--check` mode
 - ✅ ภาพ 2 ประเภท แยกโฟลเดอร์: `media/screenshots/` (จริง, `{{screenshot:}}`) +
-  `media/generated/` (AI ผ่าน Pinn.ai nano-banana-2, `{{image:}}`, content-first infographic/diagram — render ตัวอักษรไทย+อังกฤษได้)
+  `media/generated/` (AI ผ่าน built-in `TextToImage` / Gemini nano-banana, `{{image:}}`, content-first infographic/diagram — render ตัวอักษรไทย+อังกฤษได้)
 - ✅ ตอนสร้างสไลด์ preserve ทุกรูปจากบท: `{{screenshot:}}` และ `{{image:}}` → เป็น slide ครบ ไม่ตกหล่น (renderer ฝังไฟล์จริง)
 - เหลือขั้น validate จริงตอนใช้งาน: install ใน Cowork แล้วรันกับหนังสือจริง 1 เล่ม (end-to-end)

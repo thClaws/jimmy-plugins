@@ -400,7 +400,7 @@ Examples:
 
 Not every figure is a UI capture. Concepts, comparisons, processes, and data are better shown as an
 **AI-generated content figure** — an **infographic, diagram, flowchart, chart/graph, comparison, or
-annotated illustration**. These are produced by `generate-image` (Pinn.ai, model `google/nano-banana-2`,
+annotated illustration**. These are produced by `generate-image` (built-in `TextToImage`, model `flash`/nano-banana,
 which **renders Thai + English text in the image**), not screenshotted. Use a separate placeholder:
 
 ```markdown
