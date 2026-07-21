@@ -32,6 +32,7 @@ template: `skills/book-router/references/book.yaml.template`
 ## Pipeline
 
 ```
+INIT        init-book (ไม่มี book.yaml → intake wizard: metadata + targets + style → scaffold)
 PLAN        get-book-ref (seed) → outline-planner → get-book-ref (targeted)   ↺ loop
             ✋ HUMAN: อนุมัติ outline (outline/APPROVED.md) ก่อนเริ่มเขียน
 WRITE       write-book-chapter + generate-image (AI) + mockup-screenshot (placeholder)
@@ -45,11 +46,12 @@ BUILD       cover-design  →  build-epub-pdf
 ```
 > PLAN เป็นลูป: ดึง ref แกนก่อน → outline ตั้งบนของจริง → ดึง ref เจาะช่องว่าง
 
-## Skills (18)
+## Skills (19)
 
 | Skill | เฟส | สถานะ |
 |-------|-----|-------|
-| book-router | orchestrator | ✅ เขียนเต็ม (scaffold + state + routing + book-level) |
+| init-book | init | ✅ intake wizard (metadata + targets + style + cover) → เขียน book.yaml + scaffold → ส่งต่อ get-book-ref |
+| book-router | orchestrator | ✅ เขียนเต็ม (state + routing + book-level; scaffold แยกไป init-book) |
 | outline-planner | plan | ✅ เดิม |
 | get-book-ref | plan | ✅ เดิม |
 | write-book-chapter | write | ✅ เดิม (+ `{{image:...}}` สำหรับภาพ AI) |
@@ -142,10 +144,12 @@ Plugin นี้ install ได้เลยผ่าน local marketplace (`.cla
 > marketplace root กับ plugin เป็นโฟลเดอร์เดียวกัน (ตัว `thai-book-production/` นี้เอง).
 > compiler สไลด์ใช้ `pyyaml` — ถ้าเครื่องไหนไม่มี: `pip install pyyaml --break-system-packages`.
 
-## สถานะ (v1.1.0 — RELEASE)
+## สถานะ (v1.2.0 — RELEASE)
+- ✅ **init-book** — intake wizard แยกจาก book-router: เคาะ metadata + targets (epub/pdf/แปล) +
+  style ภาพ/เสียง + ปก ตั้งแต่ต้น แล้ว scaffold; book-router เหลือหน้าที่ state+routing ล้วน (delegate scaffold)
 - ✅ **thClaws-ready**: manifest ประกาศ MCP `pinn-ai` (`https://pinn.ai/mcp`, OAuth) อัตโนมัติ +
   README มีขั้นตอนติดตั้ง & auth สำหรับ thClaws (`/plugin install` → restart → `/mcp reauth pinn-ai`)
-- ✅ ครบ 18 skills — ครอบ workflow เต็ม: refs→manifest→outline→✋approve→บท+ภาพ→✋ภาพจริง→สไลด์+VO→render→TTS→วิดีโอ→ปก (nano-banana-2)→epub/pdf
+- ✅ ครบ 19 skills — ครอบ workflow เต็ม: init→refs→manifest→outline→✋approve→บท+ภาพ→✋ภาพจริง→สไลด์+VO→render→TTS→วิดีโอ→ปก (nano-banana-2)→epub/pdf
 - ✅ decisions 10 ข้อเคาะแล้ว (ดู SPEC §8 Decisions log)
 - ✅ **PPTX renderer standalone**: `build-slides-pptx` + `scripts/slides2pptx.py` (python-pptx) —
   chNN.yaml → branded .pptx ไม่พึ่ง repo นอก, ครบ 12 slide type, ฟอนต์ Prompt+Sarabun bundle, custom theme ได้

@@ -1,15 +1,14 @@
 ---
 name: book-router
 description: >
-  The front door and orchestrator for the whole book-production pipeline, built for
-  Claude Cowork where one working folder holds one book. Use this skill whenever the
-  user asks an open-ended question about their book project — "อยู่เฟสไหนแล้ว", "ทำอะไร
-  ต่อดี", "book status", "what's next on the book", "เริ่มหนังสือใหม่", "สร้างโปรเจกต์
-  หนังสือ", "ช่วยทำหนังสือ" — or any request that spans more than one stage. It
-  scaffolds a new book folder (book.yaml + directory skeleton), reads project state,
-  reports which stage each chapter is in, recommends the next action, and hands off to
-  the right stage skill. When a request clearly names one stage, let that stage skill
-  trigger directly instead.
+  The front door and orchestrator for an EXISTING book project (has a `book.yaml`), built
+  for Claude Cowork where one working folder holds one book. Use this skill whenever the
+  user asks an open-ended question about a book already underway — "อยู่เฟสไหนแล้ว", "ทำอะไร
+  ต่อดี", "book status", "what's next on the book", "ช่วยทำหนังสือต่อ" — or any request that
+  spans more than one stage. It reads project state, reports which stage each chapter is
+  in, recommends the next action, and hands off to the right stage skill. Starting a NEW
+  book (no `book.yaml` yet) is **init-book**'s job — route there. When a request clearly
+  names one stage, let that stage skill trigger directly instead.
 ---
 
 # Book Router — Pipeline Orchestrator (Cowork)
@@ -24,28 +23,24 @@ paths come from `book.yaml → layout:`, never hardcoded.
 ## Paths (thai-book-production layout)
 หนึ่ง working folder = หนังสือหนึ่งเล่ม Resolve ทุก path จาก `book.yaml → layout:` ที่ root —
 **ห้าม hardcode** สเปกโครงเต็มอยู่ที่ `references/folder-structure.md`; template ของ manifest
-อยู่ที่ `references/book.yaml.template` ถ้าไม่มี `book.yaml` = ยังไม่ใช่ book folder → scaffold ก่อน
+อยู่ที่ `../init-book/references/book.yaml.template` ถ้าไม่มี `book.yaml` = ยังไม่ใช่ book folder →
+ส่งต่อ **init-book** ให้ scaffold ก่อน (router ไม่ scaffold เอง)
 
 ## Step 0 — Are we in a book folder?
 
 A book folder has `book.yaml` at its root.
 
 - **book.yaml present** → load it. `layout:` gives every path; `chapters:` gives scope.
-- **book.yaml absent** → offer to scaffold. On yes, create from
-  `references/book.yaml.template` and make the skeleton:
-  ```
-  outline/  refs/docs/  refs/blogs/  chapters/  media/slides/
-  media/screenshots/  apparatus/  translations/  assets/  reports/  build/
-  ```
-  Then interview for `book:` fields (title, author, language) and the initial
-  `chapters:` registry, write them into book.yaml, and route to **get-book-ref** to
-  seed the core reference docs first (so the outline can be grounded on real material).
+- **book.yaml absent** → this is not a book yet. Route to **init-book** (the intake +
+  scaffold wizard) — it interviews for metadata/targets/style, writes `book.yaml`, makes
+  the skeleton, and hands back to the pipeline. Router does **not** scaffold inline.
 
 Never guess paths. If unsure which folder is the book, ask once.
 
 ## The Pipeline (canonical order)
 
 ```
+INIT        init-book (no book.yaml → intake wizard: metadata + targets + style → scaffold)
 PLAN        get-book-ref (seed) → outline-planner → get-book-ref (targeted)   ↺ loop
             → ✋ HUMAN: adjust & approve outline ({outline}/APPROVED.md)
 WRITE       write-book-chapter (+ generate-image AI figures + mockup-screenshot placeholders)
@@ -108,8 +103,9 @@ Report book-level status only once all in-scope chapters are through the per-cha
 
 ## Step 2 — Recommend the next action
 
-Priority (ตรงกับ workflow: seed refs → manifest → outline → **คนอนุมัติ** → เขียนบท+ภาพ →
+Priority (ตรงกับ workflow: init → seed refs → manifest → outline → **คนอนุมัติ** → เขียนบท+ภาพ →
 **คนแทนภาพจริง** → สไลด์+VO → render → TTS → วิดีโอ):
+0. no `book.yaml` → **init-book** (scaffold the project first; nothing else can run)
 1. `{refs_docs}`/`{refs_blogs}` empty → **get-book-ref** (seed the core docs for the
    book's subject before outlining)
 2. Seed refs present but no outline files → **outline-planner** (ground it on `refs/`)

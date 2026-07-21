@@ -14,7 +14,7 @@ description: >
 
 หนึ่ง working folder = หนังสือหนึ่งเล่ม Resolve ทุก path จาก `book.yaml → layout:` ที่ root
 ของ folder — **ห้าม hardcode** ถ้าไม่มี `book.yaml` แปลว่าไม่ได้อยู่ใน book folder ให้ให้
-`book-router` scaffold ก่อน ค่า default:
+`init-book` scaffold ก่อน ค่า default:
 
 | what | path |
 |------|------|

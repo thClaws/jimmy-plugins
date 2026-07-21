@@ -72,7 +72,7 @@
 
 ## การตรวจว่าอยู่ใน book folder หรือไม่
 
-มี `book.yaml` ที่ working folder root = ใช่ ไม่มี = ให้ `book-router` scaffold ใหม่ ห้ามเดา path เอง
+มี `book.yaml` ที่ working folder root = ใช่ ไม่มี = ให้ `init-book` scaffold ใหม่ ห้ามเดา path เอง
 
 ## Extensibility
 
