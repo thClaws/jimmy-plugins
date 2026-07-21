@@ -137,11 +137,12 @@ Plugin นี้ install ได้เลยผ่าน local marketplace (`.cla
 > marketplace root กับ plugin เป็นโฟลเดอร์เดียวกัน (ตัว `thai-book-production/` นี้เอง).
 > compiler สไลด์ใช้ `pyyaml` — ถ้าเครื่องไหนไม่มี: `pip install pyyaml --break-system-packages`.
 
-## สถานะ (v1.6.0 — RELEASE)
+## สถานะ (v1.6.1 — RELEASE)
 - ✅ **`kind: book | article`** (ใน `book.yaml → book:`) — พูดว่า "สร้างบทความ" → init-book set
   `kind: article`: เอกสารบทเดียว **ไม่มี "บทที่ N" / สารบัญ / back-matter (glossary/index/appendix)**,
   pipeline สั้นลง (book-router ข้าม APPARATUS, index-glossary skip, build-epub-pdf ตัด `--toc`+back-matter,
   write-book-chapter ใช้หัวเรื่องบทความแทน "บทที่"); `book` (default) = พฤติกรรมเดิมทุกอย่าง
+  - **v1.6.1:** article **ข้าม outline-approval gate** ด้วย (สั้น → เขียนเลย ไม่ต้องรอ `APPROVED.md`)
 - ✅ **เสียง → built-in `TextToSpeech`; ตัด Pinn.ai/MCP ออกหมด** — generate-tts เลิกใช้
   `mcp__pinn-ai__text2speech` ใช้ tool ในตัว engine (Gemini `gemini-3.1-flash-tts-preview`) แทน;
   ลบ `mcpServers.pinn-ai` ออกจาก manifest แล้ว — plugin **ไม่พึ่ง MCP ใดๆ อีก** (ภาพ+เสียง built-in ทั้งคู่)

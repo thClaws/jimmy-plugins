@@ -42,7 +42,7 @@ Never guess paths. If unsure which folder is the book, ask once.
 ```
 INIT        init-book (no book.yaml → intake wizard: metadata + targets + style → scaffold)
 PLAN        get-book-ref (seed) → outline-planner → get-book-ref (targeted)   ↺ loop
-            → ✋ HUMAN: adjust & approve outline ({outline}/APPROVED.md)
+            → ✋ HUMAN: adjust & approve outline ({outline}/APPROVED.md)   [book only; article skips]
 WRITE       write-book-chapter (+ generate-image AI figures + mockup-screenshot placeholders)
 QC          audit-chapter → proofread → fix-chapter        (loops per chapter)
             → ✋ HUMAN: adjust content · capture real screenshots to replace mockups
@@ -64,8 +64,10 @@ near the end.
 single document: exactly one chapter, **no "บทที่ N"** (write-book-chapter uses the article
 title), and the tail collapses — **SKIP APPARATUS entirely** (`index-glossary` — an article
 has no glossary/index/appendix), and `build-epub-pdf` emits **no auto-TOC and no back-matter**.
-So an article's route is: PLAN → WRITE → QC → (MEDIA if the user wants slides/video) →
-(LOCALIZE if translating) → BUILD. Everything else is identical.
+It also **skips the outline-approval human gate** — an article is short, so it flows straight
+to writing (PLAN's refs/outline are optional and need no `{outline}/APPROVED.md`). So an
+article's route is: (PLAN, light/optional — no approval) → WRITE → QC → (MEDIA if the user
+wants slides/video) → (LOCALIZE if translating) → BUILD. Everything else is identical.
 
 ## Step 1 — Build the state table
 
@@ -92,7 +94,7 @@ reading contents):
 **Human gates (สถานะที่ "คน" ต้องปลดเอง — router แจ้งและรอ ไม่ข้ามเอง):**
 | Gate | Evidence | ปลดโดย |
 |---|---|---|
-| outline-approved | `{outline}/APPROVED.md` exists | คนรีวิว outline แล้วบอก "อนุมัติ outline" → router เขียน `APPROVED.md` (วันที่+หมายเหตุ) ให้ |
+| outline-approved (book only) | `{outline}/APPROVED.md` exists | คนรีวิว outline แล้วบอก "อนุมัติ outline" → router เขียน `APPROVED.md` (วันที่+หมายเหตุ) ให้ · **article: ข้าม gate นี้** |
 | screenshots-real | ไม่มี `status: mockup` ค้าง | คนวางไฟล์จริงทับชื่อเดิมแล้วบอก "เปลี่ยนเป็นภาพจริงแล้ว" → mark `status: real` |
 
 Render: `บท | ชื่อ | สถานะล่าสุด | ค้างอะไร`.
@@ -118,9 +120,11 @@ Priority (ตรงกับ workflow: init → seed refs → manifest → outli
 2. Seed refs present but no outline files → **outline-planner** (ground it on `refs/`)
 3. Outline done but it exposes gaps / a chapter lacks source material → **get-book-ref**
    (targeted pass), then continue
-4. **HUMAN GATE — outline approval:** outline exists but no `{outline}/APPROVED.md` →
-   stop and ask the human to review/adjust the outline; on "อนุมัติ outline" write
+4. **HUMAN GATE — outline approval (book only):** outline exists but no `{outline}/APPROVED.md`
+   → stop and ask the human to review/adjust the outline; on "อนุมัติ outline" write
    `APPROVED.md` (date + reviewer note). **Do not start writing chapters before this.**
+   - **`book.kind: article` → SKIP this gate.** No `APPROVED.md` needed; go straight to
+     **write-book-chapter** once the article title/scope is set (outline is optional).
 5. Chapter in scope has no `chNN.md` → **write-book-chapter** (lowest unwritten) —
    the chapter comes with `{{image:}}` figures (**generate-image**) and `{{screenshot:}}`
    mockups (**mockup-screenshot**) generated alongside
