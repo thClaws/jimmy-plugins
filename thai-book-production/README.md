@@ -74,16 +74,50 @@ BUILD       cover-design  →  build-epub-pdf
 
 ## Requirements
 
-- **Pinn.ai MCP connector** (เชื่อมใน Cowork ของผู้ใช้เอง — ไม่ได้ bundle มากับ plugin):
-  ใช้โดย `generate-image` + `cover-design` (`text2image`, nano-banana-2) และ `generate-tts`
-  (`text2speech`) — ต้องมีบัญชี/credits ของตัวเอง ถ้าไม่ได้เชื่อม: ภาพ AI จะค้างสถานะ `needed`,
-  ปกใช้ Canva/programmatic แทนได้, TTS จะรายงานว่าขาดแล้วหยุด
+- **Pinn.ai MCP connector** — ใช้โดย `generate-image` + `cover-design` (`text2image`,
+  nano-banana-2) และ `generate-tts` (`text2speech`) ต้องมีบัญชี/credits ของตัวเอง
+  ใน **thClaws** plugin นี้ **ประกาศ server `pinn-ai` (`https://pinn.ai/mcp`) ให้อัตโนมัติ**
+  ในตัว manifest — ผู้ใช้เพียง authorize ครั้งเดียว (ดู "ติดตั้ง & auth ใน thClaws").
+  ใน Claude Cowork/Claude Code ต้องเชื่อม connector เอง ถ้ายังไม่ auth: ภาพ AI จะค้างสถานะ
+  `needed`, ปกใช้ Canva/programmatic แทนได้, TTS จะรายงานว่าขาดแล้วหยุด
 - **Python libs**: `pyyaml`, `python-pptx`, `Pillow` — ตรวจด้วย
   `skills/build-slides-pptx/scripts/check_env.py` (บอกคำสั่ง pip ให้เมื่อขาด)
 - **CLI (เฉพาะเฟสที่ใช้)**: `soffice` + `pdftoppm` + `fc-match` (render/preview สไลด์),
   `ffmpeg` (วิดีโอ), `pandoc` + `xelatex` + `epubcheck` (ประกอบเล่ม)
 
-## ติดตั้ง & ทดสอบ (local)
+## ติดตั้ง & auth ใน thClaws
+
+thClaws อ่าน Claude Code plugin format ได้ตรงๆ (`.claude-plugin/plugin.json` + โฟลเดอร์ `skills/`)
+แต่ **ไม่ใช้** `marketplace.json` — ติดตั้งผ่าน `/plugin install <git-url | .zip>` แทน โดยไม่ใส่
+`--user` = ลงที่ **workspace folder ปัจจุบัน** (`<workspace>/.thclaws/plugins/`):
+
+```
+# 1) ติดตั้ง plugin (skills + commands ใช้ได้ทันทีใน session นี้)
+/plugin install https://github.com/<org>/thai-book-production.git
+#   หรือจาก local git repo:  /plugin install /path/to/thai-book-production
+#   เจาะ subpath จาก monorepo:  <git-url>#<branch>:<subpath>
+
+# 2) ⚠ restart thClaws — MCP server (pinn-ai) spawn ตอน startup เท่านั้น
+/quit        # แล้วเปิด thclaws ใหม่
+
+# 3) authorize pinn-ai ครั้งเดียว (เปิด browser → วาง API key pk_... บนหน้า pinn.ai)
+/mcp reauth pinn-ai
+```
+
+เสร็จแล้ว `generate-image` / `cover-design` / `generate-tts` เรียก `mcp__pinn-ai__*` ได้เลย
+token เก็บฝั่ง pinn.ai (ไม่อยู่ใน plugin), thClaws refresh ให้อัตโนมัติ ไม่ต้อง auth ซ้ำ
+
+**เกร็ด**
+- `/mcp` (ไม่มี arg) — ดูรายชื่อ MCP + สถานะ auth เช็คว่า `pinn-ai` ขึ้นและ authed แล้วหรือยัง
+- ถ้าเรียก skill แล้วเจอ error ว่าไม่มี tool `mcp__pinn-ai__*` → ลืม restart ให้ `/quit` แล้วเปิดใหม่
+- token เพี้ยน/หมดสิทธิ์ภายหลัง → รัน `/mcp reauth pinn-ai` ซ้ำได้ (invalidate ตัวเก่าให้เอง)
+- ถ้าผู้ใช้ตั้ง MCP ชื่อ `pinn-ai` ไว้เองอยู่แล้ว: manifest ของ plugin จะถูก**ข้าม** (user config
+  ชนะเมื่อชื่อซ้ำ) — auth เดิมไม่โดนแตะ
+- **hosted/cloud runner** (headless ไม่มี browser): OAuth อาจทำไม่ได้ ต้อง pre-auth ไว้ก่อน —
+  desktop (ตัวหลัก) ใช้ได้ปกติ
+- ถอน: `/plugin remove thai-book-production`  ·  ปิดชั่วคราว: `/plugin disable thai-book-production`
+
+## ติดตั้ง & ทดสอบ (Claude Cowork / Claude Code — local marketplace)
 
 Plugin นี้ install ได้เลยผ่าน local marketplace (`.claude-plugin/marketplace.json` มากับ plugin แล้ว
 โดย marketplace ชื่อ `thaigpt`, plugin ชื่อ `thai-book-production`):
@@ -108,7 +142,9 @@ Plugin นี้ install ได้เลยผ่าน local marketplace (`.cla
 > marketplace root กับ plugin เป็นโฟลเดอร์เดียวกัน (ตัว `thai-book-production/` นี้เอง).
 > compiler สไลด์ใช้ `pyyaml` — ถ้าเครื่องไหนไม่มี: `pip install pyyaml --break-system-packages`.
 
-## สถานะ (v1.0.0 — RELEASE)
+## สถานะ (v1.1.0 — RELEASE)
+- ✅ **thClaws-ready**: manifest ประกาศ MCP `pinn-ai` (`https://pinn.ai/mcp`, OAuth) อัตโนมัติ +
+  README มีขั้นตอนติดตั้ง & auth สำหรับ thClaws (`/plugin install` → restart → `/mcp reauth pinn-ai`)
 - ✅ ครบ 18 skills — ครอบ workflow เต็ม: refs→manifest→outline→✋approve→บท+ภาพ→✋ภาพจริง→สไลด์+VO→render→TTS→วิดีโอ→ปก (nano-banana-2)→epub/pdf
 - ✅ decisions 10 ข้อเคาะแล้ว (ดู SPEC §8 Decisions log)
 - ✅ **PPTX renderer standalone**: `build-slides-pptx` + `scripts/slides2pptx.py` (python-pptx) —
