@@ -11,7 +11,35 @@ Image refs ({{screenshot:file}} / a screenshot filename) are emitted as <img src
 the render service resolves them against the media dirs passed alongside.
 Requires: pyyaml.
 """
-import argparse, html, os, sys
+import argparse, html, os, shutil, sys
+
+IMG_EXTS = (".png", ".jpg", ".jpeg", ".webp", ".gif")
+
+# Populated in main(): stem/filename (lowercased) → real path on disk.
+MEDIA_INDEX = {}
+# Where referenced images are copied so the render service gets them by
+# flat basename (RenderSlides uploads image_dir files flat). Set in main().
+ASSETS_DIR = None
+_COPIED = set()
+_MISSING = set()
+
+
+def build_media_index(media_dirs):
+    idx = {}
+    for d in media_dirs:
+        if not d or not os.path.isdir(d):
+            continue
+        for fn in sorted(os.listdir(d)):
+            p = os.path.join(d, fn)
+            if not os.path.isfile(p):
+                continue
+            stem, ext = os.path.splitext(fn)
+            if ext.lower() in IMG_EXTS:
+                # First match wins; index by both full name and stem so a
+                # ref written as `foo` or `foo.png` finds `foo.jpg`.
+                idx.setdefault(fn.lower(), p)
+                idx.setdefault(stem.lower(), p)
+    return idx
 
 try:
     import yaml
@@ -41,14 +69,28 @@ def bullets_html(items):
 
 
 def img_src(name):
-    """A screenshot/image filename → relative src the render service resolves."""
+    """Resolve a screenshot/image ref to the REAL file and copy it into the
+    assets dir, returning its flat basename. The deck references the actual
+    file (correct extension) rather than a guessed `.png` — TextToImage
+    writes `.jpg`, so the old `<img src="foo.png">` was a dead link."""
     if not name:
         return ""
     n = str(name)
-    # allow {{screenshot:foo}} / {{image:id}} forms
+    # allow {{screenshot:foo}} / {{image:id|caption}} forms
     if n.startswith("{{"):
         n = n.strip("{} ").split(":", 1)[-1].split("|", 1)[0].strip()
-    if not n.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
+    key = n.lower()
+    src = MEDIA_INDEX.get(key) or MEDIA_INDEX.get(os.path.splitext(key)[0])
+    if src and ASSETS_DIR:
+        base = os.path.basename(src)
+        if base not in _COPIED:
+            os.makedirs(ASSETS_DIR, exist_ok=True)
+            shutil.copyfile(src, os.path.join(ASSETS_DIR, base))
+            _COPIED.add(base)
+        return base
+    # Unresolved — keep a best-effort name (with an extension) and flag it.
+    _MISSING.add(n)
+    if not key.endswith(IMG_EXTS):
         n += ".png"
     return n
 
@@ -209,12 +251,32 @@ def main():
     ap.add_argument("yaml")
     ap.add_argument("-o", "--out")
     ap.add_argument("--theme", default="thai-tech")
+    ap.add_argument(
+        "--media-dir",
+        action="append",
+        default=None,
+        help="Dir(s) holding real image files ({{image:}}/{{screenshot:}} sources). "
+        "Repeatable. Default: media/generated + media/screenshots.",
+    )
+    ap.add_argument(
+        "--assets-dir",
+        default=None,
+        help="Where referenced images are copied (flat) for the renderer. "
+        "Default: <out dir>/assets/<stem>. Pass this same dir as RenderSlides image_dir.",
+    )
     a = ap.parse_args()
 
     d = yaml.safe_load(open(a.yaml, encoding="utf-8")) or {}
     slides = d.get("slides") or []
     if not slides:
         sys.stderr.write(f"no slides in {a.yaml}\n"); sys.exit(1)
+
+    out = a.out or os.path.splitext(a.yaml)[0] + ".marp.md"
+    stem = os.path.basename(out).split(".")[0]
+    media_dirs = a.media_dir or ["media/generated", "media/screenshots"]
+    global MEDIA_INDEX, ASSETS_DIR
+    MEDIA_INDEX = build_media_index(media_dirs)
+    ASSETS_DIR = a.assets_dir or os.path.join(os.path.dirname(out) or ".", "assets", stem)
 
     front = f"---\nmarp: true\ntheme: {a.theme}\npaginate: true\n---\n\n"
     blocks, unknown = [], []
@@ -227,9 +289,14 @@ def main():
         blocks.append(fn(s))
 
     md = front + SEP.join(blocks) + "\n"
-    out = a.out or os.path.splitext(a.yaml)[0] + ".marp.md"
     open(out, "w", encoding="utf-8").write(md)
     sys.stderr.write(f"✓ {len(slides)} slides → {out}\n")
+    if _COPIED:
+        sys.stderr.write(f"✓ {len(_COPIED)} image(s) copied → {ASSETS_DIR}  (pass as RenderSlides image_dir)\n")
+    if _MISSING:
+        sys.stderr.write(
+            f"⚠ {len(_MISSING)} image ref(s) NOT found in {media_dirs}: {sorted(_MISSING)}\n"
+        )
     if unknown:
         sys.stderr.write(f"⚠ unknown types (rendered as content): {sorted(set(unknown))}\n")
 

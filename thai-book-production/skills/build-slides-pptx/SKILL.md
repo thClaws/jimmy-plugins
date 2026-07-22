@@ -33,7 +33,7 @@ description: >
 **Two steps. That is the whole procedure. Do NOT run `check_env.py`, do NOT call `slides2pptx.py`,
 and do NOT write your own Python/Pillow/HTML renderer — the renderer is the `RenderSlides` tool.**
 
-### Step 1 — compile `chNN.yaml → Marp markdown`
+### Step 1 — compile `chNN.yaml → Marp markdown` (+ collect its images)
 The only dependency is `pyyaml`. If it's missing, install it inline (`pip install pyyaml` or
 `.venv/bin/python -m pip install pyyaml`) and move on — nothing else is needed.
 ```bash
@@ -41,30 +41,36 @@ mkdir -p build/slides
 python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-slides-pptx/scripts/slides_yaml2marp.py \
   media/slides/chNN.yaml -o build/slides/chNN.marp.md
 # → "✓ NN slides → build/slides/chNN.marp.md"
+# → "✓ K image(s) copied → build/slides/assets/chNN  (pass as RenderSlides image_dir)"
 ```
-(Resolve `media/slides` and `build` from `book.yaml → layout:` — shown here at their defaults.)
+The converter **resolves each `{{image:}}`/`{{screenshot:}}` ref to the REAL file on disk**
+(matching by stem, so a ref to `foo` finds `foo.jpg` — TextToImage writes `.jpg`, not `.png`) and
+**copies it into `build/slides/assets/chNN/`**, emitting `<img src="realname.ext">`. That's why the
+deck's images actually render — never rely on the raw `.png`-guessed name. It scans
+`media/generated` + `media/screenshots` by default (override with `--media-dir`). Watch its stderr:
+a `⚠ … NOT found` line means a figure is missing/misnamed — fix that before rendering, don't ship a
+blank slide. (Resolve `media/*` and `build` from `book.yaml → layout:` — defaults shown.)
 
 ### Step 2 — render with the `RenderSlides` tool
-Call the built-in tool directly (it is a first-class tool, NOT a shell command). It relays to the
-slide-render service and writes the artifacts:
+Call the built-in tool directly (it is a first-class tool, NOT a shell command). Point `image_dir`
+at the **assets dir Step 1 populated** so every `<img src>` resolves:
 ```
 RenderSlides(
   markdown_path = build/slides/chNN.marp.md,
   theme         = thai-tech,
-  image_dir     = media/generated,     # dir holding the figures the deck references by <img src>
+  image_dir     = build/slides/assets/chNN,   # the dir Step 1 copied the real figures into
   out_dir       = build/slides/preview/chNN,
 )
-→ writes build/slides/preview/chNN/deck.pdf + slide.001.png, slide.002.png, …
+→ writes build/slides/preview/chNN/deck.pdf + slide-01.png, slide-02.png, …
 ```
 - Endpoint resolves automatically: `SLIDE_RENDER_API` env (self-hosted) → else the thClaws Gateway
   (cloud login). No token handling on your side — the engine injects it.
 - Requires `imageToolsEnabled: true` in `.thclaws/settings.json` (same gate as TextToImage). If the
   tool isn't listed by `/tools`, tell the user to enable it and restart the session — **do not fall
   back to writing a renderer.**
-- Images: `{{screenshot:}}`→`media/screenshots/`, `{{image:}}`→`media/generated/` resolve by
-  filename. If the deck references files from more than one dir, copy them into one `image_dir`
-  first (or point `image_dir` at the dir that holds them).
-- **QC:** after it returns, open a couple of `build/slides/preview/chNN/slide.*.png` with the Read
+- Output PNGs are named `slide-NN.png` (dash) so they pair 1:1 with `generate-tts`'s `slide-NN.wav`
+  in the video step.
+- **QC:** after it returns, open a couple of `build/slides/preview/chNN/slide-*.png` with the Read
   tool before delivering — check Thai fonts, images resolved, no overflow.
 
 If `RenderSlides` returns an error, report it and stop — do NOT silently switch to python. The only
