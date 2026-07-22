@@ -43,13 +43,21 @@ and it drops the flaky `soffice` step (fixes macOS). Two steps:
    python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-slides-pptx/scripts/slides_yaml2marp.py \
      {slides}/chNN.yaml -o {build}/slides/chNN.marp.md
    ```
-2. **Render** via the `slide-render` service (Marp + Chromium + Thai fonts) → `chNN.pdf` +
-   per-slide PNGs. **Do NOT call the API from a shell in the frontend** — the render goes
-   through the thClaws engine (which holds the gateway token). When the engine exposes the
-   built-in **`RenderSlides`** tool, call that with the marp-md + any `{{image:}}`/`{{screenshot:}}`
-   files; it relays to `slide-render` and writes `{build}/slides/preview/chNN/slide-*.png`.
-   Until then, POST the marp-md to `$SLIDE_RENDER_API/slides` **from the engine's own bash**
-   (backend-initiated, token injected server-side) and unzip `deck.pdf` + `slides/*.png`.
+2. **Render** with the built-in **`RenderSlides`** tool (thClaws engine ≥ v0.102) — **never POST
+   the API from a shell/frontend.** The engine holds the endpoint + token and relays to
+   `slide-render`, so this stays backend-initiated by construction:
+   ```
+   RenderSlides(
+     markdown_path = {build}/slides/chNN.marp.md,
+     theme         = thai-tech,
+     image_dir     = {generated}      # + screenshots; any dir the deck's <img src> point into
+     out_dir       = {build}/slides/preview/chNN,
+   )
+   → writes {out_dir}/deck.pdf + slide.NNN.png (one per slide)
+   ```
+   Endpoint resolves automatically: `SLIDE_RENDER_API` env (self-hosted) → else the thClaws
+   Gateway (metered, cloud login). Gated on `imageToolsEnabled` like the other media tools.
+   **QC:** open a couple of `preview/chNN/slide.*.png` with the Read tool before delivering.
 
 Service + theme + API contract: `slide-render/` (sibling of this plugin). The 12-type ↔ Marp-md
 mapping is `scripts/slides_yaml2marp.py`.

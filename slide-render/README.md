@@ -47,10 +47,12 @@ Frontend (React/GUI) ─IPC→ thClaws Rust engine ─relay(token)→ slide-rend
 ```
 The gateway/cloud token lives in Rust only; the GUI/gui-shell CSP blocks external hosts
 anyway; auth/policy/metering stay on the same `resolve_access_key()` path as the media
-tools (billed via the gateway ×1.25 markup). Preferred mechanism: a built-in Rust tool
-`RenderSlides` (mirrors `TextToImage`) that the `build-slides-pptx` skill invokes —
-backend-initiated by construction. GUI live-preview goes via an IPC command → the same
-Rust relay, never a direct `fetch`.
+tools (billed via the gateway ×1.25 markup). Mechanism: the built-in Rust tool
+**`RenderSlides`** (thClaws engine `tools/slide_render.rs`, mirrors `TextToImage`) that the
+`build-slides-pptx` skill invokes — backend-initiated by construction. It resolves the
+endpoint `SLIDE_RENDER_API` (self-hosted) → thClaws Gateway `/slide-render/slides` (metered),
+sends the marp-md + images as multipart, and unzips `deck.pdf` + `slide.*.png` into `out_dir`.
+GUI live-preview goes via an IPC command → the same Rust relay, never a direct `fetch`.
 
 ## Contents
 - `server.js` — Express service (multipart in → zip out, per-request temp dir, cleaned).
