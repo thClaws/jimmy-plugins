@@ -130,24 +130,29 @@ Speaker notes are the MOST IMPORTANT output — they become TTS voice-over for t
 
 **What to check:**
 
-#### A. Length Requirements (HARD minimums)
+#### A. Length — keep notes CONCISE (flag notes that are TOO LONG)
 
-Speaker notes are the primary teaching medium — they must be **rich, descriptive, and thorough** with scenarios, examples, and analogies. Short terse notes are the #1 quality problem.
+Speaker notes carry the explanation, but they must be **concise** — cover the point in a few clear
+sentences and move on. **Long, padded, rambling notes are the #1 quality problem**, not short ones.
+The numbers below are CEILINGS, not quotas: a note is fine anywhere up to Max; flag it when it goes
+OVER (padding, repeated points, multi-sentence scenarios) — trim to the essential.
 
-| Slide Type | Hard Minimum | Target Range | Sweet Spot |
-|-----------|-------------|-------------|------------|
-| `cover` | 100 | 120-180 | 150 |
-| `section` | 120 | 150-220 | 180 |
-| `content` | 150 | 180-280 | 220 |
-| `two_column` | 150 | 180-280 | 220 |
-| `process` | 150 | 180-280 | 220 |
-| `table` | 120 | 150-220 | 180 |
-| `callout` | 120 | 150-200 | 170 |
-| `screenshot` | 100 | 120-180 | 150 |
-| `quote` | 80 | 100-150 | 120 |
-| `demo` | 60 | 80-120 | 100 |
+| Slide Type | Aim (words) | Max (words) |
+|-----------|-------------|-------------|
+| `cover` | 35-60 | 75 |
+| `section` | 35-60 | 75 |
+| `content` | 50-90 | 110 |
+| `two_column` | 50-90 | 110 |
+| `process` | 50-90 | 110 |
+| `table` | 40-70 | 90 |
+| `callout` | 40-70 | 90 |
+| `screenshot` | 40-70 | 90 |
+| `quote` | 25-45 | 55 |
+| `demo` | 25-45 | 55 |
 
-Count Thai words by splitting on spaces and newlines, counting each Thai word cluster and English word. Notes below the Hard Minimum are CRITICAL issues — expand with scenarios, examples, analogies, and practical tips.
+Count Thai words by splitting on spaces and clusters. **A note OVER the Max is a MAJOR issue — cut
+the padding.** The only floor is that a note must say something real (not a bare label); a slightly
+short but clear note is fine and preferred over a long one.
 
 #### B. TTS Naturalness — MALE SPEAKER ONLY
 - Notes should sound like a **friendly male Thai trainer speaking in a workshop**
@@ -159,30 +164,26 @@ Count Thai words by splitting on spaces and newlines, counting each Thai word cl
 - No robotic patterns like "ข้อแรก... ข้อสอง... ข้อสาม..."
 - Male speech patterns: "ผม" (not "ฉัน/ดิฉัน"), "นะครับ" (not "นะคะ"), "ใช่ครับ" (not "ใช่ค่ะ")
 
-#### C. Content Depth
-Notes must NOT just restate slide bullets. They are the PRIMARY teaching medium and should be rich and descriptive:
-1. **Hook** (1-2 sentences): Open with a scenario, question, or real-world problem
-2. **Explain** (4-6 sentences): Expand each point with concrete examples, analogies from business/office life, practical tips, and deeper context
-3. **Reinforce** (1-2 sentences): Summarize the key takeaway memorably, or give a practical tip
-4. **Bridge** (1 sentence): Connect to the next slide with context
-
-**Every note should contain at least one concrete example or real-world scenario.** Notes that only name the topic without explaining it are MAJOR issues. Target 7-12 sentences per slide.
+#### C. Content — clear but CONCISE
+Notes should explain the slide's point, not just restate the bullets — but do it efficiently:
+roughly **3-5 sentences**: state the point → explain briefly (one concrete example/analogy only if
+it truly helps) → a one-phrase bridge. **Padding, repeated points, and long multi-sentence scenarios
+are defects.** A scenario is optional and should be one short line at most — never a paragraph.
 
 #### D. Variety
 - Don't start every note with the same phrase (check for repetitive "มาดูกัน", "ทีนี้", etc.)
-- Good openers: "สิ่งสำคัญคือ...", "ลองนึกภาพว่า...", "หลายคนสงสัยว่า...", "ตรงนี้น่าสนใจ...", "เรามาเข้าเรื่องกัน..."
+- Good openers: vary them; but keep the opener short — don't spend two sentences setting up.
 
 **How to fix:**
-- Rewrite notes that are too short — expand with context, examples, analogies
-- Fix unnatural openings
-- Add the 3-part structure (Hook → Explain → Bridge) where missing
-- Replace bullet-reading style with narrative flow
-- Vary opening phrases
+- **Trim notes that run over the Max words** — cut padding, remove repeated points, shorten scenarios
+- Fix unnatural openings and vary opening phrases
+- Make sure the note explains the point (not just names it) — but in a few sentences, not a lecture
+- Replace bullet-reading style with a brief natural explanation
 
 **Issue severity:**
-- CRITICAL: Notes missing entirely, or under 60 words, or notes that only name the topic without any explanation/example
-- MAJOR: Notes under Hard Minimum for slide type, or just restates bullets with no expansion, or lacks any concrete example/scenario
-- MINOR: Meets minimum but could use more depth/variety to reach the Sweet Spot
+- CRITICAL: Notes missing entirely, or a bare label with no explanation at all
+- MAJOR: Notes OVER the Max words (padded/rambling/repetitive), or just restates bullets verbatim
+- MINOR: Slightly over Aim, or a repetitive opener
 
 ### Dimension 4: Slide Format Compliance (MD → YAML)
 

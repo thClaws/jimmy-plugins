@@ -88,18 +88,22 @@ material to enrich the speaker notes. The chapter gives structure; the reference
 1. **Identify the learning goal** — what the learner can DO afterward.
 2. **Sequence for understanding** — each slide builds on the previous; never show a concept before
    its prerequisites.
-3. **One key idea per slide** — if a section has 3 important concepts, that's 3 slides, not one
-   cramped slide. Conversely, don't split a single idea across slides just to add slides.
+3. **Consolidate — prefer FEWER, well-organized slides.** Group closely related points onto one
+   slide instead of giving each its own. A section's several sub-points usually belong together, not
+   spread across 3 thin slides. Only start a new slide when the topic genuinely shifts. Before adding
+   a slide, ask: *can this fold into the previous one?* A good instructor covers more ground per
+   slide and explains it concisely — not one tiny idea per slide.
 4. **Use images as proof points** — place a screenshot/figure slide right after the concept it
    illustrates ("here's the idea" → "here's what it looks like").
-5. **End each section with a takeaway** — a callout, a summary, or a bridge in the notes.
+5. **Don't over-scaffold short sections** — a lean `## N.X` section can be a single slide, not a
+   divider + several content slides + a summary.
 
-**Slide count: let the content decide — do NOT target a number.**
-Create exactly as many slides as the chapter genuinely needs to teach it well, and no more. A tight
-chapter might be 8 slides; a rich one with many screenshots might be 30+. **Never pad to hit a
-target, and never cut substance to stay under one** — both produce irrelevant or cramped slides.
-The only hard rule is coverage: every `## N.X` section is represented, and every image gets its
-slide. Beyond that, one key idea per slide and cut anything that doesn't teach.
+**Aim for a LEAN deck — fewer slides, each explaining concisely.**
+The chapter's content decides the count, but **bias toward consolidation**: a tight deck the learner
+can move through efficiently beats a long one that fragments every point into its own slide. Do NOT
+create a slide per minor idea. The only hard rule is coverage — every image gets its slide, and each
+`## N.X` section is represented (as few slides as cleanly cover it). **When in doubt, merge.** Padding
+the deck with thin, one-idea slides is a defect, not thoroughness.
 
 How chapter elements map to slide types:
 
@@ -126,24 +130,18 @@ Author each slide in `media/slides/chNN.slides.md` per
 `::: notes` for narration). Preserve document order — insert/edit/delete is just moving text blocks;
 there are no position numbers to renumber. All the rules below apply to what you write **in the MD**.
 
-#### Slide text is a VISUAL AID — keep it short (depth lives in the notes)
+#### On-slide text: short phrases, but DON'T split slides to shorten them
 
-**The single most important rule for on-slide text: the slide face is skimmable, NOT the transcript.**
-A viewer should grasp a slide in ~3 seconds. All the depth — explanations, examples, scenarios,
-analogies — goes in `::: notes` (the voice-over), NEVER on the slide. If you find yourself writing a
-full sentence on the slide, you're writing the notes in the wrong place.
+On-slide text is a visual aid — keep each line a short phrase, not a full sentence (the explanation
+lives in `::: notes`). But **do NOT create extra slides just to keep bullet counts low** — a single
+slide comfortably holds a coherent group of related bullets. Denser-but-clear beats many thin slides.
 
-On-slide text limits (hard):
-- **Bullets: short phrases, ≤ ~8 words each, NOT full sentences.** "สูตร SUMIF รวมยอดตามเงื่อนไข" ✓
-  — not "สูตร SUMIF จะรวมยอดขายตามเงื่อนไขที่คุณกำหนดเอง เช่น รวมเฉพาะสินค้าประเภท A" ✗ (that's a note).
-- **Max ~5 bullets per content slide.** More ideas → another slide, not a denser one.
-- **`body`/card text: ≤ 2 short lines**, a headline-style phrase — not a paragraph.
-- **Titles ≤ ~8 words.** No sentences ending in periods as titles.
+- **Bullets: short phrases (not full sentences).** "สูตร SUMIF รวมยอดตามเงื่อนไข" ✓ — the detailed
+  explanation of it goes in the notes, not on the slide.
+- **A content slide can hold several related bullets** — group them; don't spill related points onto
+  a second slide to reduce the count on the first.
+- **`body`/card text: a phrase, not a paragraph.** Titles: a short phrase, not a sentence.
 - Strip filler ("ในหัวข้อนี้เราจะ...", "สิ่งสำคัญคือ...") from slide text — put it in the notes.
-
-Rule of thumb: **slide text ≈ the bullet points a presenter glances at; the notes ≈ what the
-presenter actually says.** The notes are long and rich (see the word-count table below); the slide
-stays lean. Verbose slides are a defect — fix them by moving prose into `::: notes`.
 
 #### Slide construction rules
 
@@ -154,10 +152,9 @@ stays lean. Verbose slides are a defect — fix them by moving prose into `::: n
 `label` (1-3 word keyword), `title` (≤8 words), `body` (≤2 short lines — a phrase, not a paragraph).
 Card count picks the template variant automatically.
 
-**Content** — Break long sections into multiple content slides. **≤5 bullets each; each bullet a
-short phrase (≤ ~8 words), not a sentence.** The teaching goes in the notes — the bullet is just the
-peg the viewer's eye lands on. If a bullet needs a clause to make sense, shorten it and explain it in
-the notes.
+**Content** — Group a section's related points onto as few content slides as read cleanly (a slide
+can carry several bullets). **Don't split into extra slides just to lower the bullet count** — that
+inflates the deck. Each bullet is a short phrase, not a sentence; the teaching goes in the notes.
 
 **Image slides (PRESERVE EVERY IMAGE)** — **CRITICAL: every image placeholder in the chapter MUST
 become a `type: screenshot` slide** — both `{{screenshot:filename|description}}` (real UI) AND
@@ -227,40 +224,39 @@ The downstream renderer + TTS choke on emoji. **Never use emoji in any text fiel
 | ⚠️ | "ข้อควรระวัง:" |
 | ➡️ | " -> " or " — " |
 
-### Speaker notes — the voice-over script (the notes ARE the lesson)
+### Speaker notes — the voice-over script (keep it CONCISE)
 
 The `::: notes` block is the voice-over script fed to TTS — it becomes the actual audio. The slide is
-a visual aid; **the notes are the teaching.** A learner who only LISTENS should still understand the
-lesson completely. Write like a skilled instructor: introduce the concept, explain WHY it matters,
-give a concrete example or analogy from the learner's work life, walk through the details, and bridge
-to what's next.
+a visual aid; the notes carry the explanation. **Explain the slide's point clearly and efficiently,
+then move on — do NOT pad.** A learner should understand from the audio, but that does not mean long:
+a good instructor makes a point in a few clear sentences, adds one concrete touch if it helps, and
+bridges to what's next. **Long, rambling narration is the #1 defect here — brevity is the goal.**
 
-**What GOOD notes do:** paint a scenario ("สมมติว่าคุณเป็นผู้จัดการทีมขาย..."), explain the WHY not
-just the WHAT, use analogies ("เหมือนกับการจ้างผู้ช่วยส่วนตัว..."), add depth beyond the slide's
-bullets, and bridge meaningfully to the next slide.
+**What GOOD notes do:** state the point plainly, add at most ONE quick example or analogy *only if it
+genuinely aids understanding*, and bridge in a phrase. **What to AVOID:** restating the same point
+several ways, multi-sentence scenarios, "walking through" every detail, filler like "สิ่งสำคัญคือ".
 
 #### Word-count guidelines — for the `::: notes` (voice-over) ONLY
 
-**These targets apply to the spoken NOTES, not to the slide text.** Notes are meant to be long and
-rich (they ARE the audio lesson); the slide face stays lean (see the brevity rule above). Never pad
-the *slide* to hit these — they measure the narration.
+**These are CEILINGS to stay under, not quotas to fill.** They apply to the spoken NOTES, not the
+slide text. Shorter is fine and usually better — going OVER is the problem. Cover the point, then stop.
 
-(HARD TARGETS for notes — under the minimum is a failure)
+| Slide Type | Aim (words) | Max (words) |
+|-----------|-------------|-------------|
+| `cover` | 35-60 | 75 |
+| `section` | 35-60 | 75 |
+| `content` | 50-90 | 110 |
+| `two_column` | 50-90 | 110 |
+| `process` | 50-90 | 110 |
+| `table` | 40-70 | 90 |
+| `callout` | 40-70 | 90 |
+| `screenshot` | 40-70 | 90 |
+| `quote` | 25-45 | 55 |
+| `demo` | 25-45 | 55 |
 
-| Slide Type | Target Words | Hard Minimum | Sweet Spot |
-|-----------|-------------|-------------|------------|
-| `cover` | 120-180 | 100 | 150 |
-| `section` | 150-220 | 120 | 180 |
-| `content` | 180-280 | 150 | 220 |
-| `two_column` | 180-280 | 150 | 220 |
-| `process` | 180-280 | 150 | 220 |
-| `table` | 150-220 | 120 | 180 |
-| `callout` | 150-200 | 120 | 170 |
-| `screenshot` | 120-180 | 100 | 150 |
-| `quote` | 100-150 | 80 | 120 |
-| `demo` | 80-120 | 60 | 100 |
-
-Err on MORE explanation. Under-writing is a bigger problem than over-writing for video courses.
+Fewer words that teach the point cleanly beat more words. If a note runs past the Max, cut it — you're
+almost certainly repeating yourself or over-explaining. (A note still must say something real, not a
+one-word label — but the failure mode to guard against here is TOO LONG.)
 
 #### Tone and style
 Conversational Thai, a friendly **male** instructor:
@@ -268,38 +264,33 @@ Conversational Thai, a friendly **male** instructor:
 - Use "ผม" (not "ฉัน/ดิฉัน"); use "ครับ" sparingly (once or twice per note); address the listener as "คุณ".
 - Present tense, warm and clear. **NEVER start a note with "ครับคุณ"** (grammatically wrong).
 
-#### Note structure — teach like you're in the room
-1. **Hook** (1-2 sentences) — a scenario/question/problem that makes the learner care.
-2. **Explain** (4-6 sentences) — the core teaching: concrete example, analogy, HOW to use it, common
-   mistakes.
-3. **Reinforce** (1-2 sentences) — the key takeaway, memorably.
-4. **Bridge** (1 sentence) — why the next slide follows.
+#### Note structure — say it once, clearly
+Keep it to roughly **3-5 sentences**: state the point → explain it briefly (add ONE concrete example
+or analogy only if it truly helps) → a one-phrase bridge to the next slide. That's it. Don't build a
+multi-sentence scenario, don't walk through every detail, don't reinforce the same idea twice.
 
-**Total: 7-12 sentences per slide.** Content/process on the higher end; screenshot/quote lower but
-still descriptive.
-
-#### GOOD note example (content slide, ~200 words — scenario + examples + bridge)
+#### GOOD note example (content slide, ~70 words — concise, one example, quick bridge)
 ```
-สมมติว่าคุณเป็นผู้จัดการฝ่ายขาย ทุกสิ้นเดือนต้องรวบรวมตัวเลขยอดขายจาก 5 ทีมย่อย แล้วทำเป็น
-รายงานส่งผู้บริหาร ปกติใช้เวลาครึ่งวันเปิด Excel คัดลอกตัวเลข แล้วค่อย ๆ สร้างสูตร SUMIF ทีละเซลล์ครับ
-เครื่องมือนี้ทำทั้งหมดให้คุณได้ในไม่กี่นาที แค่บอกว่าอยากได้อะไร ... ผลที่ได้ไม่ใช่แค่ตารางสวย ๆ แต่เป็น
-สเปรดชีตที่มีสูตรทำงานจริง ... ต่อไปเราจะดูตัวอย่างจริงว่าหน้าตาออกมาเป็นอย่างไรครับ
+เครื่องมือนี้สร้างสเปรดชีตที่มีสูตรทำงานจริงให้คุณได้ในไม่กี่นาที แค่บอกว่าอยากได้อะไร เช่น สรุปยอดขายรายทีม
+พร้อมไฮไลต์สีทีมที่ถึงเป้า สูตร SUMIF จะรวมยอดตามเงื่อนไขให้เอง เปิดไฟล์ใน Excel หรือ Google Sheets
+ได้ทันทีครับ ต่อไปเราจะดูตัวอย่างจริงกัน
 ```
-Opens with a scenario, explains the problem, shows the solution with concrete examples, and bridges.
+States the point, gives one concrete example, bridges — no padding, no long scenario.
 
 #### What NOT to do
-- **Too short** — the #1 problem. Under the Hard Minimum → expand with a scenario/analogy/example.
-- **Just naming the topic** — "นี่คือฟีเจอร์ Connector ครับ" is useless; explain what/why/how + example.
-- **Reading the bullets aloud** — EXPAND each bullet with context, don't restate it.
-- **Same opener every slide** — vary: "สมมติว่า...", "ลองนึกภาพว่า...", "หลายคนเคยเจอปัญหา...", a scenario.
-- **Jargon without a plain-language gloss** — VLOOKUP → "เหมือนมีคนเปิดอีกหน้าหาข้อมูลมาให้".
+- **Too long / padded — the #1 problem.** If a note runs past the Max words, cut it.
+- **Restating the same point** in different words across sentences — say it once.
+- **Long multi-sentence scenarios** ("สมมติว่าคุณเป็นผู้จัดการ... ทุกสิ้นเดือน... ครึ่งวัน...") — trim to the
+  essential point; a scenario is optional and should be one short line at most.
+- **Reading the bullets aloud verbatim** — explain the idea briefly instead.
+- **Just naming the topic** — "นี่คือฟีเจอร์ Connector ครับ" alone is too thin; add one line of what/why.
+- **Jargon without a quick gloss** — VLOOKUP → "เหมือนเปิดอีกหน้าหาข้อมูลมาให้".
 
 ### Content quality — instructor standards
-- **Every slide must have `notes`** — no exceptions (no notes = dead air).
-- **One idea per slide** — split a two-topic slide.
-- **Notes are the primary teaching medium** — remove them and the learner loses 80% of the lesson.
-- **Every note needs a concrete example or scenario.**
-- **No empty filler** — cut "this is important" without a WHY; but DO add examples/tips (that's teaching).
+- **Every slide must have `notes`** — no exceptions (no notes = dead air), but keep them concise.
+- **Notes carry the explanation** — but efficiently: the point + one useful touch, not a lecture.
+- **No filler and no padding** — cut "สิ่งสำคัญคือ...", repeated points, and anything that doesn't add
+  new information. Concise-and-clear is the standard, not word count.
 - **Thai terminology consistency** — "สั่งงาน" (prompt), "ผู้ช่วย" (the assistant), "เซสชัน", "โฟลเดอร์".
 
 ## Validate (the `.slides.md` surface)
