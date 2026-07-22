@@ -22,8 +22,13 @@ COPY themes ./themes
 RUN cp themes/fonts/*.ttf /usr/share/fonts/truetype/ && fc-cache -f
 
 EXPOSE 8080
-# tini reaps zombie Chromium procs; chromium needs --no-sandbox in a container
-# (isolation comes from the container + no-network render, see README security note).
-ENV CHROMIUM_FLAGS="--no-sandbox --disable-dev-shm-usage"
+# marp-cli reads these: CHROME_NO_SANDBOX makes it launch Chromium with
+# --no-sandbox (required in a container — isolation comes from the container +
+# no-network render, see README security note); CHROME_DISABLE_GPU drops the GPU
+# in headless. Give the pod a larger /dev/shm via an emptyDir (see the k8s
+# manifest) so Chromium doesn't OOM on the default 64MB.
+ENV CHROME_NO_SANDBOX=1 \
+    CHROME_DISABLE_GPU=1
+# tini reaps zombie Chromium procs.
 ENTRYPOINT ["/usr/bin/tini","--"]
 CMD ["node","server.js"]

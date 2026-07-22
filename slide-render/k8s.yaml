@@ -1,0 +1,63 @@
+# slide-render — Marp + Chromium slide renderer.
+# Deployed to the thclaws-cloud namespace; reached in-cluster at
+#   http://slide-render.thclaws-cloud.svc.cluster.local:8080
+# The engine's RenderSlides tool points SLIDE_RENDER_API here (or the
+# gateway proxies /slide-render/* to this Service). No public Ingress —
+# renders untrusted decks, so keep it cluster-internal.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slide-render
+  namespace: thclaws-cloud
+  labels: { app: slide-render }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: slide-render }
+  template:
+    metadata:
+      labels: { app: slide-render }
+    spec:
+      containers:
+        - name: slide-render
+          image: registry.artech.cloud/slide-render:v0.1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            # SLIDE_RENDER_TOKEN unset → auth is enforced upstream (gateway).
+          resources:
+            requests: { cpu: "250m", memory: "384Mi" }
+            limits: { cpu: "1500m", memory: "1536Mi" }
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          volumeMounts:
+            # Chromium OOMs on the default 64MB /dev/shm; back it with RAM.
+            - name: dshm
+              mountPath: /dev/shm
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: slide-render
+  namespace: thclaws-cloud
+  labels: { app: slide-render }
+spec:
+  selector: { app: slide-render }
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
