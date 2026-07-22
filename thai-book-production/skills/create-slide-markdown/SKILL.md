@@ -126,17 +126,38 @@ Author each slide in `media/slides/chNN.slides.md` per
 `::: notes` for narration). Preserve document order — insert/edit/delete is just moving text blocks;
 there are no position numbers to renumber. All the rules below apply to what you write **in the MD**.
 
+#### Slide text is a VISUAL AID — keep it short (depth lives in the notes)
+
+**The single most important rule for on-slide text: the slide face is skimmable, NOT the transcript.**
+A viewer should grasp a slide in ~3 seconds. All the depth — explanations, examples, scenarios,
+analogies — goes in `::: notes` (the voice-over), NEVER on the slide. If you find yourself writing a
+full sentence on the slide, you're writing the notes in the wrong place.
+
+On-slide text limits (hard):
+- **Bullets: short phrases, ≤ ~8 words each, NOT full sentences.** "สูตร SUMIF รวมยอดตามเงื่อนไข" ✓
+  — not "สูตร SUMIF จะรวมยอดขายตามเงื่อนไขที่คุณกำหนดเอง เช่น รวมเฉพาะสินค้าประเภท A" ✗ (that's a note).
+- **Max ~5 bullets per content slide.** More ideas → another slide, not a denser one.
+- **`body`/card text: ≤ 2 short lines**, a headline-style phrase — not a paragraph.
+- **Titles ≤ ~8 words.** No sentences ending in periods as titles.
+- Strip filler ("ในหัวข้อนี้เราจะ...", "สิ่งสำคัญคือ...") from slide text — put it in the notes.
+
+Rule of thumb: **slide text ≈ the bullet points a presenter glances at; the notes ≈ what the
+presenter actually says.** The notes are long and rich (see the word-count table below); the slide
+stays lean. Verbose slides are a defect — fix them by moving prose into `::: notes`.
+
 #### Slide construction rules
 
 **Cover** — Always first. Split the chapter title into a short `title` (main idea, ≤6 words) and a
 `subtitle` (supporting context). `chapter` is the Thai label like "บทที่ 1".
 
 **Section** — One per major `## N.X` heading. 2-5 cards summarizing the section. Each card:
-`label` (1-3 word keyword), `title` (≤8 words), `body` (2-3 lines). Card count picks the template
-variant automatically.
+`label` (1-3 word keyword), `title` (≤8 words), `body` (≤2 short lines — a phrase, not a paragraph).
+Card count picks the template variant automatically.
 
-**Content** — Break long sections into multiple content slides. 3-6 bullets each; bullets are
-substantive sentences, not single words.
+**Content** — Break long sections into multiple content slides. **≤5 bullets each; each bullet a
+short phrase (≤ ~8 words), not a sentence.** The teaching goes in the notes — the bullet is just the
+peg the viewer's eye lands on. If a bullet needs a clause to make sense, shorten it and explain it in
+the notes.
 
 **Image slides (PRESERVE EVERY IMAGE)** — **CRITICAL: every image placeholder in the chapter MUST
 become a `type: screenshot` slide** — both `{{screenshot:filename|description}}` (real UI) AND
@@ -218,7 +239,13 @@ to what's next.
 just the WHAT, use analogies ("เหมือนกับการจ้างผู้ช่วยส่วนตัว..."), add depth beyond the slide's
 bullets, and bridge meaningfully to the next slide.
 
-#### Word-count guidelines (HARD TARGETS — under the minimum is a failure)
+#### Word-count guidelines — for the `::: notes` (voice-over) ONLY
+
+**These targets apply to the spoken NOTES, not to the slide text.** Notes are meant to be long and
+rich (they ARE the audio lesson); the slide face stays lean (see the brevity rule above). Never pad
+the *slide* to hit these — they measure the narration.
+
+(HARD TARGETS for notes — under the minimum is a failure)
 
 | Slide Type | Target Words | Hard Minimum | Sweet Spot |
 |-----------|-------------|-------------|------------|
