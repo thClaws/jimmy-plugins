@@ -47,7 +47,7 @@ WRITE       write-book-chapter (+ generate-image AI figures + mockup-screenshot 
 QC          audit-chapter → proofread → fix-chapter        (loops per chapter)
             → ✋ HUMAN: adjust content · capture real screenshots to replace mockups
 MEDIA       create-book-yaml (slide layout + VO script) → audit-yaml
-            → build-slides-pptx/slides2preview (render slide images — deterministic)
+            → build-slides-pptx → RenderSlides tool (Marp deck → PDF + slide-NN.png)
             → generate-tts (built-in TextToSpeech — per-slide WAV)
             → build-chapter-video (ffmpeg: slide video → chapter video — deterministic)
 APPARATUS   index-glossary
@@ -78,7 +78,7 @@ near the end.
 - **book** route: the full canonical pipeline above, unchanged.
 
 **MEDIA runs the same for every kind.** Each chapter (`chNN.md` — for an article that's the single
-`ch01`) goes through **create-book-yaml** → **build-slides-pptx**/slides2preview → **generate-tts**
+`ch01`) goes through **create-book-yaml** → **build-slides-pptx** (RenderSlides) → **generate-tts**
 → **build-chapter-video**. So slides/video are fully supported for article and mini-book too —
 never treat them as text-only.
 
@@ -97,8 +97,8 @@ reading contents):
 | proofread | `{reports}/chNN.proofread.md` exists |
 | slides | `{slides}/chNN.slides.md` exists (source); `chNN.yaml` = compiled build |
 | slides-audited | `{reports}/chNN.yaml-audit.md` exists |
-| pptx | `{build}/slides/chNN.pptx` exists and is newer than `chNN.yaml` |
-| slide-images | `{build}/slides/preview/chNN/slide-*.png` count == slide count (slides2preview) |
+| slides-rendered | `{build}/slides/chNN.marp.md` exists and is newer than `chNN.yaml` |
+| slide-images | `{build}/slides/preview/chNN/slide-*.png` count == slide count (RenderSlides) |
 | images-ready | no `{{screenshot:...}}`/`{{image:...}}` in `chNN.md` is still unresolved — real file in `{screenshots}`/mockup present, and every `{{image:id}}` has `{generated}/<id>.png` (registry `status: generated`) |
 | screenshots-real | no entry in `{screenshots}/inventory.json` used by this chapter still has `status: mockup` (**human gate** — คนจับภาพจริงมาแทน) |
 | tts | `{build}/audio/chNN/slide-*.wav` count == slide count + `manifest.json` (generate-tts) |
@@ -152,8 +152,8 @@ Priority (ตรงกับ workflow: init → seed refs → manifest → outli
    with mockups **only if the human explicitly says so.**
 10. All in-scope chapters clean, slides missing → **create-book-yaml** (slide layout +
    voice-over script ใน `::: notes`)
-11. Slides YAML clean but no pptx / slide images (or older than the YAML) →
-   **build-slides-pptx** (`slides2preview.py` — pptx + PDF + per-slide PNGs, deterministic)
+11. Slides YAML clean but no rendered slides (or older than the YAML) →
+   **build-slides-pptx** (compile Marp-md, then the **RenderSlides** tool → PDF + per-slide `slide-NN.png`)
 12. Slide images ready but `{build}/audio/chNN/` incomplete → **generate-tts**
    (built-in TextToSpeech ต่อสไลด์จาก notes, deterministic naming)
 13. Slide images + TTS ready but no `{build}/video/chNN.mp4` → **build-chapter-video**

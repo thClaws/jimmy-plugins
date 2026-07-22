@@ -54,7 +54,7 @@ This skill converts book chapter Markdown files into a video lesson. Each chapte
 
 ในโหมด "generate แล้วจูนต่อ": skill นี้ generate `.slides.md` จากบท → ผู้ใช้จูน `.slides.md`
 → compile เป็น `.yaml` The compiled YAML is rendered by:
-- **`build-slides-pptx`** (in-plugin, standalone) — `chNN.yaml` → branded `.pptx` (no external repo)
+- **`build-slides-pptx`** (in-plugin) — `chNN.yaml` → Marp-md → **RenderSlides** tool → PDF + `slide-NN.png` (python-pptx only as offline fallback)
 - **`generate-tts`** (in-plugin, built-in TextToSpeech) — per-slide voice-over WAV จาก notes
 - **`build-chapter-video`** (in-plugin, ffmpeg) — สไลด์+เสียง → วิดีโอทั้งบท
 

@@ -1,22 +1,19 @@
 ---
 name: build-slides-pptx
 description: >
-  Render a chapter's slide YAML into a branded PowerPoint (.pptx) — fully STANDALONE, no external
-  pipeline required. Uses the bundled `scripts/slides2pptx.py` (python-pptx) with a built-in
-  "Agentic Press" design theme (Prompt + Sarabun fonts, navy/parchment/teal/gold palette, layouts
-  for all 12 slide types). Use when the user asks to "สร้าง pptx", "ทำสไลด์ PowerPoint", "build pptx",
-  "render slides", "แปลง yaml เป็น pptx", "ออกไฟล์สไลด์", or when the router reaches slide rendering.
-  A custom theme can be supplied later via `--theme` or `book.yaml → style.pptx_theme`.
-  Also bundles `scripts/slides2preview.py` — a one-shot preview/font-proof pipeline (yaml → pptx →
-  PDF → per-slide PNGs → contact sheet → image-pptx) with a font guardrail; use it when the user asks
-  for "preview สไลด์", "gen preview", "สไลด์แบบรูปภาพ", "image pptx", or reports fonts looking wrong
-  on their machine.
+  Render a chapter's slide YAML into a polished, design-first slide deck (PDF + per-slide PNGs)
+  using the built-in **`RenderSlides`** tool (Marp + a CSS theme rendered by Chromium). This is the
+  DEFAULT and preferred renderer — no LibreOffice, no python-pptx, no ad-hoc scripts. Use when the
+  user asks to "สร้างสไลด์", "ทำสไลด์", "render slides", "build slides/pptx", "แปลง yaml เป็นสไลด์",
+  "gen preview", "preview สไลด์", "ออกไฟล์สไลด์", or when the router reaches slide rendering. A
+  standalone python-pptx path (`slides2pptx.py`) is bundled ONLY as an offline fallback for when the
+  RenderSlides tool is unavailable or an editable `.pptx` is explicitly required.
 ---
 
 ## Paths (thai-book-production layout)
 
 หนึ่ง working folder = หนังสือหนึ่งเล่ม Resolve ทุก path จาก `book.yaml → layout:` ที่ root
-ของ folder — **ห้าม hardcode** ถ้าไม่มี `book.yaml` แปลว่าไม่ได้อยู่ใน book folder ให้ให้
+ของ folder — **ห้าม hardcode** ถ้าไม่มี `book.yaml` แปลว่าไม่ได้อยู่ใน book folder ให้
 `init-book` scaffold ก่อน ค่า default:
 
 | what | path |
@@ -25,134 +22,96 @@ description: >
 | slides | `media/slides/chNN.slides.md` → `chNN.yaml` (build artifact) |
 | screenshots (จริง, จับจากโปรแกรม) | `media/screenshots/` (+ `inventory.json`) |
 | generated (AI, built-in TextToImage) | `media/generated/` (+ `inventory.json`) |
-| **slides pptx (output)** | `build/slides/chNN.pptx` |
+| **slides output (PDF + PNGs)** | `build/slides/chNN.marp.md`, `build/slides/preview/chNN/deck.pdf` + `slide.*.png` |
 | reports (QC ทุกชนิด) | `reports/chNN.audit.md`, `reports/chNN.proofread.md`, `reports/chNN.yaml-audit.md` |
 | build output | `build/` |
 
+---
 
-# Build Slides — Marp render (preferred) or standalone PPTX (fallback)
+# ⭐ Render slides — the ONLY default path (RenderSlides)
 
-Renders `media/slides/chNN.yaml` into slide artifacts. **Two paths:**
+**Two steps. That is the whole procedure. Do NOT run `check_env.py`, do NOT call `slides2pptx.py`,
+and do NOT write your own Python/Pillow/HTML renderer — the renderer is the `RenderSlides` tool.**
 
-## ⭐ Preferred: Marp render (design-first, no LibreOffice)
-Design lives in a **CSS theme** rendered by Chromium — far better looking than python-pptx,
-and it drops the flaky `soffice` step (fixes macOS). Two steps:
-
-1. **Compile** `chNN.yaml → Marp markdown` (maps all 12 slide types to the `thai-tech` theme):
-   ```bash
-   python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-slides-pptx/scripts/slides_yaml2marp.py \
-     {slides}/chNN.yaml -o {build}/slides/chNN.marp.md
-   ```
-2. **Render** with the built-in **`RenderSlides`** tool (thClaws engine ≥ v0.102) — **never POST
-   the API from a shell/frontend.** The engine holds the endpoint + token and relays to
-   `slide-render`, so this stays backend-initiated by construction:
-   ```
-   RenderSlides(
-     markdown_path = {build}/slides/chNN.marp.md,
-     theme         = thai-tech,
-     image_dir     = {generated}      # + screenshots; any dir the deck's <img src> point into
-     out_dir       = {build}/slides/preview/chNN,
-   )
-   → writes {out_dir}/deck.pdf + slide.NNN.png (one per slide)
-   ```
-   Endpoint resolves automatically: `SLIDE_RENDER_API` env (self-hosted) → else the thClaws
-   Gateway (metered, cloud login). Gated on `imageToolsEnabled` like the other media tools.
-   **QC:** open a couple of `preview/chNN/slide.*.png` with the Read tool before delivering.
-
-Service + theme + API contract: `slide-render/` (sibling of this plugin). The 12-type ↔ Marp-md
-mapping is `scripts/slides_yaml2marp.py`.
-
-## Fallback: standalone PPTX (offline / no render service)
-When no `slide-render` API is reachable (offline, or an editable `.pptx` is required), use the
-bundled `scripts/slides2pptx.py` (python-pptx) + `slides2preview.py` (soffice→pdf→png) below.
-The whole PPTX design lives in `slides2pptx.py` and the bundled fonts — no external repo needed.
-
-## Inputs & output
-- Input: `{slides}/chNN.yaml` (produced by `create-book-yaml` → `slides_md2yaml.py`).
-- Output: `{build}/slides/chNN.pptx` (create the folder if missing).
-- Images: `{{screenshot:}}`→`{screenshots}/`, `{{image:}}`→`{generated}/` are resolved by filename.
-
-## Run
-**Preflight first** — check the machine has the required Python libs and warn before doing work:
+### Step 1 — compile `chNN.yaml → Marp markdown`
+The only dependency is `pyyaml`. If it's missing, install it inline (`pip install pyyaml` or
+`.venv/bin/python -m pip install pyyaml`) and move on — nothing else is needed.
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-slides-pptx/scripts/check_env.py
-# exits 1 and prints the exact `pip install ...` line if anything REQUIRED is missing.
-# If it fails, install what it lists, then continue. Add --json for machine-readable output.
+mkdir -p build/slides
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-slides-pptx/scripts/slides_yaml2marp.py \
+  media/slides/chNN.yaml -o build/slides/chNN.marp.md
+# → "✓ NN slides → build/slides/chNN.marp.md"
 ```
-Then render:
+(Resolve `media/slides` and `build` from `book.yaml → layout:` — shown here at their defaults.)
+
+### Step 2 — render with the `RenderSlides` tool
+Call the built-in tool directly (it is a first-class tool, NOT a shell command). It relays to the
+slide-render service and writes the artifacts:
+```
+RenderSlides(
+  markdown_path = build/slides/chNN.marp.md,
+  theme         = thai-tech,
+  image_dir     = media/generated,     # dir holding the figures the deck references by <img src>
+  out_dir       = build/slides/preview/chNN,
+)
+→ writes build/slides/preview/chNN/deck.pdf + slide.001.png, slide.002.png, …
+```
+- Endpoint resolves automatically: `SLIDE_RENDER_API` env (self-hosted) → else the thClaws Gateway
+  (cloud login). No token handling on your side — the engine injects it.
+- Requires `imageToolsEnabled: true` in `.thclaws/settings.json` (same gate as TextToImage). If the
+  tool isn't listed by `/tools`, tell the user to enable it and restart the session — **do not fall
+  back to writing a renderer.**
+- Images: `{{screenshot:}}`→`media/screenshots/`, `{{image:}}`→`media/generated/` resolve by
+  filename. If the deck references files from more than one dir, copy them into one `image_dir`
+  first (or point `image_dir` at the dir that holds them).
+- **QC:** after it returns, open a couple of `build/slides/preview/chNN/slide.*.png` with the Read
+  tool before delivering — check Thai fonts, images resolved, no overflow.
+
+If `RenderSlides` returns an error, report it and stop — do NOT silently switch to python. The only
+time the fallback below is allowed is when `RenderSlides` is genuinely not registered (older engine
+without the tool) or the user explicitly needs an editable `.pptx`.
+
+Service + theme + the 12-slide-type ↔ Marp-md mapping live in `slide-render/` (sibling of this
+plugin) and `scripts/slides_yaml2marp.py`.
+
+## Guardrails (read before rendering)
+- Read the **compiled** `chNN.yaml`, never `.slides.md` — if stale, recompile with `slides_md2yaml.py`.
+- Fail loudly if the YAML has no `slides`. Don't invent slides.
+- Write only under `build/`. Never edit `media/` or chapter sources.
+- **Never hand-roll a renderer** (no Pillow, no raw HTML-to-image, no custom python drawing). The
+  approved renderer is `RenderSlides`. `slides2pptx.py` is fallback-only (see below).
+
+---
+
+# Fallback only: standalone PPTX (offline / editable deck required)
+
+**Use this section ONLY when `RenderSlides` is unavailable OR the user explicitly asks for an
+editable `.pptx`.** It's a python-pptx renderer with a built-in "Agentic Press" theme — lower design
+ceiling than the Marp path and it needs LibreOffice for previews (flaky on macOS).
+
+Preflight the python deps first (this checks python-pptx/pyyaml/Pillow + optional CLI tools):
+```bash
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-slides-pptx/scripts/check_env.py   # add --json for machine-readable
+```
+Render the `.pptx`:
 ```bash
 mkdir -p build/slides
 python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-slides-pptx/scripts/slides2pptx.py \
   media/slides/chNN.yaml -o build/slides/chNN.pptx \
-  --book book.yaml \
-  --media-dir media/screenshots --media-dir media/generated
+  --book book.yaml --media-dir media/screenshots --media-dir media/generated
 ```
-Requires `python-pptx` and `pyyaml` (Pillow recommended). The shared preflight
-`check_env.py` covers every plugin script's deps (pyyaml, python-pptx, Pillow) plus optional
-CLI tools (curl, soffice, pandoc, xelatex, epubcheck) — run it any time to verify the environment.
+Custom theme: `--theme mytheme.json` (deep-merged) or `book.yaml → style.pptx_theme`. Shape:
+`{ "palette": {"teal":"0F766E"}, "fonts": {"heading":"Prompt","body":"Sarabun"}, "sizes":{"title":34} }`.
 
-## Design theme (default = in code)
-The default **Agentic Press** theme is defined inside `slides2pptx.py`:
-- Fonts: **Prompt** (headings) + **Sarabun** (body) — bundled in `assets/fonts/`. Thai is written to
-  the complex-script slot so it renders correctly. If those fonts aren't installed on the machine that
-  opens the file, the app substitutes — install them for pixel-accurate output (or embed, see below).
-- Palette: `bg_dark #0D1B2A`, `parchment #F8F6F0`, `teal #007A6E`, `gold #B8860B`, card `#FFFFFF`,
-  navy `#16324F`, red `#CC3333`.
-- Backgrounds: dark for `cover/quote/demo/video_demo`; parchment for the rest.
-- Slide size 13.333×7.5in (16:9). Speaker `notes` are written into each slide's notes pane.
-- Text-fit guards: bullets capped at 6, table rows at 8, long titles auto-shrink.
-
-Covers all 12 types: cover, quote, section, content, two_column, timeline, process, table, callout,
-demo, screenshot, video_demo.
-
-## Custom theme (hook — usable now, expand later)
-Override any token without touching the script:
-- `--theme mytheme.json` — deep-merged over the default. Shape:
-  ```json
-  { "palette": {"teal":"0F766E","gold":"CA8A04"},
-    "fonts": {"heading":"Prompt","body":"Sarabun"},
-    "sizes": {"title":34} }
-  ```
-- or `book.yaml → style.pptx_theme:` — an inline dict, or a path to a JSON theme. Same shape.
-
-(Planned v-next: full custom *template* .pptx swap + font embedding for portable decks.)
-
-## Preview & font-proof pipeline (`slides2preview.py`)
-
-**ปัญหาที่แก้:** `.pptx` เก็บแค่*ชื่อ*ฟอนต์ — เครื่องที่ไม่มีฟอนต์นั้นจะสุ่มฟอนต์อื่นมาแทนแบบเงียบๆ
-(PowerPoint บน Mac, ตัว preview ของแอป, LibreOffice — แทนคนละตัวกัน) เด็คเดียวกันจึงหน้าตาไม่เหมือนกัน
-สคริปต์นี้เรนเดอร์*ครั้งเดียว*ด้วยฟอนต์บนเครื่อง build แล้ว bake แต่ละสไลด์เป็นรูปภาพ → เปิดที่ไหนก็เหมือนกัน
-
+Font-proof preview (bakes each slide to an image so it looks identical everywhere — needs `soffice`
++ `pdftoppm` + fontconfig):
 ```bash
 python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-slides-pptx/scripts/slides2preview.py \
   media/slides/chNN.yaml --book book.yaml \
   --media-dir media/screenshots --media-dir media/generated \
   --out build/slides --strict-fonts
 ```
-
-Outputs (ต่อ input `chNN.yaml`):
-| file | คืออะไร |
-|------|---------|
-| `build/slides/chNN.pptx` | native deck (แก้ไขได้ — แสดงถูกเฉพาะเครื่องที่มีฟอนต์) |
-| `build/slides/chNN-slides.pdf` | PDF ฝังฟอนต์ ตรงดีไซน์ 100% ทุกเครื่อง |
-| `build/slides/preview/chNN/slide-*.png` | ภาพ preview รายสไลด์ (default 150dpi) |
-| `build/slides/preview/chNN-contact.png` | contact sheet ไว้ QC ทั้งเด็คในภาพเดียว |
-| `build/slides/chNN-image.pptx` | **font-proof deck** — ทุกสไลด์เป็นรูป + speaker notes ครบ |
-
-Flags: `--dpi N` (ความละเอียด PNG), `--strict-fonts` (fail ถ้าฟอนต์ในธีมไม่มีจริง — **แนะนำให้ใส่เสมอ**),
-`--skip-image-pptx`, `--skip-contact`, `--skip-native`
-
-**Font guardrail:** ก่อนเรนเดอร์ สคริปต์เช็คทุกฟอนต์ในธีมผ่าน `fc-match` — ถ้าชื่อฟอนต์ resolve
-ไปเป็นฟอนต์อื่น (เช่นไฟล์ฟอนต์โหลดมาเสีย/ยังไม่ได้ติดตั้ง) จะเตือนดังๆ หรือ abort ทันทีเมื่อใช้
-`--strict-fonts` ป้องกันการ bake ภาพด้วยฟอนต์ fallback ผิดตัวโดยไม่รู้ตัว
-
-**QC ทุกครั้ง:** หลังรันเสร็จ ให้เปิด `preview/chNN-contact.png` ดูด้วยตา (Read tool) ก่อนส่งมอบเสมอ —
-เช็คฟอนต์ตรงดีไซน์ รูป resolve ถูกไฟล์ ข้อความไม่ล้นกรอบ
-
-ต้องมีเพิ่มจาก renderer หลัก: `soffice` (libreoffice) + `pdftoppm` (poppler-utils) + fontconfig
-
-## Guardrails
-- Reads the **compiled** `chNN.yaml`, never `.slides.md` — if the YAML is stale, recompile first
-  (`slides_md2yaml.py`).
-- Fail loudly if the YAML has no `slides`. Don't invent slides.
-- Writes only under `{build}/`. Never edits `media/` or chapter sources.
+Outputs: `chNN.pptx` (editable), `chNN-slides.pdf` (font-embedded), `preview/chNN/slide-*.png`,
+`preview/chNN-contact.png` (QC contact sheet), `chNN-image.pptx` (font-proof, images + notes).
+`--strict-fonts` aborts if a theme font resolves to a substitute (recommended). QC the contact sheet
+with the Read tool before delivering.

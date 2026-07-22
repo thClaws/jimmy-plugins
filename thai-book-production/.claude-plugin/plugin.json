@@ -1,6 +1,6 @@
 {
   "name": "thai-book-production",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "End-to-end technical/tutorial book / mini-book / article production pipeline for Claude Cowork (book.yaml `kind: book|mini-book|article`) — reference gathering, outline (with human approval gate), chapter/article writing with AI figures (built-in TextToImage / Gemini nano-banana) and mockup screenshots, content/language QC, Markdown-authored slides compiled to YAML, standalone PPTX/slide-image rendering, per-slide TTS (built-in TextToSpeech / Gemini), deterministic chapter video assembly (ffmpeg), glossary/index, translation, AI cover design, and epub/PDF build. Article = single doc (no chapter numbering/TOC/appendix); mini-book = 3-5 chapters (optional back-matter). Thai-first, keeps technical terms in English.",
   "author": {
     "name": "Jimmy",
