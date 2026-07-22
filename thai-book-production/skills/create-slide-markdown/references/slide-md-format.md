@@ -3,7 +3,7 @@
 **ทำไมมีไฟล์นี้:** `chNN.yaml` เป็น *build artifact* ที่ pipeline (build-slides-pptx / generate-tts / build-chapter-video) กิน —
 มันแก้มือยากเพราะ YAML อ่อนไหวกับ indent, สไลด์เรียงตามตำแหน่ง (insert/delete แล้ว cascade),
 และ `notes: |` block scalar พลาดง่าย **พื้นผิวที่มนุษย์แก้คือ `chNN.slides.md` ไฟล์นี้** แล้ว
-`create-book-yaml` compile เป็น `chNN.yaml` ให้ ไม่มีใครแก้ YAML ตรงๆ
+`create-slide-yaml` compile เป็น `chNN.yaml` ให้ ไม่มีใครแก้ YAML ตรงๆ
 
 **หลักการ:** ลำดับสไลด์ = ลำดับในเอกสาร → **insert/delete/reorder = ขยับบล็อกข้อความ ไม่มีเลข
 ตำแหน่งให้ renumber** ข้อความอิสระ (notes) อยู่ใน fenced block ไม่แคร์ indent
@@ -148,7 +148,7 @@ artifact** ที่ pipeline กิน field ใดที่ directive/บอ�
 
 **compiler (deterministic):** `scripts/slides_md2yaml.py` แปลง `.slides.md` → `.yaml` ตามสเปกนี้
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/create-book-yaml/scripts/slides_md2yaml.py ch01.slides.md
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/create-slide-yaml/scripts/slides_md2yaml.py ch01.slides.md
 python3 .../slides_md2yaml.py ch01.slides.md --check      # validate อย่างเดียว
 ```
 สคริปต์ fail ดังพร้อมชี้ slide ที่ผิด (ไม่มี directive / `:::` ไม่ปิด / ไม่มี notes / type ไม่รู้จัก)

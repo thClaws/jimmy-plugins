@@ -25,7 +25,7 @@ description: >
 
 # Generate TTS — Per-slide Voice-over (built-in TextToSpeech)
 
-Turns each slide's `notes:` (the voice-over script written by `create-book-yaml`) into a
+Turns each slide's `notes:` (the voice-over script written by `create-slide-markdown`) into a
 WAV file via the built-in **`TextToSpeech`** tool. Output naming is deterministic so
 `build-chapter-video` (ffmpeg) can pair audio to slide images by index.
 

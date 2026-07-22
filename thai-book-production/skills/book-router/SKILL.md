@@ -46,7 +46,7 @@ PLAN        get-book-ref (seed) → outline-planner → get-book-ref (targeted) 
 WRITE       write-book-chapter (+ generate-image AI figures + mockup-screenshot placeholders)
 QC          audit-chapter → proofread → fix-chapter        (loops per chapter)
             → ✋ HUMAN: adjust content · capture real screenshots to replace mockups
-MEDIA       create-book-yaml (slide layout + VO script) → audit-yaml
+MEDIA       create-slide-markdown (author .slides.md) → create-slide-yaml (compile) → audit-yaml
             → build-slides-pptx → RenderSlides tool (Marp deck → PDF + slide-NN.png)
             → generate-tts (built-in TextToSpeech — per-slide WAV)
             → build-chapter-video (ffmpeg: slide video → chapter video — deterministic)
@@ -78,7 +78,7 @@ near the end.
 - **book** route: the full canonical pipeline above, unchanged.
 
 **MEDIA runs the same for every kind.** Each chapter (`chNN.md` — for an article that's the single
-`ch01`) goes through **create-book-yaml** → **build-slides-pptx** (RenderSlides) → **generate-tts**
+`ch01`) goes through **create-slide-markdown** → **create-slide-yaml** → **build-slides-pptx** (RenderSlides) → **generate-tts**
 → **build-chapter-video**. So slides/video are fully supported for article and mini-book too —
 never treat them as text-only.
 
@@ -95,7 +95,8 @@ reading contents):
 | content-audited | `{reports}/chNN.audit.md` exists |
 | fixed | chNN.md mtime newer than its audit report |
 | proofread | `{reports}/chNN.proofread.md` exists |
-| slides | `{slides}/chNN.slides.md` exists (source); `chNN.yaml` = compiled build |
+| slides-md | `{slides}/chNN.slides.md` exists (authored source — create-slide-markdown) |
+| slides-yaml | `{slides}/chNN.yaml` exists and is newer than `chNN.slides.md` (compiled — create-slide-yaml) |
 | slides-audited | `{reports}/chNN.yaml-audit.md` exists |
 | slides-rendered | `{build}/slides/chNN.marp.md` exists and is newer than `chNN.yaml` |
 | slide-images | `{build}/slides/preview/chNN/slide-*.png` count == slide count (RenderSlides) |
@@ -150,8 +151,9 @@ Priority (ตรงกับ workflow: init → seed refs → manifest → outli
    `status: mockup` entries → remind the human to capture real screenshots and replace
    the mockup files (same filename), then mark `status: real`. Slides/video may proceed
    with mockups **only if the human explicitly says so.**
-10. All in-scope chapters clean, slides missing → **create-book-yaml** (slide layout +
-   voice-over script ใน `::: notes`)
+10. All in-scope chapters clean, `.slides.md` missing → **create-slide-markdown** (author the
+   slide Markdown + voice-over script ใน `::: notes`); then `.slides.md` exists but no `.yaml`
+   (or `.yaml` older than the `.slides.md`) → **create-slide-yaml** (compile + validate)
 11. Slides YAML clean but no rendered slides (or older than the YAML) →
    **build-slides-pptx** (compile Marp-md, then the **RenderSlides** tool → PDF + per-slide `slide-NN.png`)
 12. Slide images ready but `{build}/audio/chNN/` incomplete → **generate-tts**

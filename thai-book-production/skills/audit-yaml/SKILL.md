@@ -45,7 +45,7 @@ immediately **in `chNN.slides.md`** (the human-editable Markdown), then recompil
 bundled compiler:
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/create-book-yaml/scripts/slides_md2yaml.py \
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/create-slide-yaml/scripts/slides_md2yaml.py \
   media/slides/chNN.slides.md
 ```
 
@@ -59,11 +59,11 @@ Read these files:
 
 1. **Markdown slide format spec** — the authoring surface you audit/fix:
 ```
-Read ${CLAUDE_PLUGIN_ROOT}/skills/create-book-yaml/references/slide-md-format.md
+Read ${CLAUDE_PLUGIN_ROOT}/skills/create-slide-markdown/references/slide-md-format.md
 ```
 2. **YAML format spec** — the compile target (so you know what the MD must produce):
 ```
-Read ${CLAUDE_PLUGIN_ROOT}/skills/create-book-yaml/references/yaml-format.md
+Read ${CLAUDE_PLUGIN_ROOT}/skills/create-slide-yaml/references/yaml-format.md
 ```
 
 3. **The source chapter** — `chapters/ch{NN}.md` — this is the ground truth for content
@@ -106,18 +106,22 @@ Check for redundant or bloated slide content.
 - Bullets that repeat the same idea in different words
 - Speaker notes that repeat content from the previous slide's notes
 - Section cards that overlap significantly with subsequent content slides
-- Too many slides for one section (more than 4-5 for a single `## N.X`)
-- Total slide count: target 15-25 per chapter (may exceed if many screenshots)
+- Multiple slides teaching the SAME idea (genuine redundancy)
+
+**Slide count is NOT audited against a target.** There is no minimum or maximum — the deck should be
+exactly as long as the chapter's content needs (create-slide-markdown lets content decide). Judge
+each slide on whether it teaches something new, NOT on the total. Flag a slide only when it is
+genuinely redundant with another, not because the deck is "long" or "short".
 
 **How to fix:**
-- Merge redundant slides into one
+- Merge only GENUINELY redundant slides (same idea taught twice) into one
 - Remove duplicate bullets
 - Consolidate overlapping section cards
 - Trim notes that repeat earlier content — instead, reference forward ("ดังที่กล่าวไปแล้ว") or add new depth
-- If slide count is excessive (>30 for a chapter with <10 screenshots), consolidate
+- Do NOT merge distinct ideas just to shorten the deck, and do NOT pad to lengthen it
 
 **Issue severity:**
-- MAJOR: 3+ slides covering the same concept, or slide count >35
+- MAJOR: 3+ slides covering the same concept (true redundancy)
 - MINOR: Slight bullet overlap, minor note repetition
 
 ### Dimension 3: Speaker Notes Quality (คุณภาพ Speaker Notes)
@@ -415,8 +419,8 @@ Chapter {N}: {title}
 
 ## Key Constraints
 
-- **Never reduce slide count below 15** — if merging redundant slides would go below 15, keep some and improve their content instead
+- **No slide-count target** — never merge distinct ideas or pad to hit a number; let the content
+  decide the length (see create-slide-markdown). Only merge slides that are genuinely redundant.
 - **Never drop an image** — every `{{screenshot:}}` AND every `{{image:}}` from the `.md` must appear as a slide
 - **Always keep `notes`** — every slide MUST have notes, no exceptions
 - **Preserve slide `type`** — don't change a section slide to content unless structurally wrong
-- **Target 15-25 slides** — but OK to exceed if chapter has many screenshots (e.g., 10+ screenshots → 25-30 slides is acceptable)

@@ -368,7 +368,7 @@ Every chapter follows this structure:
 
 ### Screenshot Placeholders — MANDATORY
 
-**Every chapter MUST include screenshot placeholders.** These are NOT optional. A chapter without screenshots is incomplete and will be rejected. The downstream YAML conversion (create-book-yaml skill) depends on these placeholders to generate `type: screenshot` slides with the correct `screenshot:` filename field.
+**Every chapter MUST include screenshot placeholders.** These are NOT optional. A chapter without screenshots is incomplete and will be rejected. The downstream slide pipeline (create-slide-markdown → create-slide-yaml) depends on these placeholders to generate `type: screenshot` slides with the correct `screenshot:` filename field.
 
 Use this exact format:
 

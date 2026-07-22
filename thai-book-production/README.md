@@ -38,7 +38,7 @@ PLAN        get-book-ref (seed) → outline-planner → get-book-ref (targeted) 
 WRITE       write-book-chapter + generate-image (AI) + mockup-screenshot (placeholder)
 QC          audit-chapter  →  proofread  →  fix-chapter      (วนต่อบท)
             ✋ HUMAN: ปรับเนื้อหา · จับภาพจริงแทน mockup (inventory status: real)
-MEDIA       create-book-yaml (สไลด์+VO script) → audit-yaml → build-slides-pptx (ภาพสไลด์)
+MEDIA       create-slide-markdown (เขียน .slides.md) → create-slide-yaml (compile) → audit-yaml → build-slides-pptx (ภาพสไลด์)
             → generate-tts (built-in TextToSpeech เสียงพากย์) → build-chapter-video (ffmpeg วิดีโอบท)
 APPARATUS   index-glossary
 LOCALIZE    translate
@@ -59,7 +59,8 @@ BUILD       cover-design  →  build-epub-pdf
 | proofread | qc | ✅ เดิม |
 | fix-chapter | qc | ✅ เดิม |
 | index-glossary | apparatus | ✅ เขียนเต็ม (EN A–Z + TH ก–ฮ, section locator) |
-| create-book-yaml | media | ✅ MD authoring → compile YAML (gen .slides.md → chNN.yaml) |
+| create-slide-markdown | media | ✅ เขียนสไลด์ Markdown (author `chNN.slides.md`) — ไม่กำหนดจำนวนสไลด์ |
+| create-slide-yaml | media | ✅ compile `.slides.md` → `chNN.yaml` (deterministic) + validate |
 | audit-yaml | media | ✅ ตรวจ/แก้ที่ .slides.md → recompile YAML |
 | mockup-screenshot | media | ✅ ภาพจริง (`{{screenshot:}}`) เท่านั้น |
 | generate-image | media | ✅ ภาพ AI content-first (built-in `TextToImage` / Gemini nano-banana `{{image:}}`) — infographic/diagram, ตัวอักษรไทย+อังกฤษในภาพ; แทรก `![]()` preview ใต้ placeholder (คง placeholder) ให้รีวิวใน .md |
@@ -137,7 +138,12 @@ Plugin นี้ install ได้เลยผ่าน local marketplace (`.cla
 > marketplace root กับ plugin เป็นโฟลเดอร์เดียวกัน (ตัว `thai-book-production/` นี้เอง).
 > compiler สไลด์ใช้ `pyyaml` — ถ้าเครื่องไหนไม่มี: `pip install pyyaml --break-system-packages`.
 
-## สถานะ (v1.8.0 — RELEASE)
+## สถานะ (v1.9.0 — RELEASE)
+- ✅ **แยกสไลด์เป็น 2 skill ชัดเจน** (workflow: เขียน markdown ก่อน แล้วค่อย compile):
+  `create-slide-markdown` (เขียน `chNN.slides.md` — authoring, instructional-design ทั้งหมด) →
+  `create-slide-yaml` (compile → `chNN.yaml` deterministic + validate). แทน `create-book-yaml` เดิม
+  ที่รวม 2 งานไว้ด้วยกัน. **เลิกบังคับจำนวนสไลด์ (เดิม 15-25)** — ให้เนื้อหากำหนดจำนวนเอง สไลด์จึงตรงประเด็น
+  (audit-yaml ก็ไม่ตรวจ count target แล้ว เหลือแค่ merge ที่ซ้ำจริง + ห้าม drop ภาพ)
 - ✅ **สไลด์ design-first ผ่าน Marp + CSS** (ทางเลือกใหม่ แทน python-pptx/soffice ที่ดีไซน์ห่วย + พังบน macOS):
   `slides_yaml2marp.py` แปลง chNN.yaml → Marp-md (ครบ 12 types, theme thai-tech navy/teal/gold) →
   service `slide-render/` (Marp+Chromium+Thai fonts, `POST /slides` → pdf+png). **frontend→Rust→API เท่านั้น**;
@@ -161,7 +167,7 @@ Plugin นี้ install ได้เลยผ่าน local marketplace (`.cla
   (Gemini `flash`/nano-banana, `pro`, gpt-image-2, qwen); ไฟล์เขียนที่ `output/…` แล้ว move ไป `media/generated/`
 - ✅ **generate-image preview** — หลัง gen ภาพ แทรก `![]()` (มี marker `<!-- gen-preview:id -->`) ใต้
   `{{image:id}}` placeholder ให้รีวิวภาพใน chapter .md ได้ทันที **โดยคง placeholder ไว้**; build-epub-pdf
-  strip preview ก่อน resolve → ไม่ render ซ้ำ; create-book-yaml มองข้าม preview (นับเฉพาะ `{{...}}`)
+  strip preview ก่อน resolve → ไม่ render ซ้ำ; create-slide-markdown มองข้าม preview (นับเฉพาะ `{{...}}`)
 - ✅ **init-book** — intake wizard แยกจาก book-router: เคาะ metadata + targets (epub/pdf/แปล) +
   style ภาพ/เสียง + ปก ตั้งแต่ต้น แล้ว scaffold; book-router เหลือหน้าที่ state+routing ล้วน (delegate scaffold)
 - ✅ **thClaws-ready**: ติดตั้งด้วย `/plugin install` แล้วเปิด `imageToolsEnabled: true` + provider key/gateway
@@ -174,8 +180,8 @@ Plugin นี้ install ได้เลยผ่าน local marketplace (`.cla
 - ✅ preflight `check_env.py` — ตรวจ python lib (pyyaml/python-pptx/Pillow) + CLI ก่อนรัน, warn + บอกคำสั่ง pip
 - ✅ PLAN เป็นลูป: get-book-ref (seed) → outline-planner → get-book-ref (targeted)
 - ✅ สไลด์ authoring = Markdown (`chNN.slides.md`) → compile เป็น `chNN.yaml` (build artifact)
-  - รูปแบบ: `skills/create-book-yaml/references/slide-md-format.md`
-  - **compiler จริง (tested):** `skills/create-book-yaml/scripts/slides_md2yaml.py`
+  - รูปแบบ: `skills/create-slide-markdown/references/slide-md-format.md`
+  - **compiler จริง (tested):** `skills/create-slide-yaml/scripts/slides_md2yaml.py`
     รองรับครบ 12 slide type, fail ดังพร้อมชี้ slide ที่ผิด, `--check` mode
 - ✅ ภาพ 2 ประเภท แยกโฟลเดอร์: `media/screenshots/` (จริง, `{{screenshot:}}`) +
   `media/generated/` (AI ผ่าน built-in `TextToImage` / Gemini nano-banana, `{{image:}}`, content-first infographic/diagram — render ตัวอักษรไทย+อังกฤษได้)

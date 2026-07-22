@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """slides_md2yaml.py — deterministic compiler: .slides.md -> chNN.yaml
 
-Authoring surface spec : skills/create-book-yaml/references/slide-md-format.md
-Compile target spec    : skills/create-book-yaml/references/yaml-format.md
+Authoring surface spec : skills/create-slide-markdown/references/slide-md-format.md
+Compile target spec    : skills/create-slide-yaml/references/yaml-format.md
 
 The .slides.md file is the human-editable surface. This script turns it into the
 YAML build artifact that the in-plugin pipeline consumes (slides2pptx/preview, generate-tts, slides2video).

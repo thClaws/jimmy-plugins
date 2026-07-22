@@ -136,7 +136,7 @@ numbers, labels) wherever it aids understanding — that is the point of using t
    ![caption](../media/generated/ch01-foo.png)
    ```
    - **Never remove or edit the `{{image:id|caption}}` placeholder** — it is the source of truth the
-     pipeline (create-book-yaml, build-epub-pdf) keys off. The preview is an *addition* beside it.
+     pipeline (create-slide-markdown, build-epub-pdf) keys off. The preview is an *addition* beside it.
    - The `<!-- gen-preview:<id> -->` marker makes the preview auto-managed. On regeneration, find the
      existing `gen-preview:<id>` block (the comment + its `![...]` line) and **replace it in place** —
      never append a second copy.
