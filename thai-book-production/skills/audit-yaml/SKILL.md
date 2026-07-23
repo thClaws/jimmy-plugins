@@ -130,29 +130,32 @@ Speaker notes are the MOST IMPORTANT output — they become TTS voice-over for t
 
 **What to check:**
 
-#### A. Length — keep notes CONCISE (flag notes that are TOO LONG)
+#### A. Length — audit for DENSITY, not a word count
 
-Speaker notes carry the explanation, but they must be **concise** — cover the point in a few clear
-sentences and move on. **Long, padded, rambling notes are the #1 quality problem**, not short ones.
-The numbers below are CEILINGS, not quotas: a note is fine anywhere up to Max; flag it when it goes
-OVER (padding, repeated points, multi-sentence scenarios) — trim to the essential.
+Speaker notes must be **descriptive** — they carry the chapter's substance so the audio alone
+teaches the concept. Judge each note on **information density**: does every sentence add new chapter
+content (an explanation, a why, a concrete specific, an example), or is it padding? Two failure modes,
+both real:
+- **Too thin (under-written):** a rich chapter concept flattened to a line or two — the substance was
+  dropped. MAJOR. Fix: expand with the chapter's actual detail.
+- **Padded:** repetition, filler ("สิ่งสำคัญคือ..."), empty setup scenarios, bullets read verbatim.
+  MAJOR. Fix: cut the padding — but keep the detail.
 
-| Slide Type | Aim (words) | Max (words) |
-|-----------|-------------|-------------|
-| `cover` | 35-60 | 75 |
-| `section` | 35-60 | 75 |
-| `content` | 50-90 | 110 |
-| `two_column` | 50-90 | 110 |
-| `process` | 50-90 | 110 |
-| `table` | 40-70 | 90 |
-| `callout` | 40-70 | 90 |
-| `screenshot` | 40-70 | 90 |
-| `quote` | 25-45 | 55 |
-| `demo` | 25-45 | 55 |
+Typical word ranges (a guide to spot outliers, NOT a hard cap — a dense concept legitimately runs
+longer, a simple one shorter):
 
-Count Thai words by splitting on spaces and clusters. **A note OVER the Max is a MAJOR issue — cut
-the padding.** The only floor is that a note must say something real (not a bare label); a slightly
-short but clear note is fine and preferred over a long one.
+| Slide Type | Typical words |
+|-----------|--------------|
+| `cover` | 60-110 |
+| `section` | 80-140 |
+| `content` / `two_column` / `process` | 120-220 |
+| `table` | 90-170 |
+| `callout` / `screenshot` | 90-160 |
+| `quote` / `demo` | 50-110 |
+
+**Flag on density, not the number.** A 240-word note that's all substance is fine; a 90-word note
+that repeats itself is not. A note far BELOW the range for a concept the chapter treats in depth is
+under-written — flag it.
 
 #### B. TTS Naturalness — MALE SPEAKER ONLY
 - Notes should sound like a **friendly male Thai trainer speaking in a workshop**
@@ -164,26 +167,28 @@ short but clear note is fine and preferred over a long one.
 - No robotic patterns like "ข้อแรก... ข้อสอง... ข้อสาม..."
 - Male speech patterns: "ผม" (not "ฉัน/ดิฉัน"), "นะครับ" (not "นะคะ"), "ใช่ครับ" (not "ใช่ค่ะ")
 
-#### C. Content — clear but CONCISE
-Notes should explain the slide's point, not just restate the bullets — but do it efficiently:
-roughly **3-5 sentences**: state the point → explain briefly (one concrete example/analogy only if
-it truly helps) → a one-phrase bridge. **Padding, repeated points, and long multi-sentence scenarios
-are defects.** A scenario is optional and should be one short line at most — never a paragraph.
+#### C. Content — descriptive, carrying the chapter's substance
+Notes must teach the concept the way the chapter does, not just name it: **state the point → explain
+HOW/WHY it works with the chapter's real detail → a concrete example or specific number → a short
+bridge.** Depth tracks the concept — a rich section warrants a full, substantive note; a simple point
+a shorter one. The defects are at BOTH ends: **too thin** (a detailed concept flattened to a line —
+substance dropped) and **padded** (repetition, filler, empty scenarios). Keep detail, cut padding.
 
 #### D. Variety
 - Don't start every note with the same phrase (check for repetitive "มาดูกัน", "ทีนี้", etc.)
 - Good openers: vary them; but keep the opener short — don't spend two sentences setting up.
 
 **How to fix:**
-- **Trim notes that run over the Max words** — cut padding, remove repeated points, shorten scenarios
-- Fix unnatural openings and vary opening phrases
-- Make sure the note explains the point (not just names it) — but in a few sentences, not a lecture
-- Replace bullet-reading style with a brief natural explanation
+- **Under-written note** (thin vs. a concept the chapter details) → expand with the chapter's real
+  substance: the how, the why, a concrete example/number.
+- **Padded note** (repetition, filler, empty scenarios, bullets read verbatim) → cut the padding,
+  keep the detail.
+- Fix unnatural openings and vary opening phrases.
 
 **Issue severity:**
 - CRITICAL: Notes missing entirely, or a bare label with no explanation at all
-- MAJOR: Notes OVER the Max words (padded/rambling/repetitive), or just restates bullets verbatim
-- MINOR: Slightly over Aim, or a repetitive opener
+- MAJOR: Under-written (chapter detail dropped), OR padded/repetitive/restates bullets verbatim
+- MINOR: A repetitive opener, or slightly thin/padded in one spot
 
 ### Dimension 4: Slide Format Compliance (MD → YAML)
 
