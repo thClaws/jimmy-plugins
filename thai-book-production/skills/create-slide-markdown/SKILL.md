@@ -259,6 +259,10 @@ almost certainly repeating yourself or over-explaining. (A note still must say s
 one-word label — but the failure mode to guard against here is TOO LONG.)
 
 #### Tone and style
+**Banned calques:** follow the shared Thai style rules in
+`${CLAUDE_PLUGIN_ROOT}/skills/write-book-chapter/references/thai-style.md` for BOTH slide text
+and notes — never use ❌ terms (e.g. "ใต้ฝากระโปรง" → "เจาะลึก"/"เบื้องหลังการทำงาน").
+
 Conversational Thai, a friendly **male** instructor:
 - **MALE speaker only**: use "ครับ" — NEVER "ค่ะ", "คะ", "นะคะ", "จ้า", "จ๊ะ" or any female particles.
 - Use "ผม" (not "ฉัน/ดิฉัน"); use "ครับ" sparingly (once or twice per note); address the listener as "คุณ".

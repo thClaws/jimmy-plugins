@@ -41,6 +41,9 @@ Translate prose while keeping the book's technical conventions intact.
 - Preserve Markdown structure exactly — same headings, lists, tables, anchors.
 - Keep character names and running examples consistent across chapters (share a
   translation memory / glossary so "คุณแพร" maps the same way every time).
+- **When the target language is Thai**, follow the banned-calques list in
+  `${CLAUDE_PLUGIN_ROOT}/skills/write-book-chapter/references/thai-style.md`
+  (e.g. never "ใต้ฝากระโปรง" for "under the hood" — use "เจาะลึก"/"เบื้องหลังการทำงาน").
 
 ## Process
 1. Resolve paths from `book.yaml → layout:`. Load the source `{chapters}/chNN.md`,
