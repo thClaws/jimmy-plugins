@@ -224,49 +224,54 @@ The downstream renderer + TTS choke on emoji. **Never use emoji in any text fiel
 | ⚠️ | "ข้อควรระวัง:" |
 | ➡️ | " -> " or " — " |
 
-### Speaker notes — the voice-over script (descriptive, but not padded)
+### Speaker notes — the voice-over script (WRITE FOR THE EAR: descriptive but tight)
 
-The `::: notes` block is the voice-over script fed to TTS — it becomes the actual audio. The slide is
-a visual aid; **the notes carry the teaching, and they must be DESCRIPTIVE enough to convey the
-chapter's actual substance.** The chapter is detailed — the notes should reflect that detail, not
-flatten it to a sentence. A learner listening to the audio alone should genuinely understand the
-concept, not just hear its name.
+The `::: notes` block is the voice-over script fed to TTS — it becomes the actual **audio a person
+sits and listens to.** Two things must both be true: it's **descriptive** (conveys the point with
+its key detail, so the audio teaches) AND **tight** (a listener bores fast — say it once, clearly,
+efficiently, then move on). This is not a book paragraph you can re-read; it's spoken, so **every
+extra sentence costs the listener's attention.** Make the point, land the key detail, stop.
 
-**The one rule that governs length: information DENSITY, not a word count.** Every sentence must add
-new information drawn from the chapter — an explanation, the *why*, a concrete specific, a real
-example, a caveat. Write as much as the concept genuinely needs to be understood — and stop there.
+**The two defects to avoid — both make the VO too long AND boring:**
+1. **Over-explaining one point** — restating it three ways, spelling out every nuance, a long setup
+   scenario. Make the point once with its essential detail, then move on.
+2. **REPEATING across slides (the big one)** — re-teaching a concept, analogy, example, or timeline
+   an earlier slide already covered. This is the #1 source of tedium in a multi-slide deck.
 
-- **Descriptive (do this):** explain what the concept is, why it matters, how it works, and give a
-  concrete example or number from the chapter. A rich concept gets a full, substantive note.
-- **Padded (avoid this):** repeating the same point in different words, empty scenarios that add no
-  information, filler ("สิ่งสำคัญคือ...", "อย่างที่บอกไป..."), reading the slide bullets aloud verbatim.
-
-Cut PADDING, never DETAIL. If a chapter section is dense, the note should be dense too — that's
-descriptive, not verbose. Verbose = words with no new content; descriptive = every word earns its place.
+**Anti-repetition — a slide's note must teach something NEW.** Before writing each note, recall what
+earlier slides already said and do NOT say it again:
+- **Section dividers PREVIEW, they don't teach.** Briefly frame what this section is about and why it
+  matters (2-3 sentences) — do NOT tell the whole story; the content slides that follow carry the
+  detail. A section note that narrates the entire topic makes the next 3 slides feel like reruns.
+- **Screenshot notes DESCRIBE the image + add ONE new angle** — guide the eye through what's on screen
+  and make one fresh connection. Do NOT re-explain the concept the previous content slide just taught.
+- **Reuse an analogy at most once or twice, at its highest-impact spot** — not on every slide of a
+  section. If you used ตึก/เฟอร์นิเจอร์ or ช่างแกะสลัก already, don't reach for it again.
+- If two adjacent slides would say nearly the same thing, one of them adds nothing — make it add a
+  new example, a caveat, or a different facet, or shorten it to a bridge.
 
 #### Length guide — for the `::: notes` (voice-over) ONLY
 
-**Typical word ranges for a normally-rich concept. NOT quotas to fill and NOT ceilings to fear —
-they track how much real content the concept carries.** A simple point runs shorter; a dense,
-detail-heavy section from the book runs longer (and should). The test is always density: is every
-sentence carrying chapter substance?
+**Keep VO tight enough to hold a listener. These are the target lengths for the SPOKEN audio — aim
+for the LOW end when the point is simple, and only reach the high end for a genuinely dense concept.**
+Descriptive means "carries the point + its key detail", NOT "exhausts every detail from the book."
 
-| Slide Type | Typical words | Notes |
-|-----------|--------------|-------|
-| `cover` | 60-110 | set up the chapter's arc |
-| `section` | 80-140 | preview what the section teaches + why it matters |
-| `content` | 120-220 | the core teaching — explain fully, with the chapter's detail + an example |
-| `two_column` | 120-220 | explain BOTH sides substantively, then the trade-off |
-| `process` | 120-220 | walk each step with enough detail to actually follow it |
-| `table` | 90-170 | interpret the data — what it shows, why it matters, the standout rows |
-| `callout` | 90-160 | the tip/warning + the reasoning behind it + consequences |
-| `screenshot` | 90-160 | guide the eye through the UI + connect it to the concept |
-| `quote` | 50-90 | unpack why the quote matters |
-| `demo` | 60-110 | what the demo shows + what to watch for |
+| Slide Type | Target words | Keep it to |
+|-----------|-------------|-----------|
+| `cover` | 50-90 | one hook + the chapter's promise |
+| `section` | 40-80 | a PREVIEW — what + why, not the whole story |
+| `content` | 90-150 | the point + how/why + one concrete example |
+| `two_column` | 90-150 | both sides briefly + the trade-off |
+| `process` | 100-160 | one clear line per step |
+| `table` | 70-120 | what it shows + the standout row |
+| `callout` | 70-120 | the tip/warning + the one reason it matters |
+| `screenshot` | 70-120 | describe the image + one fresh connection |
+| `quote` | 40-70 | why it matters, briefly |
+| `demo` | 50-90 | what it shows + what to watch |
 
-A dense chapter concept may exceed the typical range — that's fine when the extra words carry real
-content. What is NOT fine is exceeding it with repetition or filler. Under-writing a rich concept
-(a one-line note where the chapter has three paragraphs of substance) is just as much a defect as padding.
+Going OVER the target is almost always repetition or over-explaining — cut it. But don't drop below a
+real explanation either: a bare one-liner for a concept the chapter details is too thin. The sweet
+spot is **descriptive-but-tight**: the listener learns the point and stays engaged.
 
 #### Tone and style
 **Banned calques:** follow the shared Thai style rules in
@@ -278,43 +283,40 @@ Conversational Thai, a friendly **male** instructor:
 - Use "ผม" (not "ฉัน/ดิฉัน"); use "ครับ" sparingly (once or twice per note); address the listener as "คุณ".
 - Present tense, warm and clear. **NEVER start a note with "ครับคุณ"** (grammatically wrong).
 
-#### Note structure — teach the concept fully
-Cover the concept the way the chapter does: **state the point → explain HOW/WHY it works (this is the
-substance — pull the real detail from the chapter) → a concrete example or specific number → a short
-bridge.** Use as many sentences as the concept's depth needs — a rich concept naturally runs longer.
-The discipline is not "few sentences", it's "every sentence adds new chapter content." Don't repeat,
-don't pad, but don't flatten a detailed concept into one thin line either.
+#### Note structure — one clean pass, then stop
+**State the point → explain how/why with the ONE key detail → a concrete example or number → a
+one-phrase bridge.** That's it — for the ear, this is enough to teach the point without losing the
+listener. Pick the *most important* detail; don't spell out every one the chapter mentions (the book
+has them; the slide's job is to teach the core, tightly). Roughly 3-6 sentences for a content slide.
 
-#### GOOD note example (content slide, ~160 words — descriptive, carries real detail, no padding)
+#### GOOD note example (content slide, ~110 words — descriptive but tight, no repetition)
 ```
-เวลาคุณสั่งงานโมเดลภาษา สิ่งที่มันทำจริง ๆ ไม่ใช่การ "เข้าใจ" ประโยคแบบคน แต่เป็นการทำนายคำถัดไปทีละคำจาก
-สถิติที่เรียนรู้มาจากข้อความมหาศาลครับ พูดง่าย ๆ คือมันถามตัวเองตลอดว่า "จากคำที่มีอยู่ตอนนี้ คำไหนน่าจะตามมา
-มากที่สุด" แล้วเลือกคำนั้น จากนั้นก็เอาคำใหม่มาต่อ แล้วทำนายคำถัดไปอีก วนแบบนี้จนจบประโยค ยกตัวอย่างถ้าเราพิมพ์ว่า
-"เมืองหลวงของประเทศไทยคือ" โมเดลจะคำนวณความน่าจะเป็นของคำถัดไป แล้วพบว่า "กรุงเทพ" มีน้ำหนักสูงสุด จึงตอบออกมา
-สิ่งที่ทำให้มันเก่งขึ้นเรื่อย ๆ คือขนาดของข้อมูลที่เรียนและจำนวนพารามิเตอร์ ยิ่งเยอะ โมเดลยิ่งจับรูปแบบภาษาได้ละเอียด
-แต่ข้อควรระวังคือมันทำนายจากสถิติ ไม่ได้ตรวจสอบว่าจริงหรือไม่ จึงมั่นใจแม้ตอนที่ผิดได้ ต่อไปเราจะดูว่าโมเดลเรียนรู้
-รูปแบบเหล่านี้จากข้อมูลได้อย่างไรครับ
+LLM ทำงานด้วยการทำนายคำถัดไปทีละคำจากสถิติที่เรียนมาจากข้อความมหาศาลครับ มันถามตัวเองว่า "จากคำที่มีอยู่
+คำไหนน่าจะตามมามากที่สุด" เลือกคำนั้น แล้วทำนายต่อไปเรื่อย ๆ จนจบ ตัวอย่างเช่นพิมพ์ "เมืองหลวงของไทยคือ"
+โมเดลให้ "กรุงเทพ" ความน่าจะเป็นสูงสุดจึงตอบออกมา ข้อควรระวังคือมันทำนายจากสถิติ ไม่ได้ตรวจว่าจริงไหม จึงมั่นใจ
+แม้ตอนผิดได้ครับ
 ```
-Note: this teaches the mechanism (next-token prediction), the why (statistics not understanding), a
-concrete example (เมืองหลวง→กรุงเทพ), what improves it (data + parameters), and a caveat (confident when
-wrong) — every sentence carries chapter substance. That's descriptive, not padded.
+Teaches the mechanism, gives one concrete example (เมืองหลวง→กรุงเทพ), lands one caveat — then stops.
+Tight enough to listen to, descriptive enough to learn from. (Note it does NOT also cover parameters,
+training, or history — those belong on their own slides, not repeated here.)
 
 #### What NOT to do
-- **Too thin — flattening a rich concept.** If the chapter spends three paragraphs on something and
-  your note is one line, you dropped the substance. Expand with the chapter's actual detail.
-- **Padding (the other failure):** repeating the same point in different words, empty setup scenarios
-  that add no information, filler ("สิ่งสำคัญคือ...", "อย่างที่กล่าวไป..."). Cut these — they aren't detail.
-- **Reading the bullets aloud verbatim** — explain the idea, don't restate the slide.
-- **Jargon without a gloss** — VLOOKUP → "เหมือนเปิดอีกหน้าไปหาข้อมูลมาให้".
-- The line to hold: **descriptive detail from the chapter = keep; words that add no new content = cut.**
+- **Repeating an earlier slide** (the #1 defect) — re-teaching a concept/analogy/example/timeline
+  already covered. Say it once, on its own slide; later slides reference it in a phrase, not re-explain it.
+- **Over-explaining one point** — three sentences where one does it, long setup scenarios, spelling
+  out every nuance. The listener bores. Land the core, move on.
+- **Padding / filler** — "สิ่งสำคัญคือ...", "อย่างที่กล่าวไป...", reading the bullets aloud verbatim.
+- **Section notes that tell the whole story** — they should PREVIEW; the content slides teach.
+- **Too thin, though** — a bare one-liner for a concept the chapter details is under-written. The
+  target is descriptive-but-tight, not empty.
 
 ### Content quality — instructor standards
 - **Every slide must have `notes`** — no exceptions (no notes = dead air).
-- **Notes must be DESCRIPTIVE** — carry the chapter's real substance (what/why/how + a concrete
-  example), enough that the audio alone teaches the concept. Match the note's depth to the chapter's.
-- **The standard is information density, not word count** — every sentence adds new chapter content.
-  Cut padding (repetition, filler, empty scenarios); keep detail. Under-writing a rich concept is a
-  defect just as much as padding is.
+- **Descriptive but TIGHT** — the note teaches THIS slide's point with its one key detail + an
+  example, then stops. Written for the ear: a listener bores, so no over-explaining, no padding.
+- **No repetition across slides** — each note adds something NEW; never re-teach what an earlier slide
+  covered. Section notes preview (short); screenshot notes describe the image + one fresh angle.
+- **Reuse an analogy at most once or twice**, at its best spot — not on every slide of a section.
 - **Thai terminology consistency** — "สั่งงาน" (prompt), "ผู้ช่วย" (the assistant), "เซสชัน", "โฟลเดอร์".
 
 ## Validate (the `.slides.md` surface)

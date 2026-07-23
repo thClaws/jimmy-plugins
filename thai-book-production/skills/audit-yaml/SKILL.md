@@ -113,12 +113,15 @@ exactly as long as the chapter's content needs (create-slide-markdown lets conte
 each slide on whether it teaches something new, NOT on the total. Flag a slide only when it is
 genuinely redundant with another, not because the deck is "long" or "short".
 
-**How to fix:**
-- Merge only GENUINELY redundant slides (same idea taught twice) into one
-- Remove duplicate bullets
-- Consolidate overlapping section cards
-- Trim notes that repeat earlier content — instead, reference forward ("ดังที่กล่าวไปแล้ว") or add new depth
-- Do NOT merge distinct ideas just to shorten the deck, and do NOT pad to lengthen it
+**How to fix (slide count is fine — fix the NOTES, don't merge slides):**
+- **Repetition is mainly a VO problem, not a count problem.** A content slide + a screenshot slide on
+  the same concept is OK — but their NOTES must differ: the content slide teaches it, the screenshot
+  slide describes the image + one new angle. Differentiate the notes; keep the slides.
+- A `section` note that told the whole story → cut it to a short PREVIEW, let the content slides teach.
+- A reused analogy on 3+ slides → keep it on the one slide it lands best; drop it elsewhere.
+- Trim over-explained notes to the core point + one key detail (the audio must stay listenable).
+- Remove duplicate bullets / overlapping section cards.
+- Do NOT merge distinct ideas or pad — count is not the target; distinct, tight notes are.
 
 **Issue severity:**
 - MAJOR: 3+ slides covering the same concept (true redundancy)
@@ -130,32 +133,35 @@ Speaker notes are the MOST IMPORTANT output — they become TTS voice-over for t
 
 **What to check:**
 
-#### A. Length — audit for DENSITY, not a word count
+#### A. Length + repetition — VO must be descriptive but TIGHT (it's audio a person listens to)
 
-Speaker notes must be **descriptive** — they carry the chapter's substance so the audio alone
-teaches the concept. Judge each note on **information density**: does every sentence add new chapter
-content (an explanation, a why, a concrete specific, an example), or is it padding? Two failure modes,
-both real:
-- **Too thin (under-written):** a rich chapter concept flattened to a line or two — the substance was
-  dropped. MAJOR. Fix: expand with the chapter's actual detail.
-- **Padded:** repetition, filler ("สิ่งสำคัญคือ..."), empty setup scenarios, bullets read verbatim.
-  MAJOR. Fix: cut the padding — but keep the detail.
+Notes are spoken audio — a listener bores when they run long or repeat. Audit for **descriptive-but-
+tight** and, above all, **no repetition across slides**. Three failure modes:
+- **Repeats an earlier slide (the #1 defect — MAJOR):** re-teaches a concept, analogy, example, or
+  timeline already covered on a previous slide. Scan the deck as a whole:
+  - a `section` note that narrates the whole topic, then the next content slides re-tell it;
+  - a `screenshot` note that re-explains the concept the previous content slide just taught, instead
+    of describing the image + one new angle;
+  - the same analogy (e.g. ตึก/เฟอร์นิเจอร์, ช่างแกะสลัก) reused on 3+ slides of a section.
+  Fix: keep the teaching on ONE slide; make the others add a new facet or shorten to a reference.
+- **Over-explains one point (MAJOR/MINOR):** three sentences where one does it, long setup scenarios,
+  every nuance spelled out. Fix: land the core point + one key detail, cut the rest.
+- **Too thin (MAJOR):** a bare one-liner for a concept the chapter details. Fix: add the core detail.
 
-Typical word ranges (a guide to spot outliers, NOT a hard cap — a dense concept legitimately runs
-longer, a simple one shorter):
+Target lengths for the SPOKEN note (over the top end usually = repetition or over-explaining):
 
-| Slide Type | Typical words |
-|-----------|--------------|
-| `cover` | 60-110 |
-| `section` | 80-140 |
-| `content` / `two_column` / `process` | 120-220 |
-| `table` | 90-170 |
-| `callout` / `screenshot` | 90-160 |
-| `quote` / `demo` | 50-110 |
+| Slide Type | Target words |
+|-----------|-------------|
+| `cover` | 50-90 |
+| `section` | 40-80 (a PREVIEW, not the whole story) |
+| `content` / `two_column` | 90-150 |
+| `process` | 100-160 |
+| `table` / `callout` / `screenshot` | 70-120 |
+| `quote` / `demo` | 40-90 |
 
-**Flag on density, not the number.** A 240-word note that's all substance is fine; a 90-word note
-that repeats itself is not. A note far BELOW the range for a concept the chapter treats in depth is
-under-written — flag it.
+**Flag both directions AND repetition.** A note well over target is over-explaining/repeating — trim.
+A note far under for a detailed concept is too thin. And any note that re-teaches an earlier slide is
+MAJOR regardless of its length.
 
 #### B. TTS Naturalness — MALE SPEAKER ONLY
 - Notes should sound like a **friendly male Thai trainer speaking in a workshop**
@@ -167,12 +173,12 @@ under-written — flag it.
 - No robotic patterns like "ข้อแรก... ข้อสอง... ข้อสาม..."
 - Male speech patterns: "ผม" (not "ฉัน/ดิฉัน"), "นะครับ" (not "นะคะ"), "ใช่ครับ" (not "ใช่ค่ะ")
 
-#### C. Content — descriptive, carrying the chapter's substance
-Notes must teach the concept the way the chapter does, not just name it: **state the point → explain
-HOW/WHY it works with the chapter's real detail → a concrete example or specific number → a short
-bridge.** Depth tracks the concept — a rich section warrants a full, substantive note; a simple point
-a shorter one. The defects are at BOTH ends: **too thin** (a detailed concept flattened to a line —
-substance dropped) and **padded** (repetition, filler, empty scenarios). Keep detail, cut padding.
+#### C. Content — descriptive but TIGHT, and non-repetitive
+Each note teaches THIS slide's point with its one key detail + an example, then stops — written for a
+listener, so no over-explaining and (critically) **no re-teaching what another slide already covered.**
+State the point → how/why with the key detail → a concrete example → a short bridge. ~3-6 sentences
+for a content slide. Section notes PREVIEW (short); screenshot notes describe the image + one new
+angle. Flag: repeats-an-earlier-slide, over-explained, or too-thin (see §A for the split).
 
 #### D. Variety
 - Don't start every note with the same phrase (check for repetitive "มาดูกัน", "ทีนี้", etc.)
