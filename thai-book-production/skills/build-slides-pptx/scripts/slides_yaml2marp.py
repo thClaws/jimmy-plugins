@@ -214,17 +214,13 @@ def demo(s):
 
 
 def screenshot(s):
-    # Book figures / screenshots render FULL-BLEED — no title/subtitle so the
-    # image fills the whole slide (the voice-over carries the context). Only
-    # an optional caption rides along, as a subtle bottom overlay (theme
-    # `.shot .cap`) that doesn't shrink the image.
+    # Book figures / screenshots render FULL-BLEED — no title/subtitle and no
+    # caption so nothing overlays the figure; it fills the whole slide edge to
+    # edge (the voice-over carries the context, incl. any `description`).
     src = img_src(s.get("screenshot") or s.get("image"))
     frame = (f'<img src="{esc(src)}">' if src else
              '<div class="ph">🖼️ (screenshot pending)</div>')
-    out = ['<!-- _class: shot -->', f'<div class="frame">{frame}</div>']
-    if s.get("description"):
-        out.append(f'<div class="cap">{esc(s["description"])}</div>')
-    return "\n".join(out)
+    return "\n".join(['<!-- _class: shot -->', f'<div class="frame">{frame}</div>'])
 
 
 def video_demo(s):
