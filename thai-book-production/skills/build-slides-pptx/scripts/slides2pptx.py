@@ -223,17 +223,15 @@ class Deck:
     def _s_section(self, slide, s):
         self.bg(slide, self.pal["parchment"])
         head = []
-        title = s.get("title", "")
-        if s.get("number"):
-            num = str(s["number"])
+        title = str(s.get("title", ""))
+        num = str(s.get("number") or "")
+        # If the title already embeds its number (e.g. "1.1 — Foo" with number
+        # "1.1"), leave the title as-is and skip the separate number run so it
+        # isn't shown twice. Token boundary so number "1" never eats "12 Monkeys".
+        embeds = num and title.startswith(num) and (title[len(num):] == "" or title[len(num)] in " .:)-–—·\t")
+        if num and not embeds:
             head.append({"text": num, "size": self.sz["subtitle"], "color": self.pal["teal"],
                          "font": self.hf, "bold": True, "space_after": 0})
-            # Drop a leading copy of the number so a title that already embeds
-            # it (e.g. "1.1 — Foo" with number "1.1") doesn't show it twice.
-            # Require a token boundary so number "1" never eats "12 Monkeys".
-            t = str(title)
-            if t.startswith(num) and (t[len(num):] == "" or t[len(num)] in " .:)-–—·\t"):
-                title = t[len(num):].lstrip(" .:)-–—·")
         head.append({"text": title, "size": self.sz["title"], "color": self.pal["dark_text"],
                      "font": self.hf, "bold": True, "space_after": 2})
         if s.get("subtitle"):
