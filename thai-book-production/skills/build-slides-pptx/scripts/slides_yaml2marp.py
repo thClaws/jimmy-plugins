@@ -59,6 +59,24 @@ def txt(s):
     return " ".join(str(s or "").split())
 
 
+def title_wo_number(number, title):
+    """Section heading text with a leading copy of `number` stripped off.
+
+    Section slides render as `number · title`. When the authored `## heading`
+    already embeds its number (e.g. title "1.1 — Foo", number "1.1") the number
+    would otherwise show twice. Drop the duplicate so it renders once."""
+    num, t = txt(number), txt(title)
+    seps = " .:)-–—·\t"
+    if num and t.startswith(num):
+        rest = t[len(num):]
+        # Only when the number is a whole leading token (next char is a
+        # separator or the title is nothing but the number) — so number "1"
+        # never eats the "12" in a title like "12 Monkeys".
+        if rest == "" or rest[0] in seps:
+            return rest.lstrip(seps)
+    return t
+
+
 def bullets_md(items, ordered=False):
     mark = (lambda i: f"{i+1}.") if ordered else (lambda i: "-")
     return "\n".join(f"{mark(i)} {txt(b)}" for i, b in enumerate(items or []))
@@ -118,7 +136,9 @@ def quote(s):
 def section(s):
     cards = s.get("cards") or []
     grid = "cards two" if len(cards) <= 2 else "cards"
-    head = "## " + " · ".join(x for x in [txt(s.get("number")), txt(s.get("title"))] if x)
+    head = "## " + " · ".join(
+        x for x in [txt(s.get("number")), title_wo_number(s.get("number"), s.get("title"))] if x
+    )
     out = ['<!-- _class: section -->', head]
     if s.get("subtitle"):
         out.append(f"### {txt(s['subtitle'])}")

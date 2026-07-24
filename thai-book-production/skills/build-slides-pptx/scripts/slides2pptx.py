@@ -223,10 +223,18 @@ class Deck:
     def _s_section(self, slide, s):
         self.bg(slide, self.pal["parchment"])
         head = []
+        title = s.get("title", "")
         if s.get("number"):
-            head.append({"text": s["number"], "size": self.sz["subtitle"], "color": self.pal["teal"],
+            num = str(s["number"])
+            head.append({"text": num, "size": self.sz["subtitle"], "color": self.pal["teal"],
                          "font": self.hf, "bold": True, "space_after": 0})
-        head.append({"text": s.get("title", ""), "size": self.sz["title"], "color": self.pal["dark_text"],
+            # Drop a leading copy of the number so a title that already embeds
+            # it (e.g. "1.1 — Foo" with number "1.1") doesn't show it twice.
+            # Require a token boundary so number "1" never eats "12 Monkeys".
+            t = str(title)
+            if t.startswith(num) and (t[len(num):] == "" or t[len(num)] in " .:)-–—·\t"):
+                title = t[len(num):].lstrip(" .:)-–—·")
+        head.append({"text": title, "size": self.sz["title"], "color": self.pal["dark_text"],
                      "font": self.hf, "bold": True, "space_after": 2})
         if s.get("subtitle"):
             head.append({"text": s["subtitle"], "size": self.sz["subtitle"], "color": self.pal["gray_text"],
