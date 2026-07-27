@@ -29,8 +29,14 @@ spec:
               value: "8080"
             # SLIDE_RENDER_TOKEN unset → auth is enforced upstream (gateway).
           resources:
-            requests: { cpu: "250m", memory: "384Mi" }
-            limits: { cpu: "1500m", memory: "1536Mi" }
+            # Headroom for /pptx: LibreOffice peaks around 700MB-1GB on a
+            # slide-heavy deck and can land while Chromium is still resident
+            # from a /slides render. The upload itself streams to disk (multer
+            # diskStorage) rather than the heap, so a 200MB deck costs /tmp,
+            # not RAM — but /tmp is the container filesystem, hence the
+            # ephemeral-storage request below.
+            requests: { cpu: "250m", memory: "512Mi", ephemeral-storage: "2Gi" }
+            limits: { cpu: "2000m", memory: "3Gi", ephemeral-storage: "8Gi" }
           readinessProbe:
             httpGet: { path: /healthz, port: 8080 }
             initialDelaySeconds: 3

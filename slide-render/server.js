@@ -2,6 +2,8 @@
 //
 // POST /slides   (multipart)  markdown=<marp md>  [theme=thai-tech]  [images=<file>…]
 //   → 200 application/zip  { deck.pdf, slides/slide-01.png … }
+// POST /pptx     (multipart)  file=<.pptx>
+//   → 200 application/zip  { deck.pdf, slides/slide-01.png … }   (same shape)
 // GET  /healthz
 //
 // Design (see README): the desktop/GUI NEVER calls this directly — the thClaws
@@ -21,7 +23,22 @@ const crypto = require("crypto");
 
 const run = promisify(execFile);
 const app = express();
+// /slides carries a Marp deck plus its figures — many small files.
 const upload = multer({ limits: { fileSize: 25 * 1024 * 1024, files: 60 } });
+
+// /pptx carries ONE big file. Disk storage, not memory: a 200MB deck
+// buffered in the Node heap alongside LibreOffice's own footprint is how
+// the pod gets OOM-killed. multer streams it to /tmp and we hand
+// LibreOffice the path it already wanted.
+const uploadPptx = multer({
+  dest: os.tmpdir(),
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, os.tmpdir()),
+    filename: (_req, file, cb) =>
+      cb(null, "up-" + crypto.randomBytes(8).toString("hex") + path.extname(safeName(file.originalname))),
+  }),
+  limits: { fileSize: 200 * 1024 * 1024, files: 1 },
+});
 
 const PORT = process.env.PORT || 8080;
 const TOKEN = process.env.SLIDE_RENDER_TOKEN || "";
@@ -88,6 +105,94 @@ app.post("/slides", auth, upload.fields([{ name: "images" }]), async (req, res) 
     }
   } finally {
     fs.rm(job, { recursive: true, force: true }).catch(() => {});
+  }
+});
+
+// Render an existing .pptx for VIEWING — the Files tab shows only extracted
+// text otherwise, and asking every user to install LibreOffice (Windows
+// especially) isn't realistic. LibreOffice does pptx→pdf; pdftoppm rasterises.
+// Marp/Chromium aren't involved: this is someone else's deck, not one we author,
+// so nothing about it is Marp-shaped.
+//
+// Deliberately the SAME response shape as /slides ({deck.pdf, slides/*.png}) so
+// the engine's existing unzip path handles both without a second code path.
+app.post("/pptx", auth, uploadPptx.single("file"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "missing 'file' field" });
+  const name = safeName(req.file.originalname || "deck.pptx");
+  if (!/\.(pptx|ppt|odp)$/i.test(name)) {
+    return res.status(400).json({ error: `unsupported extension for '${name}'` });
+  }
+
+  const job = path.join(os.tmpdir(), "pptx-" + crypto.randomBytes(8).toString("hex"));
+  try {
+    await fs.mkdir(job, { recursive: true });
+    // multer already streamed it to disk — move rather than re-copy.
+    const src = path.join(job, name);
+    await fs.rename(req.file.path, src);
+
+    // -env:UserInstallation pins a per-job profile: without it concurrent
+    // conversions share ~/.config/libreoffice and the second one exits
+    // silently having produced nothing.
+    const soffice = process.env.SOFFICE_BIN || "soffice";
+    await run(
+      soffice,
+      [
+        `-env:UserInstallation=file://${path.join(job, "lo-profile")}`,
+        "--headless",
+        "--norestore",
+        "--convert-to",
+        "pdf",
+        "--outdir",
+        job,
+        src,
+      ],
+      { cwd: job, timeout: TIMEOUT_MS },
+    );
+
+    // LibreOffice names the output after the input stem, not "deck".
+    const pdfSrc = path.join(job, name.replace(/\.[^.]+$/, "") + ".pdf");
+    if (!fss.existsSync(pdfSrc)) {
+      return res.status(422).json({
+        error: "conversion produced no pdf",
+        detail: `libreoffice could not read '${name}'`,
+      });
+    }
+    const pdf = path.join(job, "deck.pdf");
+    await fs.rename(pdfSrc, pdf);
+
+    // pdftoppm zero-pads and appends its own index: slide-01.png, slide-02.png…
+    // — the numbering the rest of the toolchain pairs against.
+    const outDir = path.join(job, "png");
+    await fs.mkdir(outDir, { recursive: true });
+    await run(
+      process.env.PDFTOPPM_BIN || "pdftoppm",
+      ["-png", "-r", String(Number(req.body.dpi) || 110), pdf, path.join(outDir, "slide")],
+      { cwd: job, timeout: TIMEOUT_MS },
+    );
+
+    res.set("Content-Type", "application/zip");
+    res.set("Content-Disposition", 'attachment; filename="deck.zip"');
+    const zip = archiver("zip", { zlib: { level: 6 } });
+    zip.on("error", (e) => {
+      throw e;
+    });
+    zip.pipe(res);
+    zip.file(pdf, { name: "deck.pdf" });
+    for (const png of (await fs.readdir(outDir)).sort()) {
+      zip.file(path.join(outDir, png), { name: `slides/${png}` });
+    }
+    await zip.finalize();
+  } catch (e) {
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: "pptx render failed",
+        detail: String(e.stderr || e.message || e).slice(0, 500),
+      });
+    }
+  } finally {
+    fs.rm(job, { recursive: true, force: true }).catch(() => {});
+    // If we failed before the rename, multer's temp copy is still there.
+    if (req.file?.path) fs.rm(req.file.path, { force: true }).catch(() => {});
   }
 });
 

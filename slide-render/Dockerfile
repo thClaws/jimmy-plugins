@@ -2,8 +2,13 @@
 FROM node:20-bookworm-slim
 
 # Chromium (Marp renders PDF + PNG via it) + Thai fonts (fallback to @font-face in theme)
+# libreoffice-impress + poppler-utils back the /pptx endpoint (view an
+# existing deck): Impress converts pptx→pdf, pdftoppm rasterises. Only the
+# Impress component is installed — the full libreoffice metapackage pulls
+# Writer/Calc/Base and roughly triples the layer for no gain here.
 RUN apt-get update && apt-get install -y --no-install-recommends \
       chromium fonts-thai-tlwg fonts-noto-core fontconfig ca-certificates tini \
+      libreoffice-impress libreoffice-core poppler-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # Marp uses the system Chromium (skip its bundled download).
