@@ -254,7 +254,7 @@ First, find the workspace root. The workspace is the user's selected folder. Use
 2. **Read screenshot index files** — `media/screenshots/info.md` + `media/screenshots/<subdir>/index.md` for relevant subdirectories
 3. **Read reference docs** — from `refs/docs/` based on chapter topic (see mapping below)
 4. **Read existing chapters** — from `chapters/` to maintain consistency
-5. **Read the Thai style rules** — `${CLAUDE_PLUGIN_ROOT}/skills/write-book-chapter/references/thai-style.md`
+5. **Read the Thai style rules** — `{skill_dir}/references/thai-style.md`
    (banned calques + preferred wording, e.g. never "ใต้ฝากระโปรง" → use "เจาะลึก"/"เบื้องหลังการทำงาน").
    These are HARD rules for every Thai sentence you generate.
 

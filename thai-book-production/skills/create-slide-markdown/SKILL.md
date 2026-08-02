@@ -53,7 +53,7 @@ compiled from your Markdown by **create-slide-yaml**. The compiled YAML then fee
 
 Read the Markdown authoring format (bundled in this skill) before writing:
 ```
-Read: ${CLAUDE_PLUGIN_ROOT}/skills/create-slide-markdown/references/slide-md-format.md
+Read: {skill_dir}/references/slide-md-format.md
 ```
 It defines the surface you author: slides split by `---`, a `<!-- slide: TYPE -->` directive per
 slide, and a `::: notes` block for narration. (The compile-target YAML schema — the fields each
@@ -307,7 +307,7 @@ spot is **descriptive-but-tight**: the listener learns the point and stays engag
 
 #### Tone and style
 **Banned calques:** follow the shared Thai style rules in
-`${CLAUDE_PLUGIN_ROOT}/skills/write-book-chapter/references/thai-style.md` for BOTH slide text
+`{skill_dir}/../write-book-chapter/references/thai-style.md` for BOTH slide text
 and notes — never use ❌ terms (e.g. "ใต้ฝากระโปรง" → "เจาะลึก"/"เบื้องหลังการทำงาน").
 
 Conversational Thai, a friendly **male** instructor:

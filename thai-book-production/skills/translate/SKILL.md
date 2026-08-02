@@ -42,7 +42,7 @@ Translate prose while keeping the book's technical conventions intact.
 - Keep character names and running examples consistent across chapters (share a
   translation memory / glossary so "คุณแพร" maps the same way every time).
 - **When the target language is Thai**, follow the banned-calques list in
-  `${CLAUDE_PLUGIN_ROOT}/skills/write-book-chapter/references/thai-style.md`
+  `{skill_dir}/../write-book-chapter/references/thai-style.md`
   (e.g. never "ใต้ฝากระโปรง" for "under the hood" — use "เจาะลึก"/"เบื้องหลังการทำงาน").
 
 ## Process

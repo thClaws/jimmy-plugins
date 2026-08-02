@@ -60,7 +60,7 @@ Use `Glob` with `**/media/screenshots/inventory.json` to find the workspace. The
 The Sarabun fonts are bundled in this skill:
 
 ```bash
-FONT_DIR="${CLAUDE_PLUGIN_ROOT}/skills/mockup-screenshot/assets/fonts/Sarabun"
+FONT_DIR="{skill_dir}/assets/fonts/Sarabun"
 ```
 
 Verify fonts exist:
@@ -87,7 +87,7 @@ find /sessions -name "Sarabun-Regular.ttf" 2>/dev/null | head -3
 ## Step 4: Run the Generator
 
 ```bash
-python "${CLAUDE_PLUGIN_ROOT}/skills/mockup-screenshot/scripts/mockup_screenshot.py" \
+python "{skill_dir}/scripts/mockup_screenshot.py" \
   <workspace> \
   ${ARGUMENTS:-all} \
   --font-dir "$FONT_DIR"
@@ -121,7 +121,7 @@ Use /list-screenshot to rescan the inventory.
 If the user says "recreate" or "regenerate" or "overwrite", pass `--force`:
 
 ```bash
-python "${CLAUDE_PLUGIN_ROOT}/skills/mockup-screenshot/scripts/mockup_screenshot.py" \
+python "{skill_dir}/scripts/mockup_screenshot.py" \
   <workspace> \
   ${ARGUMENTS:-all} \
   --font-dir "$FONT_DIR" \

@@ -45,7 +45,7 @@ immediately **in `chNN.slides.md`** (the human-editable Markdown), then recompil
 bundled compiler:
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/create-slide-yaml/scripts/slides_md2yaml.py \
+python3 {skill_dir}/../create-slide-yaml/scripts/slides_md2yaml.py \
   media/slides/chNN.slides.md
 ```
 
@@ -59,11 +59,11 @@ Read these files:
 
 1. **Markdown slide format spec** — the authoring surface you audit/fix:
 ```
-Read ${CLAUDE_PLUGIN_ROOT}/skills/create-slide-markdown/references/slide-md-format.md
+Read {skill_dir}/../create-slide-markdown/references/slide-md-format.md
 ```
 2. **YAML format spec** — the compile target (so you know what the MD must produce):
 ```
-Read ${CLAUDE_PLUGIN_ROOT}/skills/create-slide-yaml/references/yaml-format.md
+Read {skill_dir}/../create-slide-yaml/references/yaml-format.md
 ```
 
 3. **The source chapter** — `chapters/ch{NN}.md` — this is the ground truth for content

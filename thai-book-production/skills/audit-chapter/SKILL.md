@@ -75,7 +75,7 @@ can act on directly. Do NOT rewrite the chapter here — audit only.
    image placeholders (`{{screenshot:...}}` for UI captures, `{{image:...}}` for AI illustrations)
    all present per template.
 8. **Thai style — banned calques** — scan against the shared list
-   `${CLAUDE_PLUGIN_ROOT}/skills/write-book-chapter/references/thai-style.md`; any ❌ term
+   `{skill_dir}/../write-book-chapter/references/thai-style.md`; any ❌ term
    (e.g. "ใต้ฝากระโปรง") = MAJOR, report the ✅ replacement so fix-chapter can apply it.
 
 ## Severity rubric

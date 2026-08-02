@@ -38,7 +38,7 @@ then feeds `build-slides-pptx` (RenderSlides) → `generate-tts` → `build-chap
 
 The compile target — every slide type, its fields, and the design system — is specified in:
 ```
-Read: ${CLAUDE_PLUGIN_ROOT}/skills/create-slide-yaml/references/yaml-format.md
+Read: {skill_dir}/references/yaml-format.md
 ```
 You only need this to understand or debug what a `<!-- slide: TYPE -->` block compiles into.
 
@@ -52,10 +52,10 @@ python-pptx preflight; `pyyaml` alone is enough here.)
 ## Step 2 — Compile (deterministic script — never hand-transcribe)
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/create-slide-yaml/scripts/slides_md2yaml.py \
+python3 {skill_dir}/scripts/slides_md2yaml.py \
   media/slides/chNN.slides.md            # writes media/slides/chNN.yaml
 # validate only, no write:
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/create-slide-yaml/scripts/slides_md2yaml.py \
+python3 {skill_dir}/scripts/slides_md2yaml.py \
   media/slides/chNN.slides.md --check
 ```
 

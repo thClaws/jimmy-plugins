@@ -148,9 +148,11 @@ artifact** ที่ pipeline กิน field ใดที่ directive/บอ�
 
 **compiler (deterministic):** `scripts/slides_md2yaml.py` แปลง `.slides.md` → `.yaml` ตามสเปกนี้
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/create-slide-yaml/scripts/slides_md2yaml.py ch01.slides.md
+python3 <plugin>/skills/create-slide-yaml/scripts/slides_md2yaml.py ch01.slides.md
 python3 .../slides_md2yaml.py ch01.slides.md --check      # validate อย่างเดียว
 ```
+> `<plugin>` = พาธจริงของปลั๊กอิน ไฟล์นี้ถูกอ่านดิบ ๆ จึงไม่มีการแทนค่าให้ — เอาพาธเต็มที่ resolve
+> แล้วจาก `create-slide-yaml/SKILL.md` (มันใช้ `{skill_dir}` ซึ่ง engine แทนค่าตอนโหลด skill)
 สคริปต์ fail ดังพร้อมชี้ slide ที่ผิด (ไม่มี directive / `:::` ไม่ปิด / ไม่มี notes / type ไม่รู้จัก)
 
 ## กติกา (สำหรับ compiler + audit)

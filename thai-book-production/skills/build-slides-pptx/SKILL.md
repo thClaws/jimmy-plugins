@@ -38,7 +38,7 @@ The only dependency is `pyyaml`. If it's missing, install it inline (`pip instal
 `.venv/bin/python -m pip install pyyaml`) and move on — nothing else is needed.
 ```bash
 mkdir -p build/slides
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-slides-pptx/scripts/slides_yaml2marp.py \
+python3 {skill_dir}/scripts/slides_yaml2marp.py \
   media/slides/chNN.yaml -o build/slides/chNN.marp.md
 # → "✓ NN slides → build/slides/chNN.marp.md"
 # → "✓ K image(s) copied → build/slides/assets/chNN  (pass as RenderSlides image_dir)"
@@ -97,12 +97,12 @@ ceiling than the Marp path and it needs LibreOffice for previews (flaky on macOS
 
 Preflight the python deps first (this checks python-pptx/pyyaml/Pillow + optional CLI tools):
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-slides-pptx/scripts/check_env.py   # add --json for machine-readable
+python3 {skill_dir}/scripts/check_env.py   # add --json for machine-readable
 ```
 Render the `.pptx`:
 ```bash
 mkdir -p build/slides
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-slides-pptx/scripts/slides2pptx.py \
+python3 {skill_dir}/scripts/slides2pptx.py \
   media/slides/chNN.yaml -o build/slides/chNN.pptx \
   --book book.yaml --media-dir media/screenshots --media-dir media/generated
 ```
@@ -112,7 +112,7 @@ Custom theme: `--theme mytheme.json` (deep-merged) or `book.yaml → style.pptx_
 Font-proof preview (bakes each slide to an image so it looks identical everywhere — needs `soffice`
 + `pdftoppm` + fontconfig):
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-slides-pptx/scripts/slides2preview.py \
+python3 {skill_dir}/scripts/slides2preview.py \
   media/slides/chNN.yaml --book book.yaml \
   --media-dir media/screenshots --media-dir media/generated \
   --out build/slides --strict-fonts

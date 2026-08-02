@@ -157,7 +157,7 @@ Fix these patterns:
   - Bad: "คุณสามารถใช้เครื่องมือนี้ในการวิเคราะห์ข้อมูลทุกประเภทได้"
   - Good: "คุณใช้เครื่องมือนี้วิเคราะห์ข้อมูลทุกประเภทได้"
 - **Banned calques (MAJOR — fix every occurrence)**: Read the shared banned-terms list
-  `${CLAUDE_PLUGIN_ROOT}/skills/write-book-chapter/references/thai-style.md` and replace
+  `{skill_dir}/../write-book-chapter/references/thai-style.md` and replace
   every ❌ term with its ✅ replacement (e.g. "ใต้ฝากระโปรง" → "เจาะลึก" /
   "เบื้องหลังการทำงาน"). That file is the SSOT — never rely on a from-memory list.
 

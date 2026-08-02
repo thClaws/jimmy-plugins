@@ -430,9 +430,12 @@ broll:
 
 ## Pipeline Integration (in-plugin, standalone)
 
+> `<plugin>` ในบล็อกด้านล่าง = พาธจริงของปลั๊กอิน ไฟล์นี้ถูกอ่านดิบ ๆ จึงไม่มีการแทนค่าให้ — เอาพาธเต็ม
+> ที่ resolve แล้วจาก SKILL.md ของ skill นั้น ๆ (ใช้ `{skill_dir}` ซึ่ง engine แทนค่าตอนโหลด skill)
+
 ### YAML → PPTX + slide images (`build-slides-pptx`)
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-slides-pptx/scripts/slides2preview.py \
+python3 <plugin>/skills/build-slides-pptx/scripts/slides2preview.py \
   media/slides/chNN.yaml --book book.yaml --out build/slides --strict-fonts
 ```
 - Outputs: `build/slides/chNN.pptx`, `chNN-slides.pdf`, `preview/chNN/slide-*.png`,
@@ -444,7 +447,7 @@ python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-slides-pptx/scripts/slides2preview.py
 
 ### Slide images + audio → chapter video (`build-chapter-video`)
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-chapter-video/scripts/slides2video.py \
+python3 <plugin>/skills/build-chapter-video/scripts/slides2video.py \
   --images build/slides/preview/chNN --audio build/audio/chNN -o build/video/chNN.mp4
 ```
 - Pairs by index; slides without audio get a silent hold. Output H.264/AAC 1920×1080.

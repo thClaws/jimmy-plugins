@@ -38,7 +38,7 @@ pairing is strictly by index (`slide-01.png` ↔ `slide-01.wav`).
 ## Run
 ```bash
 mkdir -p build/video
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/build-chapter-video/scripts/slides2video.py \
+python3 {skill_dir}/scripts/slides2video.py \
   --images build/slides/preview/chNN \
   --audio  build/audio/chNN \
   -o build/video/chNN.mp4
