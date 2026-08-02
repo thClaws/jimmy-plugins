@@ -97,6 +97,12 @@ material to enrich the speaker notes. The chapter gives structure; the reference
    illustrates ("here's the idea" → "here's what it looks like").
 5. **Don't over-scaffold short sections** — a lean `## N.X` section can be a single slide, not a
    divider + several content slides + a summary.
+6. **A `section` slide requires ≥3 content slides under it.** Count the slides the section will
+   actually carry (content/screenshot/process/table/callout/…) BEFORE deciding to open it with a
+   divider. With **1-2** slides, a divider just announces what the very next slide teaches — drop it
+   and **fold the section title into the first content slide** (make the section heading that slide's
+   `title`, and open its notes with the one-phrase framing the divider would have carried). Only a
+   section long enough that the learner needs a signpost earns the divider.
 
 **Aim for a LEAN deck — fewer slides, each explaining concisely.**
 The chapter's content decides the count, but **bias toward consolidation**: a tight deck the learner
@@ -110,7 +116,7 @@ How chapter elements map to slide types:
 | Chapter Element | Slide Type | When to Use |
 |----------------|------------|-------------|
 | Chapter title + opening story | `cover` | Always the first slide |
-| `## N.X Section Title` | `section` | Section divider with 2-5 summary cards |
+| `## N.X Section Title` | `section` | Divider with 2-5 cards — **only if the section carries ≥3 content slides**; otherwise fold the title into the first content slide |
 | Bullet points or key facts | `content` | General information slides |
 | Before/after, pros/cons, two sides | `two_column` | Side-by-side comparison |
 | Step-by-step instructions | `process` | Numbered workflow (2-6 steps) |
@@ -148,9 +154,27 @@ slide comfortably holds a coherent group of related bullets. Denser-but-clear be
 **Cover** — Always first. Split the chapter title into a short `title` (main idea, ≤6 words) and a
 `subtitle` (supporting context). `chapter` is the Thai label like "บทที่ 1".
 
-**Section** — One per major `## N.X` heading. 2-5 cards summarizing the section. Each card:
-`label` (1-3 word keyword), `title` (≤8 words), `body` (≤2 short lines — a phrase, not a paragraph).
-Card count picks the template variant automatically.
+**Section** — NOT automatic per `## N.X` heading. **Create one only when the section carries ≥3
+content slides.** 2-5 cards summarizing the section. Each card: `label` (1-3 word keyword), `title`
+(≤8 words), `body` (≤2 short lines — a phrase, not a paragraph). Card count picks the template
+variant automatically.
+
+> **The removal test (apply to EVERY section slide before you keep it):** *if removing the section
+> slide and prepending its key info to the next slide makes the deck tighter without losing anything,
+> the section slide shouldn't exist.* A divider that only names what the following slide is about is
+> an empty beat — the learner watches a slide that teaches nothing, then watches the real slide. Cut
+> it: move the heading into the next slide's `title` and fold its one useful framing phrase into that
+> slide's notes.
+
+Folding looks like this — a 2-slide section with a divider:
+```
+<!-- slide: section number="2.3" -->   ## การเชื่อมต่อ Connector   (cards restating the next slide)
+<!-- slide: content -->                ## วิธีเพิ่ม Connector
+```
+becomes one slide, with the section name carried by the title:
+```
+<!-- slide: content -->                ## 2.3 การเชื่อมต่อ: วิธีเพิ่ม Connector
+```
 
 **Content** — Group a section's related points onto as few content slides as read cleanly (a slide
 can carry several bullets). **Don't split into extra slides just to lower the bullet count** — that
@@ -240,9 +264,17 @@ extra sentence costs the listener's attention.** Make the point, land the key de
 
 **Anti-repetition — a slide's note must teach something NEW.** Before writing each note, recall what
 earlier slides already said and do NOT say it again:
-- **Section dividers PREVIEW, they don't teach.** Briefly frame what this section is about and why it
-  matters (2-3 sentences) — do NOT tell the whole story; the content slides that follow carry the
-  detail. A section note that narrates the entire topic makes the next 3 slides feel like reruns.
+- **Section dividers PREVIEW, they don't teach — not even a small version.** The failure mode is
+  subtle: a note that dutifully "previews" by naming each point the next slides will make is just a
+  compressed rerun, and the learner hears everything twice. A preview says **why this section matters
+  and what the learner will be able to do after it** — the *motivation and destination*. It must NOT
+  state the answers, mechanisms, steps, or examples the content slides deliver.
+  - Preview ✓: "ต่อไปเป็นเรื่องการเชื่อมต่อข้อมูล ซึ่งเป็นจุดที่ทำให้ผู้ช่วยทำงานกับงานจริงของคุณได้ จบหัวข้อนี้คุณจะต่อ
+    Connector เองได้ครับ" — motivation + destination, zero mechanics.
+  - Mini-version ✗: "การเชื่อมต่อทำได้ 3 แบบ คือ Connector, อัปโหลดไฟล์ และวางลิงก์ แต่ละแบบเหมาะกับ..." —
+    that IS the next slide. Delete it from the section note.
+  - Test the note: if any sentence would also belong in a following slide's note, cut that sentence.
+    A section note that survives with only 2-3 sentences of framing is correct.
 - **Screenshot notes DESCRIBE the image + add ONE new angle** — guide the eye through what's on screen
   and make one fresh connection. Do NOT re-explain the concept the previous content slide just taught.
 - **Reuse an analogy at most once or twice, at its highest-impact spot** — not on every slide of a
@@ -259,7 +291,7 @@ Descriptive means "carries the point + its key detail", NOT "exhausts every deta
 | Slide Type | Target words | Keep it to |
 |-----------|-------------|-----------|
 | `cover` | 50-90 | one hook + the chapter's promise |
-| `section` | 40-80 | a PREVIEW — what + why, not the whole story |
+| `section` | 40-80 | why it matters + what you'll be able to do — never the answers themselves |
 | `content` | 90-150 | the point + how/why + one concrete example |
 | `two_column` | 90-150 | both sides briefly + the trade-off |
 | `process` | 100-160 | one clear line per step |
@@ -306,7 +338,11 @@ training, or history — those belong on their own slides, not repeated here.)
 - **Over-explaining one point** — three sentences where one does it, long setup scenarios, spelling
   out every nuance. The listener bores. Land the core, move on.
 - **Padding / filler** — "สิ่งสำคัญคือ...", "อย่างที่กล่าวไป...", reading the bullets aloud verbatim.
-- **Section notes that tell the whole story** — they should PREVIEW; the content slides teach.
+- **Section notes that tell the whole story — or a mini-version of it.** They frame why the section
+  matters and where it lands; they never state the points the content slides deliver.
+- **A section slide that fails the removal test** — if deleting it and prepending its key info to the
+  next slide makes the deck tighter without losing anything, it shouldn't exist. Sections with only
+  1-2 content slides almost always fail this.
 - **Too thin, though** — a bare one-liner for a concept the chapter details is under-written. The
   target is descriptive-but-tight, not empty.
 
@@ -324,7 +360,14 @@ Before handing off to create-slide-yaml, check:
 1. **MD well-formed** — every slide's first line is `<!-- slide: TYPE -->`; every `:::` is closed.
 2. **All slides have `::: notes`.**
 3. **No emoji** anywhere.
-4. **Section coverage** — every `## N.X` section from the chapter is represented.
+4. **Section coverage** — every `## N.X` section from the chapter is represented (as slides; a
+   `section` divider is not required for that).
+4b. **Section slides earn their place** — each `section` slide is followed by ≥3 content slides
+   before the next section, and passes the removal test (deleting it + folding its key info into the
+   next slide would NOT tighten the deck). Any that fails: delete it and move the heading into the
+   next slide's `title`.
+4c. **Section notes don't pre-teach** — no sentence in a `section` note also belongs in a following
+   slide's note.
 5. **Image audit (both kinds, mandatory)** — every `{{screenshot:...}}` and `{{image:...}}` in the
    chapter has a screenshot slide. Do NOT drop any to trim the deck.
 6. **Card counts valid** — section cards 2-5, process steps 2-6, timeline events 3-5.
@@ -335,6 +378,13 @@ Image audit quick-check:
   grep -oP '(?<={{image:)[^|}]+' chapters/chNN.md | sed 's/$/.png/'; } | sort -u
 grep -oP '(?<=screenshot: )["'"'"']?[^"'"'"']+' media/slides/chNN.slides.md | tr -d '"'"'"'"' | sort -u
 # first set ⊆ second (every chapter image is on a slide)
+```
+
+Section-slide quick-check — how many slides each divider actually introduces:
+```bash
+awk '/^<!-- slide: section/{if(s!="")print n" slides <- "s; s=$0; n=0; next}
+     /^<!-- slide:/{if(s!="")n++} END{if(s!="")print n" slides <- "s}' media/slides/chNN.slides.md
+# any line showing 0/1/2 -> delete that section slide, fold its title into the next slide
 ```
 
 ## Output
