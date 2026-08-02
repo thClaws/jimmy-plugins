@@ -70,8 +70,9 @@ everything else and let the user accept them in one go.
 **Offer-with-defaults (ask "รับค่า default หรือปรับ?"):**
 - `style.image_gen.art_style` — the AI-figure look applied to the **whole book** (must be
   consistent). Default in the template (clean modern infographic, teal & navy). Also
-  `aspect_ratio` (default `16:9`), `size` (default `2K`), and `model` (default `flash` — Gemini
-  nano-banana via the built-in `TextToImage` tool; no Pinn.ai needed for images).
+  `aspect_ratio` (default `16:9`), `size` (default `2K`), and `model` (default `pro` — Gemini
+  nano-banana pro via the built-in `TextToImage` tool; `flash` is the cheaper option. No Pinn.ai
+  needed for images).
 - `style.tts` — `voice` (default `Charon`), `model`, optional `style_hint` for narration.
 - `cover.tool` — `nano-banana` (AI, default) | `canva` | `programmatic`; plus `art_style`
   and `frame` (`flat` | `bleed`). Only prompt further if they'll do print (`print_trim_mm`,

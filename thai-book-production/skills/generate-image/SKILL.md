@@ -2,7 +2,7 @@
 name: generate-image
 description: >
   Generate content figures for the book with thClaws's built-in `TextToImage` tool (Gemini
-  `flash`/`pro` image — the nano-banana model — which renders Thai + English text) — the LLM authors
+  `pro` image by default, or `flash` — the nano-banana models, which render Thai + English text) — the LLM authors
   the prompt at generation time from the figure's caption and chapter context. Produces CONTENT-COMMUNICATING
   figures (`{{image:...}}`): infographics, diagrams, flowcharts, charts/graphs, comparison tables,
   and annotated illustrations with on-image labels — NOT abstract art, and NOT real UI screenshots
@@ -47,7 +47,7 @@ Two image kinds in this book, kept in **separate folders**:
 
 ## Make figures that TEACH, not decoration
 
-The default model (Gemini `flash` image — nano-banana) **renders legible text in both Thai and
+The default model (Gemini `pro` image — nano-banana) **renders legible text in both Thai and
 English** and is strong at **infographics, diagrams, flowcharts, charts/graphs, comparison tables, timelines, concept
 maps, and annotated illustrations**. Use that. **Every generated figure should communicate the
 chapter's content as concretely as possible — NOT abstract mood art.** A reader should learn
@@ -65,9 +65,14 @@ Only fall back to a purely illustrative "hero" image when the concept truly has 
 numbers, labels) wherever it aids understanding — that is the point of using the nano-banana model.
 
 ## Config (from `book.yaml → style.image_gen`)
-- `model` (default `flash`) — built-in `TextToImage` model. Gemini `flash` (nano-banana, default) or
-  `pro`; or `gpt-image-2` (OpenAI); or `qwen-image-2.0` (Qwen, strong at text). Provider is inferred
-  from the model — set `provider` explicitly only to disambiguate.
+- `model` (default `pro`) — built-in `TextToImage` model. Gemini `pro` (nano-banana pro,
+  `gemini-3-pro-image` — **default**, best at dense labeled diagrams and Thai text) or `flash`
+  (cheaper/faster, fine for simple figures); or `gpt-image-2` (OpenAI); or `qwen-image-2.0` (Qwen,
+  strong at text). Provider is inferred from the model — set `provider` explicitly only to
+  disambiguate.
+  > **Always pass `model=` explicitly.** `TextToImage`'s own built-in default is `flash`, so an
+  > omitted argument silently downgrades the figure. If `book.yaml` has no `style.image_gen.model`,
+  > pass `model="pro"`.
 - `aspect_ratio` (default `16:9`) — one of `1:1`, `3:4`, `4:3`, `9:16`, `16:9`.
 - `size` (default `2K` — print-quality figures) — `512` | `1K` | `2K`.
 - `art_style` — house visual system prepended to **every** prompt so the whole book looks like one
@@ -83,7 +88,7 @@ numbers, labels) wherever it aids understanding — that is the point of using t
       "chapter": 1,
       "caption": "ไดอะแกรมเปรียบเทียบแชตบอตทั่วไป vs Cowork (ทำงานกับไฟล์จริง)",
       "prompt": "",                     // filled with the FINAL prompt actually used (incl. on-image text)
-      "model": "flash",
+      "model": "pro",
       "aspect_ratio": "16:9",
       "size": "2K",
       "file": "ch01-chatbot-vs-cowork.png",
@@ -117,9 +122,10 @@ numbers, labels) wherever it aids understanding — that is the point of using t
      of text (use a few clear labels, not walls of text).
 4. **Generate** with the built-in tool (approval-gated — it costs money + writes a file):
    ```
-   TextToImage(prompt=<authored>, model=<style.image_gen.model>,
+   TextToImage(prompt=<authored>, model=<style.image_gen.model ?? "pro">,
                aspect_ratio=<style.image_gen.aspect_ratio>, size=<style.image_gen.size>)
    ```
+   `model` is never omitted — the tool falls back to `flash` on its own if you leave it out.
    It writes the file to `output/img-<ts>-<sha8>.<ext>`, returns the image inline, and reports that
    path. (No URL — the file is already local.)
 5. **Save.** Move the file the tool just wrote into the registry path:

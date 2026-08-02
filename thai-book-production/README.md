@@ -164,7 +164,7 @@ Plugin นี้ install ได้เลยผ่าน local marketplace (`.cla
   `mcp__pinn-ai__text2speech` ใช้ tool ในตัว engine (Gemini `gemini-3.1-flash-tts-preview`) แทน;
   ลบ `mcpServers.pinn-ai` ออกจาก manifest แล้ว — plugin **ไม่พึ่ง MCP ใดๆ อีก** (ภาพ+เสียง built-in ทั้งคู่)
 - ✅ **ภาพ AI → built-in `TextToImage`** — generate-image + cover-design ใช้ tool ในตัว engine
-  (Gemini `flash`/nano-banana, `pro`, gpt-image-2, qwen); ไฟล์เขียนที่ `output/…` แล้ว move ไป `media/generated/`
+  (Gemini `pro`/nano-banana pro — default, `flash`, gpt-image-2, qwen); ไฟล์เขียนที่ `output/…` แล้ว move ไป `media/generated/`
 - ✅ **generate-image preview** — หลัง gen ภาพ แทรก `![]()` (มี marker `<!-- gen-preview:id -->`) ใต้
   `{{image:id}}` placeholder ให้รีวิวภาพใน chapter .md ได้ทันที **โดยคง placeholder ไว้**; build-epub-pdf
   strip preview ก่อน resolve → ไม่ render ซ้ำ; create-slide-markdown มองข้าม preview (นับเฉพาะ `{{...}}`)
