@@ -168,6 +168,10 @@ Plugin นี้ install ได้เลยผ่าน local marketplace (`.cla
 - ✅ **generate-image preview** — หลัง gen ภาพ แทรก `![]()` (มี marker `<!-- gen-preview:id -->`) ใต้
   `{{image:id}}` placeholder ให้รีวิวภาพใน chapter .md ได้ทันที **โดยคง placeholder ไว้**; build-epub-pdf
   strip preview ก่อน resolve → ไม่ render ซ้ำ; create-slide-markdown มองข้าม preview (นับเฉพาะ `{{...}}`)
+  - **v1.12.0:** preview จัดการด้วยสคริปต์ `generate-image/scripts/manage-previews.py`
+    (`insert`/`strip`/`validate`) แทนการแทรกด้วยมือ — รองรับ **caption หลายบรรทัด** (เดิมแทรกแบบ
+    line-based ทำ placeholder ขาดกลาง จนตัวบทซ้ำ/หายจริงมาแล้ว), idempotent, และ `validate` เป็น
+    guardrail ปิดงาน; build-epub-pdf ทำงานบน `{build}/src/` เท่านั้น ไม่แตะ `chapters/`
 - ✅ **init-book** — intake wizard แยกจาก book-router: เคาะ metadata + targets (epub/pdf/แปล) +
   style ภาพ/เสียง + ปก ตั้งแต่ต้น แล้ว scaffold; book-router เหลือหน้าที่ state+routing ล้วน (delegate scaffold)
 - ✅ **thClaws-ready**: ติดตั้งด้วย `/plugin install` แล้วเปิด `imageToolsEnabled: true` + provider key/gateway
