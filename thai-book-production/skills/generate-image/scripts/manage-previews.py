@@ -234,10 +234,10 @@ def _deep_problems(lines):
             if not PREVIEW_COMMENT_RE.match(prev) and not PREVIEW_COMMENT_RE.match(prevprev):
                 problems.append((i + 1, 'raw image (ไม่มี <!-- gen-preview --> ก่อนหน้า) — orphan หรือของซ้ำ'))
 
-    # 2. syntax พัง `](]` / ปิดด้วย `]]`
+    # 2. syntax พัง — image line ต้องไม่ติดกันเป็น `]]` (เช่น "]](" = `]` เกิน 1 ตัว)
     for i, l in enumerate(lines):
-        if '](]' in l or l.rstrip().endswith(']]'):
-            problems.append((i + 1, 'image syntax ผิด (พบ "](]" หรือ "]]")'))
+        if '](]' in l or (']]' in l and '../media/generated/' in l) or l.rstrip().endswith(']]'):
+            problems.append((i + 1, 'image syntax ผิด (พบ "](]" หรือ "]]" ใน image line)'))
 
     # 3. ภาพ path อ้างซ้ำ — placeholder เดียวต้องมี preview เดียว
     seen = {}
