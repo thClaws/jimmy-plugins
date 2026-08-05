@@ -55,7 +55,7 @@ something from the picture alone.
 
 Prefer, in order:
 1. **Diagram / flowchart** — steps, pipelines, how something works (boxes + arrows + labels).
-2. **Comparison** — before/after, A vs B, old way vs Cowork (two labeled columns).
+2. **Comparison** — before/after, A vs B, old way vs new way (two labeled columns).
 3. **Infographic** — a labeled scene or breakdown of a feature with callouts and short text.
 4. **Chart / graph** — when the chapter has numbers or trends (bar, line, simple stats).
 5. **Annotated illustration** — a concrete scene with labels pointing at the important parts.
@@ -86,7 +86,7 @@ numbers, labels) wherever it aids understanding — that is the point of using t
     {
       "id": "ch01-chatbot-vs-cowork",
       "chapter": 1,
-      "caption": "ไดอะแกรมเปรียบเทียบแชตบอตทั่วไป vs Cowork (ทำงานกับไฟล์จริง)",
+      "caption": "ไดอะแกรมเปรียบเทียบวิธีการเดิม vs วิธีการใหม่ (พร้อมป้ายกำกับ)",
       "prompt": "",                     // filled with the FINAL prompt actually used (incl. on-image text)
       "model": "pro",
       "aspect_ratio": "16:9",
@@ -113,7 +113,7 @@ numbers, labels) wherever it aids understanding — that is the point of using t
    - Compose the prompt with `art_style` **first**, then describe the **layout** (boxes, arrows,
      columns, icons, data points) AND the **exact on-image text to render**. nano-banana renders
      Thai + English, so give the literal strings: Thai headings/labels, English technical terms
-     (Cowork, Plugin, MCP…), step numbers, short callouts. Keep on-image text short and legible.
+     step numbers, short callouts. Keep on-image text short and legible.
    - **Spell every Thai (and English) string correctly** — it becomes part of the book. If a chart
      shows numbers, state the exact values and axis labels in the prompt.
    - The prompt body may be written in English (models parse it best) while the **text to be drawn

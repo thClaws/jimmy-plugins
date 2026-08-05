@@ -2,7 +2,7 @@
 name: get-book-ref
 description: >
   Search for and download official documentation and blog posts about a given topic from any source,
-  saving them as Markdown reference files for the Thai Cowork book project. Use this skill whenever
+  saving them as Markdown reference files for any book project. Use this skill whenever
   the user asks to "find docs", "get reference", "download documentation", "หาเอกสาร", "ดาวน์โหลด doc",
   "เพิ่ม reference", "add reference", "get book ref", or mentions needing official source material
   for the book. Also trigger when the user says "search for official docs about {topic}" or
@@ -39,7 +39,7 @@ This skill searches for official documentation and blog posts about a specified 
 
 The topic may be owned by any company or project. The first step is always to identify WHO owns the topic and WHERE their official docs live, then fetch from those sources.
 
-The book project ("ผู้ช่วยคนใหม่ของคุณ: คู่มือ Claude Cowork ฉบับสมบูรณ์") relies on official reference material. Keeping the `refs/docs/` and `refs/blogs/` directories up-to-date ensures chapter writers have accurate source material.
+Every book project relies on official reference material. Keeping the `refs/docs/` and `refs/blogs/` directories up-to-date ensures chapter writers have accurate source material.
 
 ## Project Folder Structure
 
@@ -59,7 +59,7 @@ This skill runs in **two passes** within the PLAN loop:
   exposed (a chapter/subtopic lacking source material). Fetch narrowly to fill it.
 
 The user (or `book-router`) will specify a **topic** — this could be:
-- A Cowork feature (e.g., "plugins", "skills", "connectors", "scheduled tasks")
+- A feature or concept relevant to the chapter being researched
 - A product area (e.g., "Claude Code", "MCP servers", "prompt engineering")
 - A specific concept (e.g., "enterprise deployment", "safety", "financial services")
 
@@ -212,7 +212,7 @@ Not found:
 
 ## Tips for Better Results
 
-- **Be thorough with search queries** — Try multiple phrasings. A doc might not mention "Cowork" in the title but could be highly relevant.
+- **Be thorough with search queries** — Try multiple phrasings. A doc might not mention the exact product name in the title but could be highly relevant.
 - **Check for recently published content** — Anthropic updates docs frequently. Include year in searches (2025, 2026).
 - **Prefer complete over partial** — It's better to have one complete doc than three truncated ones.
 - **Watch for redirects** — Some URLs redirect. Follow the redirect and save the final content.

@@ -36,7 +36,7 @@ triggers:
 
 # Audit YAML Skill — Audit & Auto-Fix in One Pass
 
-You are a YAML slide quality auditor and fixer for the book "ผู้ช่วยคนใหม่ของคุณ: คู่มือ Claude Cowork ฉบับสมบูรณ์". Your job is to audit each YAML slide file against 5 dimensions, then **immediately fix every issue** — no separate fix step.
+You are a YAML slide quality auditor and fixer for the active book project. Your job is to audit each YAML slide file against 5 dimensions, then **immediately fix every issue** — no separate fix step.
 
 ## Core Principle
 
@@ -308,7 +308,7 @@ grep -n 'พลักอิน' "$YAML_FILE"       # → Plugin
 grep -n 'สกิล' "$YAML_FILE"          # → Skill (keep English)
 grep -n 'คอนเนกเตอร์' "$YAML_FILE"   # → Connector (keep English)
 grep -n 'ตัวเชื่อม' "$YAML_FILE"     # → Connector (keep English)
-grep -n 'โคเวิร์ก' "$YAML_FILE"      # → Cowork (keep English)
+grep -n '<thai-translation>' "$YAML_FILE"  # → <English-term> (keep English)
 grep -n 'อัพเดต' "$YAML_FILE"        # → อัปเดต (update, Royal Institute spelling)
 grep -n 'อัพเดท' "$YAML_FILE"        # → อัปเดต
 grep -n 'อัพโหลด' "$YAML_FILE"       # → อัปโหลด (upload)
@@ -344,14 +344,14 @@ Also check manually for:
 - Wrong prepositions, doubled words
 
 #### C. Product Terminology
-Keep in English: Claude, Cowork, Plugin, Skill, Connector, MCP, API, SDK, Gmail, Chrome, OAuth, SSO, URL, UI
+Keep in English: project-specific technical terms defined in book.yaml style config
 
 Use Thai: ติดตั้ง, ตั้งค่า, เครื่องมือ, คำสั่ง, ไฟล์, โฟลเดอร์, หน้าจอ, หน้าต่าง
 
 Correct terms:
 | Term | Correct | Wrong |
 |------|---------|-------|
-| Cowork | "Cowork" | "โหมด Cowork", "Cowork mode" |
+| {Term} | "{Term}" | "{thai-variant}", "{mode} {Term}" |
 | Plugin | "Plugin" | "พลักอิน", "ปลั๊กอิน" |
 | Skill | "Skill" | "สกิล", "ทักษะ" (when meaning Claude skill) |
 | Connector | "Connector" | "คอนเนกเตอร์", "ตัวเชื่อม" |

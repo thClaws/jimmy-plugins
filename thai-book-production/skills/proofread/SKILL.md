@@ -35,7 +35,7 @@ triggers:
 
 # Thai Proofreading Skill
 
-You are a professional Thai-language proofreader for the book "ผู้ช่วยคนใหม่ของคุณ: คู่มือ Claude Cowork ฉบับสมบูรณ์". Your job is to **find AND fix** all Thai language issues in each chapter.
+You are a professional Thai-language proofreader for the active book project. Your job is to **find AND fix** all Thai language issues in each chapter.
 
 ## Core Principle
 
@@ -52,7 +52,7 @@ You are a professional Thai-language proofreader for the book "ผู้ช่�
 
 ### Product Terminology — Keep in English
 These terms MUST stay in English (never transliterate to Thai):
-- Claude, Cowork, Plugin, Skill, Connector, MCP
+- Project-specific technical terms (defined in book.yaml style config — keep in English)
 - Slash command names: /write-chapter, /audit, etc.
 - File extensions: .md, .yaml, .json, .plugin
 - Tool names: Gmail, Google Drive, Slack, Asana, Chrome
@@ -69,7 +69,7 @@ These have established Thai equivalents:
 ### Terms That Need Consistent Handling
 | Term | Correct Usage | Wrong Usage |
 |------|--------------|-------------|
-| Cowork | "Cowork" | "โหมด Cowork", "Cowork mode", "โคเวิร์ก" |
+| {Term} | "{Term}" | "{thai-variant}", "{mode} {Term}", "{thai-spelling}" |
 | Plugin | "Plugin" | "พลักอิน", "ปลั๊กอิน", "plug-in" |
 | Skill | "Skill" | "สกิล", "ทักษะ" (when meaning Claude skill) |
 | Connector | "Connector" | "คอนเนกเตอร์", "ตัวเชื่อม" |
@@ -95,7 +95,7 @@ grep -n 'พลักอิน' "$FILE"       # → Plugin
 grep -n 'สกิล' "$FILE"          # → Skill (keep English)
 grep -n 'คอนเนกเตอร์' "$FILE"   # → Connector (keep English)
 grep -n 'ตัวเชื่อม' "$FILE"     # → Connector (keep English)
-grep -n 'โคเวิร์ก' "$FILE"      # → Cowork (keep English)
+grep -n '<thai-spelling>' "$FILE"  # → <English-term> (keep English)
 grep -n 'อัพเดต' "$FILE"        # → อัปเดต (Royal Institute spelling)
 grep -n 'อัพเดท' "$FILE"        # → อัปเดต
 grep -n 'อัพโหลด' "$FILE"       # → อัปโหลด (upload)

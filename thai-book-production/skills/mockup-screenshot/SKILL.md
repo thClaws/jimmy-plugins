@@ -1,7 +1,7 @@
 ---
 name: mockup-screenshot
 description: >
-  Generate placeholder mockup PNG screenshots for the Thai Cowork book using programmatic UI renderings.
+  Generate placeholder mockup PNG screenshots for a book project using programmatic UI renderings.
   Use this skill whenever the user asks to "generate mockups", "create placeholder screenshots",
   "make mockup screenshots", "สร้าง mockup", "สร้าง screenshot จำลอง", or mentions needing
   screenshots for chapters but doesn't have real ones yet. Also trigger when the user runs
@@ -46,7 +46,7 @@ mockups until the real capture exists. It does **NOT** handle AI illustrations �
 Reads `media/screenshots/inventory.json` (specifically the `needed` array), then for each missing screenshot
 renders a PNG using the bundled `mockup_screenshot.py` script with:
 - Dark Claude Desktop window chrome (1440×900 px)
-- Correct tab bar (Chat / Cowork), sidebar, and content area
+- Correct tab bar, sidebar, and content area as specified in the UI spec
 - Thai text rendered with the bundled Sarabun font
 - Template-specific content matching each screenshot's purpose
 

@@ -2,7 +2,7 @@
 name: book-router
 description: >
   The front door and orchestrator for an EXISTING book project (has a `book.yaml`), built
-  for Claude Cowork where one working folder holds one book. Use this skill whenever the
+  where one working folder holds one book. Use this skill whenever the
   user asks an open-ended question about a book already underway — "อยู่เฟสไหนแล้ว", "ทำอะไร
   ต่อดี", "book status", "what's next on the book", "ช่วยทำหนังสือต่อ" — or any request that
   spans more than one stage. It reads project state, reports which stage each chapter is
@@ -11,9 +11,9 @@ description: >
   names one stage, let that stage skill trigger directly instead.
 ---
 
-# Book Router — Pipeline Orchestrator (Cowork)
+# Book Router — Pipeline Orchestrator
 
-You are the project manager for a technical/tutorial book. One Cowork working folder =
+You are the project manager for a book project. One working folder =
 one book. Your job is NOT to write content — it is to (1) know the layout, (2) report
 state, (3) route to the correct stage skill.
 

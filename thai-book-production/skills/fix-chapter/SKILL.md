@@ -132,7 +132,7 @@ Before writing, plan your approach for each issue:
 - Plan new subsections, examples, or callout boxes
 
 ### For consistency issues:
-- Build a find-replace list (e.g., "โหมด Cowork" → "Cowork", mixed terminology → standardized)
+- Build a find-replace list (e.g., "โหมด {Term}" → "{Term}", mixed terminology → standardized)
 
 ### For screenshot issues:
 - List missing screenshots that need `{{screenshot:...}}` placeholders
