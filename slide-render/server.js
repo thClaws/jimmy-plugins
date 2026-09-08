@@ -208,4 +208,21 @@ app.post("/pptx", auth, uploadPptx.single("file"), async (req, res) => {
   }
 });
 
+// Multer rejects a malformed upload (unexpected field, too many files, a part
+// over the size limit) by throwing BEFORE any route handler runs, so the
+// per-route try/catch never sees it and Express answers with an HTML 500. The
+// caller is the engine's RenderSlides relay, which parses JSON — give it a
+// 400 that names the field instead of an opaque server error.
+app.use((err, _req, res, next) => {
+  if (res.headersSent) return next(err);
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({
+      error: "bad upload",
+      detail: `${err.code}${err.field ? ` on field '${err.field}'` : ""}`,
+    });
+  }
+  console.error(err);
+  res.status(500).json({ error: "internal error" });
+});
+
 app.listen(PORT, () => console.log(`slide-render listening on :${PORT}`));

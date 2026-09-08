@@ -30,6 +30,17 @@ COPY themes ./themes
 # themes/fonts/*.ttf also installed system-wide (fc fallback beside the @font-face)
 RUN cp themes/fonts/*.ttf /usr/share/fonts/truetype/ && fc-cache -f
 
+# Run as a non-root user. Chromium still needs --no-sandbox in a container
+# without SYS_ADMIN (below), so this is not the setuid sandbox coming back —
+# it is the second half of the defence: a deck that escapes the renderer lands
+# as an unprivileged user with no write access to the app or the system.
+# The home directory has to be real and writable: fontconfig caches there on
+# first render, and LibreOffice falls back to it if a job's -env profile fails.
+RUN useradd --create-home --uid 10001 --shell /usr/sbin/nologin render \
+    && chown -R render:render /app
+USER render
+ENV HOME=/home/render
+
 EXPOSE 8080
 # marp-cli reads these: CHROME_NO_SANDBOX makes it launch Chromium with
 # --no-sandbox (required in a container — isolation comes from the container +

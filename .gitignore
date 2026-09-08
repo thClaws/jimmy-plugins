@@ -1,2 +1,7 @@
 __pycache__/
 *.pyc
+
+# Packaged plugin artifacts. A zip committed for "easy install" goes stale the
+# moment the next version lands and then quietly ships an old plugin to whoever
+# downloads it — build one at release time from the tag instead.
+*.zip

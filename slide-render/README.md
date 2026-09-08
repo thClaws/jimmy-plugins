@@ -14,10 +14,17 @@ POST /slides   (multipart)
        markdown = <marp md>           (required)
        theme    = thai-tech           (optional; must exist in themes/)
        images   = <file> …            (0+ screenshots/figures referenced by <img src="name.png">)
-   → 200 application/zip  { deck.pdf, slides/slide-01.png, slide-02.png, … }
+   → 200 application/zip  { deck.pdf, slides/slide.001.png, slide.002.png, … }
        + X-Slide-Count: <n>           (rendered pages — the gateway bills off this)
-   → 400 bad input · 401 unauthorized · 500 render failed
+   → 400 bad input / malformed upload · 401 unauthorized · 500 render failed
 ```
+
+The two routes do NOT name their PNGs the same way: Marp emits `slide.001.png`
+(dot, 3-digit) and pdftoppm emits `slide-N.png` with the width set by the page
+count (`slide-1` for a 2-page deck, `slide-01` for a 12-page one). Both sort
+correctly within a document, and the engine's `RenderSlides` renumbers either
+form to the `slide-NN.png` the rest of the toolchain pairs against
+(`slide-01.png` ↔ `slide-01.wav`). Do not depend on the raw names.
 
 Both render routes set **`X-Slide-Count`** before the zip starts streaming. It is
 the billing unit: the gateway reads it off the 2xx and debits the caller's credit
@@ -48,10 +55,9 @@ it is your compute. That branch cannot reach the hosted service.
 a given commit ships the exact versions that were audited. Re-run `npm audit --package-lock-only`
 after any dependency change.
 
-Known, accepted: three moderate `qs` advisories reach us through Express 4's `body-parser`.
-Clearing them needs Express 5, a breaking upgrade, for denial-of-service issues on a
-cluster-internal service that only an authenticated gateway can reach. `multer` is still on the
-1.x LTS line, which upstream has retired — worth moving to 2.x the next time this file is opened.
+`npm audit` is clean as of 2026-09-08, on Express 5 and multer 2. Both upgrades were verified
+against a running container, not just a build: `/healthz`, every 400 path, a real Marp render of
+a Thai deck, and a LibreOffice `/pptx` conversion, all as uid 10001.
 
 ## Run locally
 ```
@@ -64,7 +70,7 @@ curl -sS -X POST localhost:8080/slides -F markdown=@deck.md -F theme=thai-tech -
 
 ## Build + deploy (cloud)
 ```
-docker build -t registry.artech.cloud/slide-render:v0.2.0 .
+docker build -t registry.artech.cloud/slide-render:v0.3.0 .
 # deploy as a k3s Deployment+Service in thclaws-cloud; expose via gateway /slide-render/*
 kubectl apply -f k8s.yaml      # Deployment + Service + HPA + PodDisruptionBudget
 ```
@@ -75,9 +81,11 @@ session affinity and no shared volume. `k8s.yaml` ships an HPA (1→6 pods on 60
 CPU is the signal because a render pins a core for roughly a second per page) and a
 PodDisruptionBudget, since a render can run up to `TIMEOUT_MS` and dies with its pod.
 Once the HPA is applied it owns `replicas` — stop editing that field by hand.
-**Chromium in Docker:** Chromium's sandbox needs either a non-root user or `--no-sandbox`
-(the image sets `CHROMIUM_FLAGS`). Mirror marp-team/marp-cli's official image (runs as a
-non-root user) for the hardened path, and render with **no network** (untrusted decks).
+**Chromium in Docker:** the image runs as the unprivileged `render` user (uid 10001) and
+still passes `--no-sandbox`, because Chromium's setuid sandbox needs `SYS_ADMIN` that the pod
+does not get. The two are not alternatives: no-sandbox is forced by the container, and the
+non-root user is what limits where an escaped renderer can write. Render with **no network**
+(untrusted decks).
 
 ## ⚠️ Architecture constraint (hard)
 The **desktop/GUI must NEVER call this API directly.** Flow is always:

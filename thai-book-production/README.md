@@ -185,6 +185,19 @@ Plugin นี้ install ได้เลยผ่าน local marketplace (`.cla
 > marketplace root กับ plugin เป็นโฟลเดอร์เดียวกัน (ตัว `thai-book-production/` นี้เอง).
 > compiler สไลด์ใช้ `pyyaml` — ถ้าเครื่องไหนไม่มี: `pip install pyyaml --break-system-packages`.
 
+## สถานะ (v1.13.0)
+
+- ✅ **ปิดช่องที่ทำต้นฉบับหายได้** — `manage-previews.py` เป็นสคริปต์เดียวที่เขียนทับไฟล์บท
+  และมันใช้ `open(path,'w')` ซึ่งตัดไฟล์ทิ้งก่อนเขียนไบต์แรก ตายกลางทาง = บทเหลือศูนย์ไบต์
+  ตอนนี้เขียนไฟล์ชั่วคราว → fsync → `os.replace` (atomic) + ทิ้ง `.bak` ไว้หนึ่งชั้น
+- ✅ **โฟลเดอร์หนังสืออยู่ใน git ตั้งแต่วันแรก** — `init-book` ทำ `git init` + วาง `.gitignore`
+  (ignore แค่ `build/` กับ `*.bak`; `media/generated/` กับ `media/screenshots/` commit เสมอ)
+  เพราะสี่ skill เขียนทับไฟล์บทในที่เดิม commit ก่อนรันคือ undo คำสั่งเดียว
+- ✅ **guard ทำงานเองแล้ว** — `check-generic.py` (รีโปนี้) และ `manage-previews validate`
+  (โฟลเดอร์หนังสือ) มาเป็น pre-commit hook ติดตั้งครั้งเดียว ดูหัวข้อ Guards
+- ✅ **ถอด zip v1.7.0 ออกจาก git** — artifact ที่ค้างมาตั้งแต่ 6 เวอร์ชันก่อนและ
+  ส่งปลั๊กอินเก่าให้คนที่โหลดไปเงียบ ๆ (`*.zip` เข้า .gitignore แล้ว)
+
 ## สถานะ (v1.12.0 — RELEASE)
 
 - ✅ **ถอดหนังสือเล่มแรกออกจาก plugin ทั้งหมด** — เดิม skill หลายตัวฝังชื่อผลิตภัณฑ์/ศัพท์/โดเมน

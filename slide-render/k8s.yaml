@@ -22,10 +22,20 @@ spec:
     metadata:
       labels: { app: slide-render }
     spec:
+      # Matches the image's USER. Declared here too so the cluster refuses to
+      # start it as root if the image is ever rebuilt without the USER line.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
       containers:
         - name: slide-render
-          image: registry.artech.cloud/slide-render:v0.2.0
+          image: registry.artech.cloud/slide-render:v0.3.0
           imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ["ALL"] }
           ports:
             - containerPort: 8080
           env:
