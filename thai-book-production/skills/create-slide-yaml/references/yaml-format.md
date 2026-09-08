@@ -6,7 +6,7 @@ Reference for the YAML slide definition format — the compile target consumed b
 
 ```yaml
 meta:
-  book: <book-slug>        # e.g. "claude-cowork", "claude-code"
+  book: <book-slug>        # จาก book.yaml → book.slug
   chapter: <int>           # Chapter number (1-indexed)
   title: <string>          # Chapter title
   subtitle: <string>       # Chapter subtitle
@@ -402,7 +402,7 @@ Optional metadata. Not consumed by the slide renderer — used for video product
 ```yaml
 broll:
   - type: screenshot
-    desc: "Claude Desktop Settings > Usage page showing token breakdown"
+    desc: "หน้า Settings > Usage ของแอป แสดงรายละเอียดการใช้งาน"
     at: "0:15"
   - type: diagram
     desc: "Flowchart of the agentic loop: Observe → Plan → Act → Reflect"

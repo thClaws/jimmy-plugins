@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-"""mockup_screenshot.py — render placeholder Claude Desktop UI mockups (bundled).
+"""mockup_screenshot.py — render placeholder app-UI mockups (bundled).
 
-Reads {workspace}/media/screenshots/inventory.json and renders a 1440x900 mockup PNG
-for each entry that has no image file yet (or all requested), using the bundled
-Sarabun fonts. Every rendered entry is marked "status": "mockup" in the inventory so
-book-router can track the human replace-with-real gate.
+Reads the screenshot inventory.json and renders a 1440x900 mockup PNG for each entry
+that has no image file yet (or all requested), using the bundled Sarabun fonts. Every
+rendered entry is marked "status": "mockup" in the inventory so book-router can track
+the human replace-with-real gate.
+
+The window chrome (app name, tabs, sidebar) is NOT hardcoded — it comes from
+{workspace}/book.yaml -> mockup: {app_name, tabs, sidebar}. Left empty (or with no
+book.yaml / no PyYAML), the mockup draws a neutral empty window, which is honest;
+drawing some other product's UI would not be.
 
 Inventory formats accepted (tolerant):
   {"needed": [ {"file": "01-home.png", "title": "...", "description": "...",
@@ -14,11 +19,16 @@ Entries may use keys file/filename, title/name, description/desc.
 
 Usage:
   python3 mockup_screenshot.py <workspace> [all|chapter-N|<filename>]
-                               --font-dir DIR [--force]
+                               --font-dir DIR [--force] [--shots-dir DIR]
 
 Exit codes: 0 ok, 1 input error, 2 missing dependency.
 """
 import argparse, json, os, sys, glob
+
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 try:
     from PIL import Image, ImageDraw, ImageFont
@@ -32,6 +42,26 @@ PARCH = (248, 246, 240); TEAL = (0, 122, 110); TEAL_SOFT = (220, 234, 232)
 GRAY = (90, 106, 126); WHITE = (255, 255, 255); LINE = (227, 223, 213)
 
 def log(m): sys.stderr.write(f"[mockup] {m}\n")
+
+def load_book(workspace):
+    path = os.path.join(workspace, "book.yaml")
+    if yaml is None or not os.path.exists(path):
+        if yaml is None:
+            log("PyYAML not installed — drawing a neutral window (no app chrome)")
+        return {}
+    try:
+        return yaml.safe_load(open(path, encoding="utf-8")) or {}
+    except Exception as e:
+        log(f"WARNING: could not read book.yaml ({e}) — drawing a neutral window")
+        return {}
+
+def chrome_from(book):
+    """book.yaml -> mockup: {app_name, tabs, sidebar}. Empty = neutral window."""
+    m = (book.get("mockup") or {}) if isinstance(book, dict) else {}
+    as_list = lambda v: [str(x) for x in v if str(x).strip()] if isinstance(v, list) else []
+    return {"app_name": str(m.get("app_name") or "").strip(),
+            "tabs": as_list(m.get("tabs")),
+            "sidebar": as_list(m.get("sidebar"))}
 
 def load_font(font_dir, weight, size):
     cand = {"bold": ["Sarabun-Bold.ttf", "Sarabun-SemiBold.ttf"],
@@ -55,7 +85,7 @@ def wrap(draw, text, font, max_w):
     if cur: lines.append(cur)
     return lines or [""]
 
-def render(entry, out_path, font_dir):
+def render(entry, out_path, font_dir, chrome):
     title = entry.get("title") or entry.get("name") or os.path.basename(out_path)
     desc = entry.get("description") or entry.get("desc") or ""
     img = Image.new("RGB", (W, H), NAVY)
@@ -68,21 +98,28 @@ def render(entry, out_path, font_dir):
     d.rectangle([0, 0, W, 44], fill=DARK)
     for i, c in enumerate([(255, 95, 86), (255, 189, 46), (39, 201, 63)]):
         d.ellipse([16 + i * 24, 15, 30 + i * 24, 29], fill=c)
-    # tab bar
-    for i, (tab, active) in enumerate([("Chat", False), ("Cowork", True), ("Code", False)]):
-        x = W // 2 - 150 + i * 100
-        col = WHITE if active else GRAY
-        d.text((x, 12), tab, font=f_sm, fill=col)
-        if active:
-            d.rectangle([x - 6, 38, x + 66, 41], fill=TEAL)
-    # sidebar
-    d.rectangle([0, 44, 240, H], fill=DARK)
-    d.text((20, 64), "Claude", font=f_md, fill=WHITE)
-    for i, item in enumerate(["+ New task", "Recents", "Projects", "Customize", "Settings"]):
-        d.text((20, 120 + i * 40), item, font=f_sm, fill=GRAY)
+    # tab bar — first tab is the active one; no tabs configured = no tab bar
+    tabs = chrome["tabs"]
+    if tabs:
+        span = 100
+        x0 = W // 2 - (len(tabs) * span) // 2
+        for i, tab in enumerate(tabs):
+            x = x0 + i * span
+            active = i == 0
+            d.text((x, 12), tab, font=f_sm, fill=WHITE if active else GRAY)
+            if active:
+                d.rectangle([x - 6, 38, x + 66, 41], fill=TEAL)
+    # sidebar — only when the book declares one
+    side_w = 240 if (chrome["app_name"] or chrome["sidebar"]) else 0
+    if side_w:
+        d.rectangle([0, 44, side_w, H], fill=DARK)
+        if chrome["app_name"]:
+            d.text((20, 64), chrome["app_name"], font=f_md, fill=WHITE)
+        for i, item in enumerate(chrome["sidebar"][:8]):
+            d.text((20, 120 + i * 40), item, font=f_sm, fill=GRAY)
     # content area
-    d.rectangle([240, 44, W, H], fill=PARCH)
-    cx, cw = 280, W - 320
+    d.rectangle([side_w, 44, W, H], fill=PARCH)
+    cx, cw = side_w + 40, W - side_w - 80
     d.text((cx, 90), title, font=f_big, fill=NAVY)
     d.rectangle([cx, 136, cx + 70, 140], fill=TEAL)
     y = 165
@@ -109,9 +146,17 @@ def main(argv=None):
     ap.add_argument("--font-dir", required=True)
     ap.add_argument("--force", action="store_true",
                     help="re-render even if the PNG exists (never overwrites status:real)")
+    ap.add_argument("--shots-dir",
+                    help="override the screenshot dir (default: book.yaml layout.screenshots)")
     args = ap.parse_args(argv)
 
-    shots_dir = os.path.join(args.workspace, "media", "screenshots")
+    book = load_book(args.workspace)
+    chrome = chrome_from(book)
+    if not (chrome["tabs"] or chrome["sidebar"] or chrome["app_name"]):
+        log("book.yaml has no mockup: chrome — rendering neutral windows")
+    rel = args.shots_dir or ((book.get("layout") or {}).get("screenshots")
+                             if isinstance(book, dict) else None) or "media/screenshots"
+    shots_dir = rel if os.path.isabs(rel) else os.path.join(args.workspace, rel)
     inv_path = os.path.join(shots_dir, "inventory.json")
     if not os.path.exists(inv_path):
         log(f"no inventory.json at {inv_path}"); return 1
@@ -139,7 +184,7 @@ def main(argv=None):
             skipped += 1; continue                     # never touch real captures
         if os.path.exists(out) and not args.force:
             skipped += 1; continue
-        render(e, out, args.font_dir)
+        render(e, out, args.font_dir, chrome)
         e["status"] = "mockup"
         done += 1
         log(f"rendered {fname}")

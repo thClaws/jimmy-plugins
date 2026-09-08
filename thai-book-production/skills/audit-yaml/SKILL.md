@@ -36,7 +36,13 @@ triggers:
 
 # Audit YAML Skill — Audit & Auto-Fix in One Pass
 
-You are a YAML slide quality auditor and fixer for the book "ผู้ช่วยคนใหม่ของคุณ: คู่มือ Claude Cowork ฉบับสมบูรณ์". Your job is to audit each YAML slide file against 5 dimensions, then **immediately fix every issue** — no separate fix step.
+You are a YAML slide quality auditor and fixer for the book named in `book.yaml → book.title`
+(subject: `book.subject`). Your job is to audit each YAML slide file against 5 dimensions, then
+**immediately fix every issue** — no separate fix step.
+
+**Read `book.yaml → terminology:` first.** `keep_english[]` and `forbidden{}` (wrong → correct)
+are this book's terminology; the `proofread` skill reads the same two keys, so the slides and the
+chapters can't drift apart. Never carry terminology from another book into this one.
 
 ## Core Principle
 
@@ -303,12 +309,6 @@ grep -n 'สรุม' "$YAML_FILE"          # → สรุป (summarize)
 grep -n 'เครื่อมือ' "$YAML_FILE"      # → เครื่องมือ (tool)
 grep -n 'เคื่อง' "$YAML_FILE"        # → เครื่อง
 grep -n 'ส้าง' "$YAML_FILE"          # → สร้าง (create)
-grep -n 'ปลั๊กอิน' "$YAML_FILE"      # → Plugin (keep English)
-grep -n 'พลักอิน' "$YAML_FILE"       # → Plugin
-grep -n 'สกิล' "$YAML_FILE"          # → Skill (keep English)
-grep -n 'คอนเนกเตอร์' "$YAML_FILE"   # → Connector (keep English)
-grep -n 'ตัวเชื่อม' "$YAML_FILE"     # → Connector (keep English)
-grep -n 'โคเวิร์ก' "$YAML_FILE"      # → Cowork (keep English)
 grep -n 'อัพเดต' "$YAML_FILE"        # → อัปเดต (update, Royal Institute spelling)
 grep -n 'อัพเดท' "$YAML_FILE"        # → อัปเดต
 grep -n 'อัพโหลด' "$YAML_FILE"       # → อัปโหลด (upload)
@@ -332,6 +332,14 @@ grep -n 'แอปพลิเคชั่น' "$YAML_FILE"  # → แอปพ�
 grep -n 'เเ' "$YAML_FILE"            # → แ (double Sara Ae is invalid Thai)
 ```
 
+Those hold for every book. **Then scan this book's own terminology** — one grep per
+`terminology.forbidden` key in `book.yaml`:
+
+```bash
+# for each  "<wrong>": "<correct>"  in book.yaml terminology.forbidden
+grep -n '<wrong>' "$YAML_FILE"       # → <correct> (book terminology)
+```
+
 **Fix every match.** Every grep hit is a confirmed spelling error — no judgment needed, just fix it.
 
 Also check manually for:
@@ -343,18 +351,19 @@ Also check manually for:
 - Wrong classifiers, incomplete sentences
 - Wrong prepositions, doubled words
 
-#### C. Product Terminology
-Keep in English: Claude, Cowork, Plugin, Skill, Connector, MCP, API, SDK, Gmail, Chrome, OAuth, SSO, URL, UI
+#### C. Product Terminology *(from book.yaml)*
+Keep in English: every entry in `terminology.keep_english`, plus `book.subject` itself and the
+product/vendor names it belongs to, plus the usual initialisms (API, SDK, OAuth, SSO, URL, UI).
 
 Use Thai: ติดตั้ง, ตั้งค่า, เครื่องมือ, คำสั่ง, ไฟล์, โฟลเดอร์, หน้าจอ, หน้าต่าง
 
-Correct terms:
+Correct terms — one row per `terminology.forbidden` entry:
 | Term | Correct | Wrong |
 |------|---------|-------|
-| Cowork | "Cowork" | "โหมด Cowork", "Cowork mode" |
-| Plugin | "Plugin" | "พลักอิน", "ปลั๊กอิน" |
-| Skill | "Skill" | "สกิล", "ทักษะ" (when meaning Claude skill) |
-| Connector | "Connector" | "คอนเนกเตอร์", "ตัวเชื่อม" |
+| {correct} | "{correct}" | "{forbidden key}" |
+
+`terminology:` empty ⇒ only the universal Thai rules apply, but a term must still be spelled the
+same way on every slide of the deck.
 
 #### D. Thai/English Mixing
 - Space before AND after English words in Thai sentences

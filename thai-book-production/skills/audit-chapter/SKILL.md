@@ -39,8 +39,8 @@ can act on directly. Do NOT rewrite the chapter here — audit only.
 - The chapter file: `{chapters}/chNN.md`
 - Its slice of the outline + learning objectives: `{outline}/outline.md`, `{outline}/plan.md`
 - `page_target` for this chapter from `book.yaml → chapters[id].page_target`
-- The `write-book-chapter/references/chapter-source-map.md` + `{refs_docs}/` / `{refs_blogs}/`
-  material for that chapter, if present
+- The reference material this chapter was written from: the sources named in
+  `{outline}/plan.md` for this chapter, plus `{refs_docs}/` / `{refs_blogs}/`, if present
 
 ## Process
 1. Resolve paths from `book.yaml → layout:`. Load `chNN.md`, `outline/outline.md`,

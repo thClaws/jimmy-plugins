@@ -1,12 +1,13 @@
 ---
 name: mockup-screenshot
 description: >
-  Generate placeholder mockup PNG screenshots for the Thai Cowork book using programmatic UI renderings.
+  Generate placeholder mockup PNG screenshots for the current book using programmatic UI renderings.
   Use this skill whenever the user asks to "generate mockups", "create placeholder screenshots",
   "make mockup screenshots", "สร้าง mockup", "สร้าง screenshot จำลอง", or mentions needing
   screenshots for chapters but doesn't have real ones yet. Also trigger when the user runs
-  /mockup-screenshot. This skill reads media/screenshots/inventory.json and renders realistic-looking
-  Claude Desktop UI mockups for any missing screenshots, using the Sarabun Thai font.
+  /mockup-screenshot. This skill reads the screenshot inventory.json and renders app-window mockups
+  for any missing screenshots, using the Sarabun Thai font. The window chrome comes from
+  book.yaml -> mockup: — never from a hardcoded product UI.
 ---
 
 ## Paths (thai-book-production layout)
@@ -32,8 +33,8 @@ description: >
 
 # Mockup Screenshot Generator
 
-This skill generates placeholder PNG mockups that simulate Claude Desktop UI screenshots, allowing
-chapter writing to proceed before real screenshots are captured.
+This skill generates placeholder PNG mockups of the app the book is about, allowing chapter writing
+to proceed before real screenshots are captured.
 
 **Scope — real screenshots only (`{{screenshot:...}}`).** This skill covers the **screenshot** image
 kind: UI captures of the app, living in `{screenshots}/` (`media/screenshots/`). It produces stand-in
@@ -45,15 +46,23 @@ mockups until the real capture exists. It does **NOT** handle AI illustrations �
 
 Reads `media/screenshots/inventory.json` (specifically the `needed` array), then for each missing screenshot
 renders a PNG using the bundled `mockup_screenshot.py` script with:
-- Dark Claude Desktop window chrome (1440×900 px)
-- Correct tab bar (Chat / Cowork), sidebar, and content area
+- Dark app-window chrome (1440×900 px)
+- Tab bar + sidebar taken from `book.yaml → mockup:` (`app_name`, `tabs`, `sidebar`); the **first
+  tab is drawn active**. Leave them empty and the mockup is a neutral empty window — that is the
+  correct output when the book's app chrome is unknown. Never invent another product's UI.
 - Thai text rendered with the bundled Sarabun font
 - Template-specific content matching each screenshot's purpose
 
 ## Step 1: Find the Workspace
 
-Use `Glob` with `**/media/screenshots/inventory.json` to find the workspace. The parent directory of
-`media/screenshots/` is the workspace root.
+`Glob` for `**/book.yaml` — its parent directory is the workspace root. The script reads
+`layout.screenshots` from that same `book.yaml` (default `media/screenshots/`), so pass the
+workspace root, not the screenshots directory.
+
+**If `book.yaml → mockup:` is empty** and the book *is* about a piece of software with a UI worth
+drawing, ask the user for the app name, its top tabs, and its sidebar items, write them into
+`book.yaml → mockup:`, then render. If the book has no app (a concept, a language, a process),
+leave `mockup:` empty and let the neutral window stand.
 
 ## Step 2: Determine Font Path
 
@@ -82,7 +91,7 @@ find /sessions -name "Sarabun-Regular.ttf" 2>/dev/null | head -3
 | (empty) | Generate all missing screenshots from inventory.json `needed` list |
 | `all` | Same as empty — generate everything not yet present |
 | `chN` | Only generate mockups for chapter N (e.g., `ch3`) |
-| A filename | Generate just that one file (e.g., `05-typing-task-in-cowork.png`) |
+| A filename | Generate just that one file (e.g., `05-typing-a-task.png`) |
 
 ## Step 4: Run the Generator
 
@@ -106,12 +115,12 @@ After the script completes, report:
 
 ```
 Generated N mockup screenshots:
-  ✓ media/screenshots/01-chat-tab-home-screen.png
-  ✓ media/screenshots/02-cowork-tab-home-screen.png
+  ✓ media/screenshots/01-home-screen.png
+  ✓ media/screenshots/02-project-view.png
   ...
 
 Already existed (skipped):
-  - media/screenshots/05-typing-task-in-cowork.png
+  - media/screenshots/05-typing-a-task.png
 
 Use /list-screenshot to rescan the inventory.
 ```

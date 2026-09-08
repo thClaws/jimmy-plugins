@@ -1,12 +1,13 @@
 ---
 name: write-book-chapter
 description: >
-  Write a chapter for the Thai-language book "ผู้ช่วยคนใหม่ของคุณ: คู่มือ Claude Cowork ฉบับสมบูรณ์".
-  Use this skill whenever the user asks to write, draft, or generate a book chapter — especially when
-  they mention a chapter number (e.g., "เขียนบทที่ 3", "write chapter 5", "draft บทที่ 10").
-  Also trigger when the user says "เขียนบท", "write chapter", "เริ่มเขียนหนังสือ", or references
-  the Cowork book project. This skill reads the book outline, finds related reference documents
-  and screenshots, then produces a complete chapter in Markdown format ready for epub conversion.
+  Write a chapter (or the single document of an article) for the book defined by `book.yaml`
+  in the current working folder — any subject, any topic. Use this skill whenever the user asks
+  to write, draft, or generate a book chapter — especially when they mention a chapter number
+  (e.g., "เขียนบทที่ 3", "write chapter 5", "draft บทที่ 10"). Also trigger when the user says
+  "เขียนบท", "write chapter", "เริ่มเขียนหนังสือ", or names the current book project. This skill
+  reads `book.yaml` (subject, audience, voice, scope), the outline, related reference documents
+  and screenshots, then produces a complete chapter in Markdown ready for epub conversion.
 ---
 
 ## Paths (thai-book-production layout)
@@ -30,13 +31,40 @@ description: >
 | build output | `build/` |
 
 
-# Write Book Chapter — คู่มือ Claude Cowork ฉบับสมบูรณ์
+# Write Book Chapter
+
+## Step 0 — Load who this book is for
+
+**Read `book.yaml` before writing a word.** Everything about voice and depth comes from it,
+not from this file:
+
+| field | drives |
+|-------|--------|
+| `book.title` / `book.subtitle` | how the chapter refers to the book itself |
+| `book.subject` | **what the book teaches** — the product/topic every example is about |
+| `book.audience` | who is reading and what they already know → the level you pitch at |
+| `book.voice` | the tone (default: a patient colleague sitting beside the reader) |
+| `scope.words_per_chapter` | the length to aim for (`[min, max]`) |
+| `scope.total_pages_target` | the size of the whole book, for proportion |
+| `scope.parts` | Part names, when this book is divided into Parts (empty = no Parts) |
+| `terminology.keep_english` | terms to leave in English rather than transliterate |
+| `chapters[]` | this chapter's title, its Part, and its `page_target` |
+
+If `book.subject` or `book.audience` is empty, **ask the user once** rather than guessing —
+a chapter written for nobody in particular reads like filler. (`init-book` normally fills
+these in; an older `book.yaml` may predate them.)
 
 ## Overview
 
-This skill produces or improves chapters for the Thai-language book about Claude Cowork. The book targets **non-technical business professionals** who have never used Cowork before. Every chapter must be practical, friendly, and screenshot-rich — like a patient colleague walking someone through the app for the first time.
+This skill produces or improves chapters for the book described by `book.yaml`. Every chapter
+must be practical, friendly and figure-rich — written for `book.audience`, in `book.voice`,
+with every example drawn from `book.subject`.
 
-**Target book size: 300+ pages (~75,000 words total).** With 13 chapters, each chapter should be roughly **5,000-7,000 words** (about 20-30 pages). This is a real, substantial book — not a pamphlet. Each section needs depth: explanations, real-world scenarios, step-by-step walkthroughs, multiple examples, tips, and warnings.
+**Size comes from `scope:`.** Aim inside `scope.words_per_chapter` (the template's default is
+5,000-7,000 words ≈ 20-30 pages, which suits a full `book`; articles and mini-books set this
+far lower). Each section still needs depth: explanations, real-world scenarios, step-by-step
+walkthroughs, multiple examples, tips, and warnings — a chapter at the low end of the range is
+still a chapter, not a pamphlet.
 
 ## Document kind (book vs article)
 
@@ -75,13 +103,13 @@ This detection is automatic. Do NOT ask the user which mode to use — just chec
 
 3. **Respect the reader's intelligence** — Non-technical doesn't mean stupid. Explain concepts clearly without being condescending. Use analogies from the reader's world (office work, daily tasks, business problems), not from programming.
 
-4. **Show, don't tell** — Instead of "Cowork can organize files," write a full walkthrough: what the reader types, what they see on screen, what Cowork does step-by-step, and what the result looks like. Include realistic multi-line prompts.
+4. **Show, don't tell** — Instead of "{subject} can do X," write a full walkthrough: what the reader types or clicks, what they see on screen, what {subject} does step-by-step, and what the result looks like. Include realistic, complete inputs — not fragments.
 
 5. **Depth with purpose** — Every paragraph should teach something actionable. If a paragraph exists only as filler or transition, either cut it or inject a useful insight.
 
-6. **The "try it now" principle** — Every 2-3 pages, give the reader something to do. Not a massive project, just a small action: "ลองเปิด Cowork แล้วพิมพ์...", "สังเกตว่าตรงมุมขวาบน..."
+6. **The "try it now" principle** — Every 2-3 pages, give the reader something to do. Not a massive project, just a small action they can take in {subject} right now: "ลองเปิด… แล้วพิมพ์…", "สังเกตว่าตรงมุมขวาบน…"
 
-7. **Honest about limitations** — O'Reilly books earn trust by being honest. When a feature has limitations, say so directly. "ตรงนี้ Cowork ยังทำได้ไม่สมบูรณ์ ควรตรวจสอบผลลัพธ์เองด้วย"
+7. **Honest about limitations** — O'Reilly books earn trust by being honest. When a feature has limitations, say so directly: "ตรงนี้ {subject} ยังทำได้ไม่สมบูรณ์ ควรตรวจสอบผลลัพธ์เองด้วย"
 
 **Then follow Steps 0-4 below to write the chapter from scratch.**
 
@@ -109,8 +137,8 @@ This detection is automatic. Do NOT ask the user which mode to use — just chec
 1. Read ALL reference docs from `refs/docs/` and `refs/blogs/` directories
 2. Check each doc's `> Last checked:` date (if present). If older than 2 weeks or missing, flag it.
 3. **Search for latest updates** on the chapter's topics:
-   - `WebSearch` for recent Anthropic blog posts about the chapter's features
-   - `WebSearch` for recent changes to Cowork, Claude Desktop, or related products
+   - `WebSearch` on the domains in `book.yaml → sources` for recent posts about the chapter's topic
+   - `WebSearch` for recent changes to {subject} or the products around it
    - Check if any features described in the chapter have been renamed, moved, removed, or significantly changed
 4. If you find new information that contradicts or updates the reference docs, note it — you'll use this in Step E2 (Accuracy) and Step E4 (Apply Edits).
 
@@ -129,9 +157,9 @@ This detection is automatic. Do NOT ask the user which mode to use — just chec
 
 Score the chapter on each dimension (Strong / Adequate / Needs Work) and note specific issues:
 
-1. **Accuracy** — INTENSIVE fact-check: Every claim must be verified against `refs/docs/` reference files AND the latest search results from Step E1. Wrong facts are unacceptable. Cross-reference EVERY feature description, UI path, capability claim, and number. Pay special attention to: counts (e.g., "Claude Desktop มี 3 โหมด" — verify it's still 3), feature names that may have been renamed, UI paths that may have moved, and new features the chapter doesn't mention yet. See the `/audit` command's fact-check rules for the full checklist.
+1. **Accuracy** — INTENSIVE fact-check: Every claim must be verified against `refs/docs/` reference files AND the latest search results from Step E1. Wrong facts are unacceptable. Cross-reference EVERY feature description, UI path, capability claim, and number. Pay special attention to: counts (any "มี N อย่าง" claim — verify N is still N), names that may have been renamed, UI paths that may have moved, and things released since the refs were saved that the chapter doesn't mention yet. See the `/audit` command's fact-check rules for the full checklist.
 
-2. **Completeness** — Does the chapter cover ALL topics from the outline? Are any outline sub-sections missing or only superficially covered? Is the word count in the 5,000-7,000 range?
+2. **Completeness** — Does the chapter cover ALL topics from the outline? Are any outline sub-sections missing or only superficially covered? Is the word count inside `scope.words_per_chapter`?
 
 3. **Clarity** — Can a non-technical reader follow every explanation without getting lost? Are there jargon dumps without explanation? Are there sentences that require re-reading?
 
@@ -141,7 +169,7 @@ Score the chapter on each dimension (Strong / Adequate / Needs Work) and note sp
 
 6. **Engagement** — Is the opening story compelling and relatable? Are there enough "ลองดู" (try it) moments? Does the reader feel motivated to keep reading? Is the hands-on project detailed and exciting?
 
-7. **Consistency** — Terminology matches the book style guide? (Cowork not "โหมด Cowork", Plugin not "ปลั๊กอิน", etc.) Tone consistent throughout? No gendered particles? Screenshot format correct?
+7. **Consistency** — Terminology matches `terminology:` in `book.yaml` (`keep_english` left in English, nothing from `forbidden`)? Tone consistent throughout? No gendered particles? Screenshot format correct?
 
 8. **Screenshots & Visual Learning** — Are there 8+ screenshot placeholders? Are they placed where they help most? Do descriptions (after `|`) clearly describe what the reader sees? Are all filenames real (present in `media/screenshots/` per inventory.json)?
 
@@ -260,14 +288,18 @@ First, find the workspace root. The workspace is the user's selected folder. Use
 
 ### Reference Document Mapping
 
-Once you've found the reference docs, use them based on chapter topic:
-- Intro/install chapters: get-started docs, introductory blog posts
-- Safety chapters: safety-specific docs
-- Skills chapters: skills documentation
-- Connectors chapters: connector and team/enterprise docs
-- Plugins chapters: plugin docs and blog posts
-- Scheduling chapters: scheduling docs
-- Always read broadly when unsure — more context is better than less
+Which sources feed which chapter is a property of **this** book, so it lives with the book,
+not in this skill:
+
+1. `{outline}/plan.md` — the outline stage records the sources it grounded each chapter on.
+   That is the authoritative mapping; read this chapter's entry first.
+2. `book.yaml → chapters[]` — the chapter's title and Part tell you what it is about.
+3. Fall back to matching by topic: read the `> Source:` line and the headings of the files in
+   `{refs_docs}/` / `{refs_blogs}/` and take the ones whose subject overlaps this chapter.
+
+Read broadly when unsure — more context is better than less. If a chapter has no usable
+source material at all, say so and suggest `get-book-ref` for that gap rather than inventing
+facts about `book.subject`.
 
 ## Step 1: Research Phase
 
@@ -279,7 +311,7 @@ Find and read the book outline. For the target chapter, note:
 - Every sub-section number and title (e.g., 3.1, 3.2, ...)
 - The bullet points under each sub-section — these are the key topics to cover
 - The hands-on project at the end
-- Which Part the chapter belongs to (Part I–IV) and the Part's learning goal
+- Which Part the chapter belongs to (from `chapters[].part` / `scope.parts`; skip when the book has no Parts) and that Part's learning goal
 
 ### Read Reference Documents
 Read the documents most relevant to this chapter's topic. The reference docs contain detailed technical information, examples, and explanations that the chapter must draw from. Don't just skim — read thoroughly, because the depth in these docs is what makes the difference between a thin chapter and a rich one.
@@ -291,15 +323,18 @@ Read the screenshot index files to identify screenshots matching the chapter's c
 
 ### Chapter Length Target
 
-This is the most important requirement. Each chapter should be **5,000-7,000 words** (approximately 25-35 pages in the final book). Here's what that means in practice:
+This is the most important requirement. **Read the range from `book.yaml → scope.words_per_chapter`**
+and hit it; `chapters[].page_target` says how many pages that chapter is meant to fill. The
+proportions below are written for the template default (`[5000, 7000]` words ≈ 25-35 pages) —
+scale them to whatever the book actually asks for:
 
-| Chapter Element | Target Length |
-|----------------|--------------|
-| Opening story (blockquote) | 150-250 words — a vivid, relatable scenario |
-| Each main section (## N.X) | 800-1,500 words — thorough coverage with examples |
-| Hands-on project section | 800-1,200 words — detailed step-by-step walkthrough |
-| Chapter summary | 200-300 words — comprehensive bullet recap |
-| Total per chapter | 5,000-7,000 words |
+| Chapter Element | Share of the chapter | At the default 5,000-7,000 words |
+|----------------|---------------------|----------------------------------|
+| Opening story (blockquote) | ~3% | 150-250 words — a vivid, relatable scenario |
+| Each main section (## N.X) | ~20% each | 800-1,500 words — thorough coverage with examples |
+| Hands-on project section | ~18% | 800-1,200 words — detailed step-by-step walkthrough |
+| Chapter summary | ~4% | 200-300 words — comprehensive bullet recap |
+| Total per chapter | 100% | `scope.words_per_chapter` |
 
 **Why this matters:** The current chapters average only ~1,150 words — that's a pamphlet, not a book chapter. A real training book needs depth. The reader should feel like they truly understand each concept after reading, not just have a surface-level awareness.
 
@@ -314,9 +349,9 @@ For each section, ensure you include ALL of these elements:
    - Role-based: "ในฐานะผู้จัดการ คุณต้อง..."
    - Situational: "ลองนึกภาพว่าคุณต้องเตรียมรายงาน..."
 
-2. **Core explanation** (3-5 paragraphs) — Explain the concept thoroughly. Don't just say "Cowork can do X" — explain HOW it works, WHY it works that way, and WHAT the reader should expect to see. Use analogies for non-technical readers.
+2. **Core explanation** (3-5 paragraphs) — Explain the concept thoroughly. Don't just say "{subject} can do X" — explain HOW it works, WHY it works that way, and WHAT the reader should expect to see. Use analogies pitched at `book.audience`.
 
-3. **Multiple examples** (2-4 examples per section) — Each concept needs at least 2 concrete examples. Show example prompts the reader would type, describe what Cowork does step-by-step, and show the expected output. For comparison sections, show both the "wrong way" and "right way" with full prompts.
+3. **Multiple examples** (2-4 examples per section) — Each concept needs at least 2 concrete examples. Show exactly what the reader would type or click, describe what {subject} does step-by-step, and show the expected output. For comparison sections, show both the "wrong way" and "right way" in full.
 
 4. **Detailed prompt examples** — Don't just show 1-line prompts. Show realistic, multi-sentence prompts that a real user would write:
    ```
@@ -340,7 +375,7 @@ Every chapter follows this structure:
 # บทที่ {N}: {ชื่อบท}
 
 > {เรื่องเล่าเปิดบท — ย่อหน้าเดียวยาว ๆ 150-250 คำ เขียนเหมือนเล่าเรื่องให้เพื่อนฟัง
-> บรรยายสถานการณ์ที่ผู้อ่านน่าจะเคยเจอ แล้วแสดงให้เห็นว่า Cowork แก้ปัญหานี้ได้อย่างไร}
+> บรรยายสถานการณ์ที่ผู้อ่านน่าจะเคยเจอ แล้วแสดงให้เห็นว่า {subject} แก้ปัญหานี้ได้อย่างไร}
 
 ---
 
@@ -384,32 +419,28 @@ Where `filename.png` is the exact screenshot filename (including subdirectory pa
 Examples:
 
 ```markdown
-{{screenshot:02-cowork-tab-home-screen.png|หน้าจอ Cowork เมื่อเปิดครั้งแรก แสดง 3 แท็บด้านบนและเมนูด้านซ้าย}}
+{{screenshot:02-home-screen.png|หน้าจอแรกของ {subject} เมื่อเปิดครั้งแรก แสดงเมนูหลักด้านซ้าย}}
 
-{{screenshot:subagents/03-tasks-running.png|Progress panel แสดง 4 Subagents กำลังทำงาน}}
+{{screenshot:settings/03-account-page.png|หน้า Settings ส่วนบัญชีผู้ใช้ ชี้ให้เห็นช่องที่ต้องกรอก}}
 
-{{screenshot:schedule/01-scheduled-page-empty.png|หน้า Scheduled Tasks ว่างเปล่า พร้อมปุ่ม New task}}
+{{screenshot:setup/01-empty-state.png|หน้าจอตอนยังไม่มีข้อมูล พร้อมปุ่มเริ่มต้นตรงกลาง}}
 ```
 
 **Hard rules for screenshot placeholders:**
 1. **Search the screenshots directory FIRST** — Read info.md / index.md files in the media/screenshots/ directory and all subdirectories. Know what screenshots exist before writing.
 2. **Use ONLY real filenames** that exist in the screenshots directory. Do NOT invent filenames.
 3. **Always include `.png` extension** — even if the chapter source omits it.
-4. **Include subdirectory paths** when the screenshot is in a subdirectory (e.g., `subagents/01-work-many-jobs-simultaneously.png`, `browser/03-claude-cowork.png`).
+4. **Include subdirectory paths** when the screenshot is in a subdirectory (e.g., `settings/01-account-page.png`).
 5. **Minimum 8 screenshots per chapter**, aim for 10-15. Tutorial-heavy chapters should have 15+.
 6. Place each placeholder on its own line, with a blank line before and after.
 7. The Thai description after `|` should describe what the reader will see — this becomes alt text and caption.
 8. **Place screenshots where they help the reader** — after explaining a concept (show the UI), during walkthroughs (show each step), at comparisons (show before/after).
 
 **How to choose which screenshots to use:**
-- For UI overview sections: use the main tab screenshots (01-chat-tab, 02-cowork-tab, 03-code-tab)
-- For customize/settings: use customize and settings screenshots (04-customize, 27-settings, etc.)
-- For skills sections: use skill screenshots (06 through 15)
-- For connectors: use connector screenshots (16 through 20)
-- For plugins: use plugin screenshots (21 through 25)
-- For task examples: use task screenshots (34-question, 35-running, 36-completed, 37-context-panel)
-- For subagent sections: use subagents/ directory screenshots
-- For browser sections: use browser/ directory screenshots
+- Pick by what the section teaches: an overview section wants the top-level screens, a
+  walkthrough wants one shot per step, a settings section wants the settings screens
+- Match on the inventory `description`, never on a filename you remember from another book
+- Screenshots grouped in a subdirectory belong to that area — use them for that area's sections
 
 ### AI Content Figures — `{{image:...}}`
 
@@ -419,7 +450,7 @@ annotated illustration**. These are produced by `generate-image` (built-in `Text
 which **renders Thai + English text in the image**), not screenshotted. Use a separate placeholder:
 
 ```markdown
-{{image:ch01-chatbot-vs-cowork|ไดอะแกรมเปรียบเทียบแชตบอตทั่วไป (ตอบข้อความ) กับ Cowork (ทำงานกับไฟล์จริง) พร้อมป้ายกำกับ}}
+{{image:ch01-before-vs-after|ไดอะแกรมเปรียบเทียบวิธีเดิม กับวิธีที่ {subject} ทำให้ พร้อมป้ายกำกับ}}
 {{image:ch10-connector-flow|แผนภาพขั้นตอนการเชื่อม Connector: เลือก → อนุญาตสิทธิ์ → ใช้งาน (3 กล่องมีลูกศร)}}
 ```
 
@@ -442,24 +473,24 @@ If the outline's bullet points for a section seem sparse, use these strategies t
 
 **Walk through the user's experience** — Don't just say "Claude will organize the files." Walk through what happens: "เมื่อคุณกด 'Let's go' Claude จะเริ่มด้วยการอ่านชื่อไฟล์ทั้งหมดก่อน คุณจะเห็นใน Progress Panel ว่า 'Reading files...' ขึ้นเป็นสีเขียว หลังจากนั้นสักครู่ Claude อาจถามว่า 'ต้องการจัดตามประเภทไฟล์ หรือตามวันที่?' คุณเลือกตัวเลือกที่ต้องการ จากนั้น Claude จะ..."
 
-**Add "what if" scenarios** — "แล้วถ้า Cowork ทำผิดล่ะ? สมมติคุณสั่งให้จัดไฟล์แต่ Cowork แยกประเภทไม่ตรง คุณมีทางเลือก 3 ทาง..."
+**Add "what if" scenarios** — "แล้วถ้า {subject} ทำผิดล่ะ? สมมติผลลัพธ์ออกมาไม่ตรงที่ต้องการ คุณมีทางเลือก 3 ทาง…"
 
 **Include troubleshooting** — "ถ้าเจอปัญหานี้... ให้ลอง..."
 
-**Add context boxes** — Background information that enriches understanding: "ทำไม Cowork ถึงถามก่อนลบไฟล์ทุกครั้ง? เพราะ Anthropic ออกแบบให้ Cowork ขออนุญาตก่อนทำสิ่งที่ย้อนกลับไม่ได้..."
+**Add context boxes** — Background that enriches understanding: "ทำไม {subject} ถึงทำแบบนี้? เพราะผู้สร้างออกแบบให้…" — อธิบายเหตุผลเบื้องหลัง ไม่ใช่แค่ขั้นตอน
 
 ## Tone and Voice
 
 ### Language
-- **ภาษาไทยทั้งหมด** — ยกเว้นคำศัพท์เฉพาะทางที่ไม่มีคำแปลที่เป็นธรรมชาติ (เช่น Cowork, Plugin, Skill, Connector, Prompt, Slash Command)
+- **ภาษาไทยทั้งหมด** — ยกเว้นคำศัพท์เฉพาะทางที่ไม่มีคำแปลที่เป็นธรรมชาติ: ใช้รายการ `terminology.keep_english` ใน `book.yaml`
 - เมื่อใช้ศัพท์ภาษาอังกฤษครั้งแรก ให้อธิบายความหมายสั้น ๆ ในวงเล็บ เช่น "Connector (ช่องทางเชื่อมต่อเครื่องมือภายนอก)"
-- ใช้ "คุณ" เรียกผู้อ่าน ใช้ "Claude" หรือ "Cowork" เรียกเครื่องมือ — ไม่ใช้ "มัน"
+- ใช้ "คุณ" เรียกผู้อ่าน เรียกเครื่องมือด้วยชื่อจริง (`book.subject`) — ไม่ใช้ "มัน"
 
 ### Tone
 - **เหมือนเพื่อนร่วมงานที่เก่งกว่าสอนให้** — ไม่ใช่ตำราเรียน ไม่ใช่คู่มือราชการ
 - ใกล้ชิดแต่เป็นมืออาชีพ ไม่เกรงใจเกินไป ไม่หยาบ
 - ใช้เรื่องเล่าและสถานการณ์จริง — "สมมติว่าเจ้านายส่ง LINE มาบอกว่า..."
-- ยอมรับเมื่อมีข้อจำกัด — "ตรงนี้ Cowork ยังทำไม่ค่อยดีนัก ให้ตรวจสอบเองด้วย"
+- ยอมรับเมื่อมีข้อจำกัด — "ตรงนี้ {subject} ยังทำไม่ค่อยดีนัก ให้ตรวจสอบเองด้วย"
 - ให้กำลังใจ — "ไม่ต้องกังวล ครั้งแรกอาจงง แต่ทำ 2-3 ทีจะเริ่มเข้าใจ"
 
 ### Writing Style
@@ -515,7 +546,7 @@ For walkthrough steps, use numbered lists with bold step descriptions and explan
 
 Before saving the chapter, verify:
 
-- [ ] **Word count is 5,000-7,000 words** — count the words. If under 4,000, the chapter is too thin. Go back and add depth.
+- [ ] **Word count is inside `scope.words_per_chapter`** — count the words. More than ~20% under the low end means the chapter is too thin: go back and add depth, don't pad.
 - [ ] ครอบคลุมทุกหัวข้อย่อยที่ระบุไว้ใน outline — ไม่ข้ามหัวข้อใด
 - [ ] เรื่องเล่าเปิดบทดึงดูดและยาว 150-250 คำ
 - [ ] ทุก concept มีตัวอย่าง prompt หรือสถานการณ์ประกอบอย่างน้อย 2 ตัวอย่าง
@@ -533,7 +564,7 @@ Before saving the chapter, verify:
 
 Save to the chapters directory with zero-padded numbering:
 ```
-ch{NN}.md  (e.g., ch01.md, ch02.md, ..., ch13.md)
+ch{NN}.md  (e.g., ch01.md, ch02.md, …)
 ```
 
 Place the file in the same directory as existing chapters. If no chapters directory exists, create one at `chapters/`.
@@ -543,13 +574,18 @@ Place the file in the same directory as existing chapters. If no chapters direct
 These rules ensure the book reads as a cohesive whole:
 
 ### Terminology Consistency
-Always use these exact terms (don't alternate):
-- "Cowork" (ไม่ใช่ "Claude Cowork mode" หรือ "โหมด Cowork")
-- "สั่งงาน" สำหรับ giving prompts (ไม่ใช่ "พิมพ์คำสั่ง" หรือ "ถามคำถาม")
-- "ผู้ช่วย" สำหรับ Claude (ไม่ใช่ "AI" หรือ "บอท")
+The book's own vocabulary lives in `book.yaml → terminology:` — read it and follow it:
+- `keep_english` — leave these in English, never transliterate
+- `forbidden` — a map of wrong → right; never emit a key from it
+
+Generic Thai-writing conventions that hold for every book in this pipeline:
+- "โฟลเดอร์" สำหรับ folder (ไม่ใช่ "ไดเรกทอรี")
 - "เซสชัน" สำหรับ session (ไม่ใช่ "ช่วงการทำงาน")
 - "โทเค็น" สำหรับ token
-- "โฟลเดอร์" สำหรับ folder (ไม่ใช่ "ไดเรกทอรี")
+
+When you settle a new term mid-chapter (the outline threw up a word `terminology:` doesn't
+cover), add it to `book.yaml → terminology` so `proofread` and `audit-yaml` enforce the same
+choice everywhere else. One decision, one place.
 
 ### Cross-Reference Pattern
 When referring to another chapter:
@@ -566,10 +602,8 @@ At the end of each chapter, list the actual source documents used. **Every refer
 ```markdown
 ## แหล่งอ้างอิง
 
-- Anthropic, "Get started with Cowork" — คู่มือการเริ่มต้นใช้งาน Cowork
-  - ที่มา: https://support.claude.com/en/articles/13345190-get-started-with-cowork
-- Anthropic, "Introducing Cowork: Claude Code for the rest of your work" — บล็อกประกาศเปิดตัว Cowork
-  - ที่มา: https://claude.com/blog/cowork-research-preview
+- {ผู้เผยแพร่}, "{ชื่อเอกสารจริง}" — {อธิบายสั้น ๆ ว่าใช้ทำอะไร}
+  - ที่มา: {URL จริงจากบรรทัด `> Source:` ของไฟล์ใน refs/}
 ```
 
-Only list documents that were actually read and used as source material for the chapter. Do NOT list other chapters as references. Do NOT use generic placeholders like "Anthropic Official Guides".
+Only list documents that were actually read and used as source material for the chapter. Do NOT list other chapters as references. Do NOT use generic placeholders like "Official Guides" — copy the real title and the real URL out of the reference file.

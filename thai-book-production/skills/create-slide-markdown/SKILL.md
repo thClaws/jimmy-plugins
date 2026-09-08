@@ -204,8 +204,8 @@ The `screenshot` field is **required** — never use a `title`/`description` pla
 **For every screenshot slide, you MUST visually inspect the actual image file before writing the
 notes.** Use `Read` on the PNG (it supports images):
 ```
-Read: <workspace>/media/screenshots/02-cowork-tab-home-screen.png
-Read: <workspace>/media/generated/ch01-architecture-vs-weights.jpg
+Read: <workspace>/{screenshots}/02-home-screen.png
+Read: <workspace>/{generated}/ch01-old-way-vs-new-way.png
 ```
 Generic notes like "นี่คือหน้าจอการตั้งค่า" are useless. When you SEE the image you can write notes
 that match reality: "สังเกตปุ่ม Enable ตรงมุมขวาบน", "ในรายการจะเห็น 3 Connector ที่เชื่อมต่อแล้ว".

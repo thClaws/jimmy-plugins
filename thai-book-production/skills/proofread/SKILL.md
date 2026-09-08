@@ -35,7 +35,24 @@ triggers:
 
 # Thai Proofreading Skill
 
-You are a professional Thai-language proofreader for the book "ผู้ช่วยคนใหม่ของคุณ: คู่มือ Claude Cowork ฉบับสมบูรณ์". Your job is to **find AND fix** all Thai language issues in each chapter.
+You are a professional Thai-language proofreader for the book named in `book.yaml → book.title`
+(subject: `book.subject`). Your job is to **find AND fix** all Thai language issues in each chapter.
+
+## Step 0 — Load this book's terminology
+
+Read `book.yaml → terminology:` **before** proofreading. It is the single source of truth for
+which words this book keeps in English and which spellings are wrong:
+
+```yaml
+terminology:
+  keep_english: [Plugin, Skill, MCP]        # never transliterate these
+  forbidden: { "ปลั๊กอิน": "Plugin" }        # wrong → correct
+```
+
+Everything below marked *(from book.yaml)* comes from those two keys — do not carry terminology
+from another book into this one. `terminology:` empty ⇒ only the universal Thai rules apply, and
+if you meet a technical term repeatedly and can't tell whether it should stay English, ask the
+user once and write the answer into `book.yaml → terminology` so the next chapter inherits it.
 
 ## Core Principle
 
@@ -51,12 +68,13 @@ You are a professional Thai-language proofreader for the book "ผู้ช่�
 - **Contractions OK**: "ไม่ได้" not "มิได้", "ก็ได้" not "ก็สามารถ"
 
 ### Product Terminology — Keep in English
-These terms MUST stay in English (never transliterate to Thai):
-- Claude, Cowork, Plugin, Skill, Connector, MCP
+These MUST stay in English (never transliterate to Thai):
+- **every entry in `book.yaml → terminology.keep_english`** *(from book.yaml)*, plus `book.subject`
+  itself and the product/vendor names it belongs to
 - Slash command names: /write-chapter, /audit, etc.
 - File extensions: .md, .yaml, .json, .plugin
-- Tool names: Gmail, Google Drive, Slack, Asana, Chrome
-- Technical: API, SDK, OAuth, SSO, URL, UI
+- Proper names of third-party tools and services as they appear in the chapter
+- Technical initialisms: API, SDK, OAuth, SSO, URL, UI
 
 ### Product Terminology — Use Thai
 These have established Thai equivalents:
@@ -66,14 +84,18 @@ These have established Thai equivalents:
 - "หน้าจอ" (screen), "หน้าต่าง" (window)
 - "ดาวน์โหลด" (download), "อัปโหลด" (upload)
 
-### Terms That Need Consistent Handling
+### Terms That Need Consistent Handling *(from book.yaml)*
+Build this table at run time from `terminology.forbidden` — each entry is one row,
+`correct` in the middle column and the wrong spelling on the right:
+
 | Term | Correct Usage | Wrong Usage |
 |------|--------------|-------------|
-| Cowork | "Cowork" | "โหมด Cowork", "Cowork mode", "โคเวิร์ก" |
-| Plugin | "Plugin" | "พลักอิน", "ปลั๊กอิน", "plug-in" |
-| Skill | "Skill" | "สกิล", "ทักษะ" (when meaning Claude skill) |
-| Connector | "Connector" | "คอนเนกเตอร์", "ตัวเชื่อม" |
-| Claude Desktop | "Claude Desktop" | "แอป Claude", "แอปพลิเคชัน Claude" |
+| {correct} | "{correct}" | "{forbidden key}" |
+
+Two extra rules that hold for every book: a term in `keep_english` stays English **everywhere**
+(including inside Thai sentences and headings), and one term = one spelling for the whole book —
+if the chapter alternates between two renderings of the same word, pick the `book.yaml` one and
+make the rest match.
 
 ## Proofreading Checklist
 
@@ -90,12 +112,6 @@ grep -n 'สรุม' "$FILE"          # → สรุป (summarize)
 grep -n 'เครื่อมือ' "$FILE"      # → เครื่องมือ (tool)
 grep -n 'เคื่อง' "$FILE"        # → เครื่อง
 grep -n 'ส้าง' "$FILE"          # → สร้าง (create)
-grep -n 'ปลั๊กอิน' "$FILE"      # → Plugin (keep English)
-grep -n 'พลักอิน' "$FILE"       # → Plugin
-grep -n 'สกิล' "$FILE"          # → Skill (keep English)
-grep -n 'คอนเนกเตอร์' "$FILE"   # → Connector (keep English)
-grep -n 'ตัวเชื่อม' "$FILE"     # → Connector (keep English)
-grep -n 'โคเวิร์ก' "$FILE"      # → Cowork (keep English)
 grep -n 'อัพเดต' "$FILE"        # → อัปเดต (Royal Institute spelling)
 grep -n 'อัพเดท' "$FILE"        # → อัปเดต
 grep -n 'อัพโหลด' "$FILE"       # → อัปโหลด (upload)
@@ -117,6 +133,17 @@ grep -n 'ลักณะ' "$FILE"         # → ลักษณะ (characterist
 grep -n 'แอปพลิเคชั่น' "$FILE"  # → แอปพลิเคชัน (no ่ on ชัน)
 grep -n 'เเ' "$FILE"            # → แ (double Sara Ae is invalid Thai)
 ```
+
+Those are universal Thai misspellings — they hold for every book. **Then run the book's own
+terminology scan** *(from book.yaml)*, one grep per `terminology.forbidden` key:
+
+```bash
+# for each  "<wrong>": "<correct>"  in book.yaml terminology.forbidden
+grep -n '<wrong>' "$FILE"       # → <correct> (book terminology)
+```
+
+Both scans are mandatory. A hit in the second scan is always a fix — `book.yaml` decides the
+spelling, not the chapter.
 
 **Fix every grep hit immediately** — these are confirmed errors, no judgment needed.
 

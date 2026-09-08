@@ -50,6 +50,13 @@ everything else and let the user accept them in one go.
   init/router/write/build.
 - `book.title` — ชื่อเต็มบนปก (article: หัวเรื่องบทความ). Derive `book.slug` from it (kebab-case
   ASCII, for build filenames เช่น `my-book.epub`); confirm the slug.
+- `book.subject` — **สิ่งที่หนังสือสอน** ไม่ใช่ชื่อปก (title "บัญชีไม่ยากอย่างที่คิด" → subject
+  "Excel สำหรับงานบัญชี"; title "เขียนโค้ดให้ปลอดภัย" → subject "OWASP Top 10"). ทุก skill
+  ปลายทางอ้างค่านี้แทนการฝังชื่อผลิตภัณฑ์ — ถ้าเว้นว่าง prompt ปลายทางจะพูดถึง "หัวข้อของเล่มนี้"
+  แบบลอย ๆ และงานจะจืด **จึงต้องถามเสมอ**
+- `book.audience` — ใครอ่าน + มีพื้นแค่ไหน 1-2 บรรทัด (เช่น "คนทำงานสายธุรกิจที่ไม่ใช่สายเทคนิค
+  ไม่เคยใช้ {subject} มาก่อน"). ตัวนี้กำหนดระดับความยากของทุกบท
+- `book.voice` — โทน (default: "เหมือนเพื่อนร่วมงานใจเย็นที่นั่งสอนข้าง ๆ")
 - `book.author`
 - `book.language` — default `th`. Keep `keep_english_terms: true` (คงศัพท์เทคนิคอังกฤษ)
   unless the user says otherwise.
@@ -62,12 +69,26 @@ everything else and let the user accept them in one go.
     placeholder `id: 1` and note it can grow later.
   - Set a `page_target` per chapter (default 15; article often ~5–10) — audit-chapter checks
     thickness ±20% against it.
+- **`scope:`** — ขนาดงานที่ตั้งใจ ใช้แทนตัวเลขที่เคยฝังใน write-book-chapter:
+  - `total_pages_target` (default 300 สำหรับ `book`; mini-book ~60-100; article ~5-15)
+  - `words_per_chapter` (default `[5000, 7000]`; article/mini-book สั้นกว่านี้มาก)
+  - `parts` — ชื่อ Part ตามลำดับ **ถ้าเล่มนี้แบ่ง Part**; ไม่แบ่งให้ปล่อย `[]` (อย่ายัด Part
+    ให้เล่มที่ไม่ต้องการ)
 - **Output targets** (`targets:`) — these steer the whole pipeline, so decide now:
   - `epub` (default `true`)
   - `pdf` (default `false`) — needs `xelatex`; note the extra toolchain
   - `translations` (default `[]`) — เช่น `[en]` เพื่อทำฉบับอังกฤษ
 
 **Offer-with-defaults (ask "รับค่า default หรือปรับ?"):**
+- `terminology.keep_english` / `terminology.forbidden` — ศัพท์เฉพาะของหัวข้อนี้ที่ต้องคงเป็น
+  อังกฤษ และคำทับศัพท์ที่ห้ามใช้ (เช่น `{"ปลั๊กอิน": "Plugin"}`). เริ่มจากรายการสั้น ๆ ได้ —
+  `proofread` กับ `audit-yaml` อ่านจากที่นี่ที่เดียว และจะเสนอเพิ่มเมื่อเจอคำใหม่ระหว่างตรวจ
+- `sources.official_docs` / `official_blogs` — โดเมนเอกสาร/บล็อกทางการของหัวข้อ (เช่น
+  `docs.ltx.io`, `learn.microsoft.com`). ไม่รู้ตอนนี้ก็ปล่อยว่าง — `get-book-ref` จะสืบว่าใคร
+  เป็นเจ้าของหัวข้อแล้วเขียนกลับมาให้
+- `mockup:` — ถ้าหนังสือสอน **แอปที่มี UI** และอยากได้ mockup screenshot ก่อนจับภาพจริง ให้ระบุ
+  `app_name`, `tabs`, `sidebar` ของแอปนั้น · ไม่ใช่หนังสือสอนแอป (หรือยังไม่รู้) ปล่อยว่าง —
+  `mockup-screenshot` จะวาดกรอบหน้าต่างเปล่าแทนที่จะวาดแอปผิดตัว
 - `style.image_gen.art_style` — the AI-figure look applied to the **whole book** (must be
   consistent). Default in the template (clean modern infographic, teal & navy). Also
   `aspect_ratio` (default `16:9`), `size` (default `2K`), and `model` (default `pro` — Gemini
@@ -98,8 +119,8 @@ user override selectively.
 
 ## Step 3 — Confirm & hand off
 
-Show a one-screen summary: **kind (book/article)**, title/slug, author, language, chapter
-count, targets, and the image/voice/cover choices. Then route to the first pipeline stage:
+Show a one-screen summary: **kind (book/article)**, title/slug, **subject**, **audience**,
+author, language, chapter count, targets, and the image/voice/cover choices. Then route to the first pipeline stage:
 
 > โครงเริ่ม (book/บทความ) พร้อมแล้ว — เริ่ม **get-book-ref** เพื่อดึงเอกสารอ้างอิงหลักก่อนวาง outline ไหม
 
@@ -113,4 +134,7 @@ and routing.
   `layout:`. Get it right here so nothing downstream has to guess.
 - Whole-book style (`image_gen.art_style`, `tts.voice`) is expensive to change mid-book —
   settle it now, not at the MEDIA stage.
+- `book.subject` + `book.audience` are what keep every downstream skill about **this** book.
+  Leave them blank and the pipeline writes generic filler; there is no other place that
+  carries "what is this book about, and for whom".
 - Your output is a scaffold, not content. Stop at "ready for get-book-ref".

@@ -8,7 +8,7 @@
     {
       "name": "thai-book-production",
       "source": "./",
-      "description": "End-to-end technical/tutorial book production pipeline for Claude Cowork — outline, references, chapter writing, content & language QC, apparatus, Markdown-authored slides compiled to the video YAML pipeline, translation, and epub/PDF build. Thai-first; keeps technical terms in English."
+      "description": "End-to-end technical/tutorial book production pipeline for Claude Cowork — book-agnostic (subject/terminology/sources live in book.yaml): outline, references, chapter writing, content & language QC, apparatus, Markdown-authored slides compiled to the video YAML pipeline, translation, and epub/PDF build. Thai-first; keeps technical terms in English."
     }
   ]
 }

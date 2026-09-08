@@ -2,7 +2,7 @@
 name: get-book-ref
 description: >
   Search for and download official documentation and blog posts about a given topic from any source,
-  saving them as Markdown reference files for the Thai Cowork book project. Use this skill whenever
+  saving them as Markdown reference files for the current book project (`book.yaml`). Use this skill whenever
   the user asks to "find docs", "get reference", "download documentation", "หาเอกสาร", "ดาวน์โหลด doc",
   "เพิ่ม reference", "add reference", "get book ref", or mentions needing official source material
   for the book. Also trigger when the user says "search for official docs about {topic}" or
@@ -35,17 +35,19 @@ description: >
 
 ## Overview
 
-This skill searches for official documentation and blog posts about a specified topic from **any source** (not just Anthropic), downloads the complete content, and saves them as properly formatted Markdown files in the book project's `refs/docs/` and `refs/blogs/` directories.
+This skill searches the official documentation and blog domains for the book's subject (from `book.yaml → sources:`), downloads the complete content, and saves it as properly formatted Markdown in the book project's `refs/docs/` and `refs/blogs/` directories.
 
 The topic may be owned by any company or project. The first step is always to identify WHO owns the topic and WHERE their official docs live, then fetch from those sources.
 
-The book project ("ผู้ช่วยคนใหม่ของคุณ: คู่มือ Claude Cowork ฉบับสมบูรณ์") relies on official reference material. Keeping the `refs/docs/` and `refs/blogs/` directories up-to-date ensures chapter writers have accurate source material.
+Every book in this pipeline is grounded in official reference material — the outline and every chapter are written from what lands in `refs/docs/` and `refs/blogs/`. Which sources count as "official" depends on the book, so they come from `book.yaml`, never from this file.
 
 ## Project Folder Structure
 
 (โครงจริงดูจากตาราง **## Paths** ด้านบน — resolve จาก `book.yaml → layout:` เสมอ: outline/, refs/docs/, refs/blogs/, chapters/chNN.md, media/…)
 
-Find the workspace root by using `Glob` with pattern `**/refs/docs/01-get-started-with-cowork.md` or checking common locations like `/sessions/*/mnt/claude-cowork/`.
+Find the workspace root the same way every other skill in this plugin does: `Glob` for
+`**/book.yaml`. Its parent directory is the book folder; resolve `refs_docs` / `refs_blogs`
+from `book.yaml → layout:`. No `book.yaml` ⇒ not a book folder ⇒ hand to `init-book`.
 
 ## Step 0: Understand the Request
 
@@ -58,12 +60,9 @@ This skill runs in **two passes** within the PLAN loop:
 - **Targeted pass** (after a draft outline) — the topic is a specific gap the outline
   exposed (a chapter/subtopic lacking source material). Fetch narrowly to fill it.
 
-The user (or `book-router`) will specify a **topic** — this could be:
-- A Cowork feature (e.g., "plugins", "skills", "connectors", "scheduled tasks")
-- A product area (e.g., "Claude Code", "MCP servers", "prompt engineering")
-- A specific concept (e.g., "enterprise deployment", "safety", "financial services")
-
-Parse the topic and prepare search queries for both documentation and blog posts.
+The user (or `book-router`) will specify a **topic**, always inside the book's subject
+(`book.yaml → book.subject`) — a feature of it, an area around it, or a specific concept it
+involves. Parse the topic and prepare search queries for both documentation and blog posts.
 
 ## Step 1: Check What Already Exists
 
@@ -80,39 +79,34 @@ Read the first few lines (especially the `> Source:` line) of existing files to 
 
 ## Step 2: Search for Official Documentation
 
-Search for official Anthropic documentation about the topic. Use these search strategies:
+### Step 2a — Who owns this topic?
 
-### Support Documentation (support.claude.com)
+Read `book.yaml → sources:`.
 
-Search for documentation on the official support site:
+- **Populated** → use those domains directly. They were confirmed for this book already.
+- **Empty** → find the owner *first*, then search. A topic belongs to whoever builds it:
+  a product has a vendor, a language has a foundation, a standard has a body. Search
+  `"{subject} official documentation"` / `"{subject} docs"`, confirm the domains actually
+  belong to that owner (not an aggregator, tutorial farm, or SEO clone), then **write them
+  back to `book.yaml → sources`** so every later pass reuses the same answer instead of
+  re-deriving it. Tell the user which domains you settled on.
 
-```
-WebSearch: "site:support.claude.com {topic}"
-WebSearch: "support.claude.com cowork {topic}"
-WebSearch: "claude.com support {topic} 2025 OR 2026"
-```
+### Step 2b — Search those domains
 
-Look for URLs matching the pattern: `https://support.claude.com/en/articles/*`
-
-### Blog Posts (claude.com/blog)
-
-Search for official blog posts:
+For each domain in `sources.official_docs` and `sources.official_blogs`:
 
 ```
-WebSearch: "site:claude.com/blog {topic}"
-WebSearch: "claude.com blog cowork {topic}"
-WebSearch: "anthropic blog {topic} cowork 2025 OR 2026"
+WebSearch: "site:{domain} {topic}"
+WebSearch: "{subject} {topic} documentation"
+WebSearch: "{subject} {topic} 2025 OR 2026"        # recency, when the topic moves fast
 ```
 
-Look for URLs matching the pattern: `https://claude.com/blog/*`
+Keep URLs whose host matches a `sources:` domain. Anything off-domain is a candidate, not a
+source: only add it after checking it really is published by the owner (a vendor's docs
+sometimes live on a second domain — add that domain to `sources` too).
 
-### Also Check Anthropic Docs (docs.claude.com)
-
-For more technical topics (API, MCP, Claude Code), also search:
-
-```
-WebSearch: "site:docs.claude.com {topic}"
-```
+**Only official material.** Tutorials, Medium posts, Stack Overflow answers and AI-generated
+summaries are not sources for this book; they belong in the author's head, not in `refs/`.
 
 ## Step 3: Download and Save Documents
 
@@ -135,7 +129,7 @@ NN-{slug}.md
 ```
 Where NN is the next number after the highest existing doc number (zero-padded to 2 digits), and {slug} is a kebab-case summary of the article title.
 
-Example: If the last doc is `08-financial-services-plugins-for-cowork.md`, the next one is `09-{slug}.md`.
+Example: If the last doc is `08-deployment-guide.md`, the next one is `09-{slug}.md`.
 
 **For blogs:**
 ```
@@ -196,24 +190,24 @@ After downloading, provide a summary:
 Downloaded {N} new documents:
 
 Docs:
-- refs/docs/09-{slug}.md — "{Title}" (from support.claude.com)
+- refs/docs/09-{slug}.md — "{Title}" (from {domain})
   {word count} words, complete/partial
 
 Blogs:
-- refs/blogs/05-{slug}.md — "{Title}" (from claude.com/blog)
+- refs/blogs/05-{slug}.md — "{Title}" (from {domain})
   {word count} words, complete/partial
 
 Already existed (skipped):
-- {URL} → already saved as refs/docs/01-get-started-with-cowork.md
+- {URL} → already saved as refs/docs/01-{slug}.md
 
 Not found:
-- No official {topic} documentation found on support.claude.com
+- No official {topic} documentation found on the domains in `sources:`
 ```
 
 ## Tips for Better Results
 
-- **Be thorough with search queries** — Try multiple phrasings. A doc might not mention "Cowork" in the title but could be highly relevant.
-- **Check for recently published content** — Anthropic updates docs frequently. Include year in searches (2025, 2026).
+- **Be thorough with search queries** — Try multiple phrasings. A doc might not mention `book.subject` in its title and still be exactly the source you need.
+- **Check for recently published content** — official docs move fast. Include the year in searches (2025, 2026).
 - **Prefer complete over partial** — It's better to have one complete doc than three truncated ones.
 - **Watch for redirects** — Some URLs redirect. Follow the redirect and save the final content.
 - **Cross-reference the book outline** — Read `outline/outline.md` to understand which topics need references. This helps prioritize which docs to download.

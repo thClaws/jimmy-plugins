@@ -15,6 +15,19 @@ book:
   publisher: ""
   language: th                  # ISO 639-1
   keep_english_terms: true      # คงศัพท์เทคนิคเป็นอังกฤษ
+  subject: ""                   # สิ่งที่หนังสือ "สอน" — ต่างจาก title
+                                #   เช่น title "บัญชีไม่ยากอย่างที่คิด" → subject "Excel สำหรับงานบัญชี"
+                                #   ทุก skill ใช้ค่านี้แทนการฝังชื่อผลิตภัณฑ์ในตัว prompt
+  audience: ""                  # ใครอ่าน + มีพื้นแค่ไหน (1-2 บรรทัด)
+                                #   เช่น "คนทำงานสายธุรกิจที่ไม่ใช่สายเทคนิค ไม่เคยใช้ {subject} มาก่อน"
+  voice: ""                     # โทนการเขียน เช่น "เหมือนเพื่อนร่วมงานใจเย็นที่นั่งสอนข้าง ๆ"
+
+# ขนาดงานที่ตั้งใจ — write-book-chapter/audit-chapter อ่านค่านี้แทนการฝังตัวเลขไว้ใน skill
+scope:
+  total_pages_target: 300       # เป้าหน้ารวมทั้งเล่ม (article/mini-book ตั้งต่ำลง)
+  words_per_chapter: [5000, 7000]   # ช่วงจำนวนคำต่อบท
+  parts: []                     # ชื่อ Part ตามลำดับ; ว่าง = เล่มนี้ไม่มี Part
+                                #   เช่น ["เริ่มได้ทันที", "ทักษะที่ใช้ทุกวัน"]
 
 # path config — ทุกค่าสัมพันธ์กับ folder root; แก้ที่นี่ที่เดียวมีผลทั้ง pipeline
 layout:
@@ -43,6 +56,24 @@ chapters:
     page_target: 15
   # - id: 2
   #   ...
+
+# ศัพท์เฉพาะของเล่มนี้ — proofread + audit-yaml อ่านจากที่เดียวกัน
+terminology:
+  keep_english: []              # คำที่ต้องคงเป็นอังกฤษ เช่น [Plugin, Skill, MCP]
+  forbidden: {}                 # คำผิด → คำที่ถูก เช่น { "ปลั๊กอิน": "Plugin" }
+
+# แหล่งอ้างอิงทางการของหัวข้อนี้ — get-book-ref ใช้ตั้ง query
+# ว่างไว้ได้: get-book-ref จะถามว่าใครเป็นเจ้าของหัวข้อ แล้วเขียนกลับมาที่นี่
+sources:
+  official_docs: []             # โดเมนเอกสารทางการ เช่น ["docs.example.com"]
+  official_blogs: []            # โดเมนบล็อกทางการ เช่น ["example.com/blog"]
+
+# หน้าตา UI สำหรับ mockup screenshot (ใช้เมื่อยังไม่มีภาพจับจริง)
+# ว่างไว้ = วาดกรอบหน้าต่างเปล่า ๆ ดีกว่าวาดแอปผิดตัว
+mockup:
+  app_name: ""                  # ชื่อที่โชว์บน sidebar เช่น "Claude"
+  tabs: []                      # แท็บบนสุด เช่น [Home, Projects, Settings]; แท็บแรก = active
+  sidebar: []                   # เมนูซ้าย เช่น ["+ New task", Recents, Settings]
 
 # เป้าหมาย output
 targets:

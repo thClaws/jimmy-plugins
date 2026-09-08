@@ -8,7 +8,11 @@ Plugin เดียวครอบทั้ง lifecycle การผลิต�
 1. **1 folder ต่อ 1 เล่ม** — เปิด folder ใน Cowork แล้วทำงานได้ทั้ง pipeline
 2. **`book.yaml` = single source of truth** — ทุก skill อ่าน path จาก `layout:` ไม่ hardcode
    เปลี่ยนโครงที่เดียวมีผลทั้งระบบ และเพิ่มเฟสใหม่ในอนาคตได้โดยไม่กระทบของเดิม
-3. **`book-router` เป็น orchestrator** — scaffold folder ใหม่, ดู state, บอกเฟสถัดไป, ส่งต่อ
+3. **Plugin ไม่ผูกกับหนังสือเล่มใดเล่มหนึ่ง** — *เรื่อง*ของเล่มมาจาก `book.yaml` เท่านั้น
+   (`book.subject`/`audience`/`voice`, `scope:`, `terminology:`, `sources:`, `mockup:`)
+   ห้ามฝังชื่อผลิตภัณฑ์/โดเมน/ศัพท์ของเล่มใดเล่มหนึ่งลงในไฟล์ skill — บังคับด้วย
+   `python3 scripts/check-generic.py` (exit 1 ถ้ามีหลุด)
+4. **`book-router` เป็น orchestrator** — scaffold folder ใหม่, ดู state, บอกเฟสถัดไป, ส่งต่อ
 
 ## โครงสร้าง folder
 
@@ -70,6 +74,16 @@ BUILD       cover-design  →  build-epub-pdf
 | translate | localize | ✅ เขียนเต็ม (TM + preserve non-prose) |
 | cover-design | build | ✅ built-in `TextToImage` (Gemini nano-banana; ปกตรง+รอยสัน+ชื่อไทยบนปก) + Canva/programmatic |
 | build-epub-pdf | build | ✅ เขียนเต็ม (Pandoc epub + xelatex pdf + epubcheck) |
+
+### ค่าที่ skill ต้องอ่านจาก `book.yaml` (ห้าม hardcode)
+
+| key | ใครอ่าน | ถ้าเว้นว่าง |
+|-----|---------|-------------|
+| `book.subject` / `audience` / `voice` | write-book-chapter, audit-chapter, create-slide-markdown, generate-image | prompt พูดลอย ๆ งานจืด — init-book จึงถามเสมอ |
+| `scope.words_per_chapter` / `total_pages_target` / `parts` | write-book-chapter, audit-chapter | ใช้ค่า default ในเทมเพลต |
+| `terminology.keep_english` / `forbidden` | proofread, audit-yaml, fix-chapter | ใช้เฉพาะกฎภาษาไทยสากล |
+| `sources.official_docs` / `official_blogs` | get-book-ref, write-book-chapter | get-book-ref ถามว่าใครเป็นเจ้าของหัวข้อ แล้วเขียนกลับ |
+| `mockup.app_name` / `tabs` / `sidebar` | mockup-screenshot | วาดหน้าต่างเปล่า (ดีกว่าวาดแอปผิดตัว) |
 
 ทุก skill มีส่วน **## Paths** ที่ชี้ไปยัง `book.yaml → layout:` — path เดิมแบบ `book/chapters/`
 ถูกแทนด้วยโครงใหม่ทั้งหมดแล้ว โครงบท = `ch01.md`; toolchain (cover/build) override ได้ที่
@@ -138,7 +152,29 @@ Plugin นี้ install ได้เลยผ่าน local marketplace (`.cla
 > marketplace root กับ plugin เป็นโฟลเดอร์เดียวกัน (ตัว `thai-book-production/` นี้เอง).
 > compiler สไลด์ใช้ `pyyaml` — ถ้าเครื่องไหนไม่มี: `pip install pyyaml --break-system-packages`.
 
-## สถานะ (v1.9.0 — RELEASE)
+## สถานะ (v1.12.0 — RELEASE)
+
+- ✅ **ถอดหนังสือเล่มแรกออกจาก plugin ทั้งหมด** — เดิม skill หลายตัวฝังชื่อผลิตภัณฑ์/ศัพท์/โดเมน
+  ของหนังสือเล่มที่ใช้พัฒนา plugin ไว้ในตัว prompt ทำให้เล่มถัดไปถูกลากกลับไปหาเรื่องเดิมเงียบ ๆ
+  ตอนนี้ *เรื่อง*ของเล่มมาจาก `book.yaml` ล้วน:
+  - `book.yaml` เพิ่ม `book.subject/audience/voice`, `scope:`, `terminology:`, `sources:`, `mockup:`
+    — `init-book` ถามครบตั้งแต่ต้น (subject/audience/voice บังคับถาม)
+  - `write-book-chapter` มี **Step 0 — Load who this book is for**; ความยาวบทคิดจาก
+    `scope.words_per_chapter`; ตัด `references/chapter-source-map.md` ทิ้ง (map มาจาก
+    `outline/plan.md` + `book.yaml chapters[]` แทน)
+  - `get-book-ref` หา workspace ด้วย `**/book.yaml` และตั้ง query จาก `sources:` —
+    ไม่มี `sources` ก็ **ถามว่าใครเป็นเจ้าของหัวข้อ แล้วเขียนคำตอบกลับลง `book.yaml`**
+  - `proofread` + `audit-yaml` แยก grep เป็น 2 ชั้น: คำผิดภาษาไทยสากล (คงไว้) กับ
+    `terminology.forbidden` ของเล่มนั้น (อ่านจาก `book.yaml` แหล่งเดียวกัน สไลด์กับบทจึงไม่หลุดกัน)
+  - `mockup-screenshot` วาด chrome จาก `mockup.app_name/tabs/sidebar` (แท็บแรก = active) และ
+    เคารพ `layout.screenshots`; ว่าง = หน้าต่างเปล่าแบบกลาง ๆ ไม่วาดแอปของคนอื่น
+  - ตัวอย่างใน `generate-image` / `create-slide-markdown` / `create-slide-yaml` / `fix-chapter`
+    เปลี่ยนเป็น placeholder (`{subject}`, `{slug}`) หรือตัวอย่างกลาง ๆ
+- ✅ **guard กันหลุดซ้ำ**: `python3 scripts/check-generic.py` สแกนทั้ง plugin แล้ว exit 1
+  พร้อมเลขบรรทัด ถ้าเจอชื่อผลิตภัณฑ์/โดเมนของเล่มใดเล่มหนึ่ง — ยกเว้นไฟล์ที่พูดถึง *host*
+  (Claude Cowork = ที่ plugin รัน) ซึ่ง allowlist ไว้ 7 ไฟล์
+
+## สถานะ (v1.9.0)
 - ✅ **แยกสไลด์เป็น 2 skill ชัดเจน** (workflow: เขียน markdown ก่อน แล้วค่อย compile):
   `create-slide-markdown` (เขียน `chNN.slides.md` — authoring, instructional-design ทั้งหมด) →
   `create-slide-yaml` (compile → `chNN.yaml` deterministic + validate). แทน `create-book-yaml` เดิม

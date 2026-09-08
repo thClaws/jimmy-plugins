@@ -132,7 +132,8 @@ Before writing, plan your approach for each issue:
 - Plan new subsections, examples, or callout boxes
 
 ### For consistency issues:
-- Build a find-replace list (e.g., "โหมด Cowork" → "Cowork", mixed terminology → standardized)
+- Build the find-replace list from `book.yaml → terminology.forbidden` (wrong → correct), plus any
+  term the chapter spells two different ways — pick the `book.yaml` spelling
 
 ### For screenshot issues:
 - List missing screenshots that need `{{screenshot:...}}` placeholders
@@ -247,7 +248,7 @@ Quick reference for common audit issue types:
 | Missing screenshot | Add `{{screenshot:...}}` at relevant position (check inventory first) |
 | Terminology inconsistency | Find-replace across entire chapter |
 | Bad flow/ordering | Restructure sections, add transition paragraphs |
-| Missing safety warning | Add callout box with warning from refs/docs/02-use-cowork-safely |
+| Missing safety warning | Add callout box with the warning from the matching `refs/docs/` file |
 | Forward reference | Add "ดูบทที่ N" or rephrase to not assume future knowledge |
 | Unsupported claim | Remove claim or find supporting evidence in reference docs |
-| Pricing/version info | Add caveat "ราคาอาจเปลี่ยนแปลง ดูข้อมูลล่าสุดที่ claude.com/pricing" |
+| Pricing/version info | Add caveat "ราคาอาจเปลี่ยนแปลง ดูข้อมูลล่าสุดที่เว็บทางการ" + ลิงก์จาก `book.yaml → sources` |
