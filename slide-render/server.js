@@ -4,6 +4,10 @@
 //   → 200 application/zip  { deck.pdf, slides/slide-01.png … }
 // POST /pptx     (multipart)  file=<.pptx>
 //   → 200 application/zip  { deck.pdf, slides/slide-01.png … }   (same shape)
+//
+// Both render routes return `X-Slide-Count: <n>` — the number of rendered
+// pages. The gateway bills per page off that header, so it must be set
+// before the zip starts streaming.
 // GET  /healthz
 //
 // Design (see README): the desktop/GUI NEVER calls this directly — the thClaws
@@ -89,13 +93,18 @@ app.post("/slides", auth, upload.fields([{ name: "images" }]), async (req, res) 
     await run(marp, [...common, "--images", "png", "-o", path.join("png", "slide.png")],
       { cwd: job, timeout: TIMEOUT_MS });
 
+    // Count the pages BEFORE streaming: the gateway meters this render per
+    // rendered page and reads the count off the response header, which can
+    // only be set while headers are still unsent.
+    const pngs = (await fs.readdir(outDir)).sort();
     res.set("Content-Type", "application/zip");
     res.set("Content-Disposition", 'attachment; filename="deck.zip"');
+    res.set("X-Slide-Count", String(pngs.length));
     const zip = archiver("zip", { zlib: { level: 6 } });
     zip.on("error", (e) => { throw e; });
     zip.pipe(res);
     zip.file(path.join(job, "deck.pdf"), { name: "deck.pdf" });
-    for (const png of (await fs.readdir(outDir)).sort()) {
+    for (const png of pngs) {
       zip.file(path.join(outDir, png), { name: `slides/${png}` });
     }
     await zip.finalize();
@@ -170,15 +179,18 @@ app.post("/pptx", auth, uploadPptx.single("file"), async (req, res) => {
       { cwd: job, timeout: TIMEOUT_MS },
     );
 
+    // Same header contract as /slides — the gateway meters both routes off it.
+    const pngs = (await fs.readdir(outDir)).sort();
     res.set("Content-Type", "application/zip");
     res.set("Content-Disposition", 'attachment; filename="deck.zip"');
+    res.set("X-Slide-Count", String(pngs.length));
     const zip = archiver("zip", { zlib: { level: 6 } });
     zip.on("error", (e) => {
       throw e;
     });
     zip.pipe(res);
     zip.file(pdf, { name: "deck.pdf" });
-    for (const png of (await fs.readdir(outDir)).sort()) {
+    for (const png of pngs) {
       zip.file(path.join(outDir, png), { name: `slides/${png}` });
     }
     await zip.finalize();

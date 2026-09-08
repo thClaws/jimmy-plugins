@@ -11,16 +11,20 @@ metadata:
   namespace: thclaws-cloud
   labels: { app: slide-render }
 spec:
+  # Baseline only — the HPA below owns `replicas` once it is applied, so
+  # do not tune this number by hand after the first apply.
   replicas: 1
   selector:
     matchLabels: { app: slide-render }
+  strategy:
+    rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
   template:
     metadata:
       labels: { app: slide-render }
     spec:
       containers:
         - name: slide-render
-          image: registry.artech.cloud/slide-render:v0.1.0
+          image: registry.artech.cloud/slide-render:v0.2.0
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
@@ -67,3 +71,60 @@ spec:
     - name: http
       port: 8080
       targetPort: 8080
+---
+# Horizontal scaling. Every render is self-contained — the handler makes
+# its own temp dir and removes it in `finally`, and nothing is shared
+# between requests — so the Service can fan out over any number of pods
+# with no session affinity and no shared volume.
+#
+# CPU is the right signal: a render is Chromium (or LibreOffice) pinning
+# a core for ~1s per page, so queueing shows up as sustained CPU long
+# before memory moves. The 60% target leaves headroom for the burst that
+# arrives while a new pod is still pulling its (large) image.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: slide-render
+  namespace: thclaws-cloud
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: slide-render
+  minReplicas: 1
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: { type: Utilization, averageUtilization: 60 }
+  behavior:
+    scaleUp:
+      # Renders arrive in bursts (a whole book's chapters at once), so
+      # add capacity fast; the image is big, and waiting a full minute
+      # between steps means the burst is over before help arrives.
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 30
+    scaleDown:
+      # Slow down: a half-finished 120s render dies with its pod.
+      stabilizationWindowSeconds: 600
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 300
+---
+# A render can take up to TIMEOUT_MS (120s). Without this, a scale-down
+# or a node drain can kill a pod mid-render and the caller gets a 502
+# after already being billed nothing (the debit only lands on 2xx).
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: slide-render
+  namespace: thclaws-cloud
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels: { app: slide-render }
