@@ -31,7 +31,11 @@ spec:
         fsGroup: 10001
       containers:
         - name: slide-render
-          image: registry.artech.cloud/slide-render:v0.3.0
+          # Tags are never reused. v0.1.0, v0.1.1, v0.2.0 and v0.3.0 all exist
+          # in the registry already — check `/v2/slide-render/tags/list` before
+          # bumping, because pushing over a live tag swaps the code under a
+          # running pod on its next restart with nothing in git to explain it.
+          image: registry.artech.cloud/slide-render:v0.4.0
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false

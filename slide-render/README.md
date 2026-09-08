@@ -70,10 +70,18 @@ curl -sS -X POST localhost:8080/slides -F markdown=@deck.md -F theme=thai-tech -
 
 ## Build + deploy (cloud)
 ```
-docker build -t registry.artech.cloud/slide-render:v0.3.0 .
+docker build -t registry.artech.cloud/slide-render:v0.4.0 .
 # deploy as a k3s Deployment+Service in thclaws-cloud; expose via gateway /slide-render/*
 kubectl apply -f k8s.yaml      # Deployment + Service + HPA + PodDisruptionBudget
 ```
+
+**The live deployment had drifted from this file.** As of 2026-09-08 the cluster was on
+revision 6 running `v0.3.0`, while `k8s.yaml` still said `v0.1.0` — the image and the resource
+limits had been changed with `kubectl` and never written back. The manifest is now the truth
+again, so the next `kubectl apply -f k8s.yaml` will also reset the memory request (live 384Mi →
+manifest 512Mi) and add the HPA, PodDisruptionBudget and securityContext. That is intended; it
+is listed here so it is not a surprise. Patch by editing this file and applying it, not with
+`kubectl set image`.
 
 **Scaling.** Every request is self-contained — its own temp dir, removed in
 `finally`, nothing shared — so the Service fans out over any number of pods with no
