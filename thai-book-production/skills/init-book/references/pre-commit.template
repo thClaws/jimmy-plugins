@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Pre-commit guard for a BOOK working folder (the one holding book.yaml).
+#
+# Install:  cp .gitignore-sibling → see init-book Step 2
+#           ln -sf ../../.githooks/pre-commit .git/hooks/pre-commit
+#   or simply: cp <this file> .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+# Bypass:   git commit --no-verify
+#
+# Catches the damage class that manage-previews.py was written for — a
+# chapter whose {{image:...}} placeholders and gen-preview blocks have gone
+# out of sync, or whose markdown was mechanically corrupted by an edit. The
+# check is deterministic and takes milliseconds; running it at commit time
+# means a broken chapter never becomes the version you roll back to.
+set -euo pipefail
+
+SCRIPT="${MANAGE_PREVIEWS:-}"
+if [ -z "$SCRIPT" ]; then
+  # default install location of the plugin inside a thClaws workspace
+  for c in \
+    "$HOME/.thclaws/plugins/thai-book-production/skills/generate-image/scripts/manage-previews.py" \
+    ".thclaws/plugins/thai-book-production/skills/generate-image/scripts/manage-previews.py"; do
+    [ -f "$c" ] && SCRIPT="$c" && break
+  done
+fi
+if [ -z "$SCRIPT" ] || [ ! -f "$SCRIPT" ]; then
+  echo "pre-commit: manage-previews.py not found — set MANAGE_PREVIEWS=<path>; skipping" >&2
+  exit 0
+fi
+
+# Portable collection: macOS still ships bash 3.2, which has no `mapfile`.
+chapters=""
+while IFS= read -r f; do
+  case "$f" in chapters/*.md) chapters="$chapters $f";; esac
+done < <(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$chapters" ] && exit 0
+
+echo "pre-commit: validating chapter file(s):$chapters"
+# shellcheck disable=SC2086
+python3 "$SCRIPT" validate $chapters

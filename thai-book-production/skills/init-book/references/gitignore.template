@@ -1,0 +1,27 @@
+# วางไว้ที่ราก working folder ของหนังสือ (ที่เดียวกับ book.yaml)
+#
+# หลักการ: commit ทุกอย่างที่ "สร้างใหม่แล้วไม่เหมือนเดิม" หรือที่เสียเงินสร้าง
+# ignore เฉพาะของที่ deterministic และสร้างซ้ำได้จากสิ่งที่ commit ไว้
+
+# ─── ignore: ผลผลิตขั้นสุดท้าย สร้างซ้ำได้จาก chapters/ + media/ ───
+build/
+
+# ─── ignore: สำเนาสำรองที่ script เขียนไว้ตอนแก้ไฟล์บท ───
+*.bak
+
+# ─── ignore: ขยะระบบ ───
+__pycache__/
+.DS_Store
+Thumbs.db
+
+# ─── เก็บไว้ใน git เสมอ (อย่าเติมลงบนนี้) ───
+# chapters/       ต้นฉบับ — ของจริงทั้งหมดอยู่ตรงนี้
+# outline/        โครงเรื่องและการอนุมัติ
+# refs/           เอกสารอ้างอิงที่ดึงมา — เป็นฐานของทุก claim ในเล่ม
+# media/generated ภาพ AI: เสียเงินสร้าง และสั่งซ้ำไม่ได้ภาพเดิม
+# media/screenshots ภาพจับจริง: สร้างใหม่ไม่ได้เลยถ้าแอปเปลี่ยนหน้าตา
+# media/slides    ที่มาของสไลด์ (.slides.md) และ .yaml ที่ compile แล้ว
+# apparatus/      glossary / index
+# translations/   คำแปล
+# reports/        ผลตรวจ ใช้เทียบย้อนได้ว่าบทดีขึ้นจริงไหม
+# book.yaml       manifest

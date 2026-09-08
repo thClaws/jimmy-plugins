@@ -42,6 +42,17 @@ already owns, which has always been free.
 Running your own copy and pointing `SLIDE_RENDER_API` at it costs nothing, because
 it is your compute. That branch cannot reach the hosted service.
 
+## Dependencies
+
+`package-lock.json` is authoritative and the image builds from it (`npm ci`), so a rebuild of
+a given commit ships the exact versions that were audited. Re-run `npm audit --package-lock-only`
+after any dependency change.
+
+Known, accepted: three moderate `qs` advisories reach us through Express 4's `body-parser`.
+Clearing them needs Express 5, a breaking upgrade, for denial-of-service issues on a
+cluster-internal service that only an authenticated gateway can reach. `multer` is still on the
+1.x LTS line, which upstream has retired — worth moving to 2.x the next time this file is opened.
+
 ## Run locally
 ```
 npm install

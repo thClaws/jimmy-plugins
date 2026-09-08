@@ -116,6 +116,18 @@ user override selectively.
    ```
 3. Seed empty registries where the pipeline expects them: `media/screenshots/inventory.json`
    and `media/generated/inventory.json` as `[]` (list skills read these).
+4. **Put the folder under version control.** `git init` if it is not already a repo, copy
+   `references/gitignore.template` to `<folder>/.gitignore`, and make the first commit right
+   here — an empty scaffold is the cleanest baseline there will ever be.
+
+   This is not housekeeping. Later stages **rewrite chapter files in place**
+   (`fix-chapter`, `proofread`, `translate`, `generate-image`'s preview blocks), and the only
+   thing that turns "the audit rewrote a section I liked" into a one-command undo is a commit
+   from before it ran. Say so to the user in one line and offer to commit after each stage.
+
+   The template ignores `build/`, `*.bak` and OS junk, and deliberately keeps
+   `media/generated/` and `media/screenshots/` — AI figures cost money and never regenerate
+   identically, and real screenshots cannot be regenerated at all once the app's UI moves on.
 
 ## Step 3 — Confirm & hand off
 

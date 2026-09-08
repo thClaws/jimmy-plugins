@@ -19,6 +19,7 @@ Plugin เดียวครอบทั้ง lifecycle การผลิต�
 ```
 <book-slug>/
 ├── book.yaml            manifest (path + chapter registry + targets)
+├── .gitignore           git repo ตั้งแต่ init — ignore แค่ build/ กับ *.bak
 ├── outline/             outline.md, plan.md
 ├── refs/                docs/, blogs/
 ├── chapters/            chNN.md            ← source of truth
@@ -50,7 +51,7 @@ BUILD       cover-design  →  build-epub-pdf
 ```
 > PLAN เป็นลูป: ดึง ref แกนก่อน → outline ตั้งบนของจริง → ดึง ref เจาะช่องว่าง
 
-## Skills (19)
+## Skills (20)
 
 | Skill | เฟส | สถานะ |
 |-------|-----|-------|
@@ -88,6 +89,38 @@ BUILD       cover-design  →  build-epub-pdf
 ทุก skill มีส่วน **## Paths** ที่ชี้ไปยัง `book.yaml → layout:` — path เดิมแบบ `book/chapters/`
 ถูกแทนด้วยโครงใหม่ทั้งหมดแล้ว โครงบท = `ch01.md`; toolchain (cover/build) override ได้ที่
 `book.yaml → cover:` / `build:`
+
+## Guards (ติดตั้งครั้งเดียว)
+
+สอง guard นี้มีอยู่แล้วในโค้ด แต่เดิมต้องสั่งเอง ซึ่งแปลว่ามันจะไม่ทำงานพอดีในคอมมิตที่มันถูกเขียนมาเพื่อดัก
+
+**1. ในรีโปนี้** — กันชื่อผลิตภัณฑ์ของหนังสือเล่มใดเล่มหนึ่งหลุดกลับเข้ามาใน skill:
+
+```bash
+# รันจากรากของ jimmy-plugins
+ln -sf ../../thai-book-production/scripts/pre-commit .git/hooks/pre-commit
+```
+
+**2. ในโฟลเดอร์หนังสือแต่ละเล่ม** — กัน chapter ที่ placeholder กับ preview ไม่ตรงกัน
+หรือ markdown ถูกแก้จนพัง กลายเป็นเวอร์ชันที่คุณจะ rollback กลับไปหา:
+
+```bash
+cp <plugin>/skills/init-book/references/pre-commit.template .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+# ถ้าหา plugin ไม่เจอ: export MANAGE_PREVIEWS=<path>/manage-previews.py
+```
+
+ข้ามชั่วคราวด้วย `git commit --no-verify`
+
+## Version control ของตัวหนังสือ
+
+`init-book` ทำ `git init` ให้ตั้งแต่ต้นและวาง `.gitignore` ที่ ignore แค่ `build/` กับ `*.bak`
+**`media/generated/` กับ `media/screenshots/` ถูก commit เสมอ** — ภาพ AI เสียเงินสร้างและสั่งซ้ำ
+ไม่ได้ภาพเดิม ส่วนภาพจับหน้าจอจริงสร้างใหม่ไม่ได้เลยเมื่อ UI ของแอปเปลี่ยนไปแล้ว
+
+เรื่องนี้ไม่ใช่แค่ความเป็นระเบียบ หลาย skill **เขียนทับไฟล์บทในที่เดิม** (`fix-chapter`,
+`proofread`, `translate`, preview block ของ `generate-image`) commit ก่อนรันแต่ละขั้นคือสิ่งเดียว
+ที่ทำให้ "audit แก้ย่อหน้าที่เราชอบทิ้ง" กลายเป็นการ undo คำสั่งเดียว
 
 ## Requirements
 

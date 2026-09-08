@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Pre-commit guard for the thai-book-production PLUGIN repo.
+#
+# Install (from the jimmy-plugins repo root):
+#   ln -sf ../../thai-book-production/scripts/pre-commit .git/hooks/pre-commit
+# Bypass:
+#   git commit --no-verify
+#
+# check-generic.py exists because one book's product names leaked into the
+# skills once and silently steered every later book back to that subject.
+# A guard nobody runs is a guard that fails on the commit that reintroduces
+# the bug — which is exactly the commit it was written for.
+set -euo pipefail
+
+# Locate the plugin from the repo root, NOT from $BASH_SOURCE: git invokes
+# this through .git/hooks/pre-commit, so a path relative to the script
+# resolves inside .git/ when the hook is a symlink.
+root="$(git rev-parse --show-toplevel)"
+plugin="$root/thai-book-production"
+
+if ! git diff --cached --name-only | grep -q '^thai-book-production/'; then
+  exit 0   # nothing in this plugin is staged
+fi
+if [ ! -f "$plugin/scripts/check-generic.py" ]; then
+  echo "pre-commit: check-generic.py missing at $plugin — skipping" >&2
+  exit 0
+fi
+
+echo "pre-commit: check-generic.py"
+python3 "$plugin/scripts/check-generic.py" "$plugin"

@@ -35,7 +35,9 @@ exit 1 เมื่อพบปัญหา — placeholder caption ยาวข
 import argparse
 import os
 import re
+import shutil
 import sys
+import tempfile
 
 # caption ห้ามคร่อม `}}` / `{{` / บรรทัดว่าง — กัน placeholder ที่ปิดไม่ครบ
 # ไม่ให้กลืนตัวบททั้งย่อหน้าเข้าไปเป็น caption
@@ -53,8 +55,37 @@ def _read(path):
 
 
 def _write(path, text):
-    with open(path, 'w', encoding='utf-8') as f:
-        f.write(text)
+    """เขียนทับไฟล์บทแบบ atomic + เก็บสำเนาก่อนหน้าไว้หนึ่งชั้น
+
+    `open(path, 'w')` ตัดไฟล์ทิ้งทันทีก่อนจะเขียนอะไรลงไป ถ้ากระบวนการตายหรือ
+    ดิสก์เต็มระหว่างนั้น บทที่เขียนมาทั้งวันจะเหลือศูนย์ไบต์ — ความเสียหายแบบที่
+    docstring ข้างบนเล่าไว้ว่าเกิดมาแล้วสามรอบ เขียนลงไฟล์ชั่วคราวใน directory
+    เดียวกันแล้ว os.replace() แทน (atomic บน POSIX) ผู้อ่านจะเห็นไฟล์เก่าหรือ
+    ไฟล์ใหม่เต็ม ๆ เท่านั้น ไม่มีสถานะครึ่ง ๆ
+
+    `.bak` คือตาข่ายชั้นที่สอง สำหรับตอนที่เนื้อหาใหม่ "เขียนสำเร็จ" แต่ผิด —
+    atomic write กันไฟล์พังได้ แต่กันการแก้ที่ไม่ต้องการไม่ได้
+    """
+    path = os.fspath(path)
+    if os.path.exists(path):
+        try:
+            shutil.copy2(path, path + '.bak')
+        except OSError:
+            pass  # สำเนาสำรองพลาดไม่ควรกันการเขียนจริง
+    d = os.path.dirname(os.path.abspath(path))
+    fd, tmp = tempfile.mkstemp(dir=d, prefix='.manage-previews-', suffix='.tmp')
+    try:
+        with os.fdopen(fd, 'w', encoding='utf-8') as f:
+            f.write(text)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
 
 
 def _alt(caption):

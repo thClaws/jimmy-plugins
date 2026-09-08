@@ -18,8 +18,12 @@ ENV CHROME_PATH=/usr/bin/chromium \
     NODE_ENV=production
 
 WORKDIR /app
-COPY package.json ./
-RUN npm install --omit=dev && npm install -g @marp-team/marp-cli@4
+# Copy the lockfile and install from it. `npm install` without the lock
+# re-resolves every transitive dependency at build time, so two builds of the
+# same commit could ship different code — and the audited versions in
+# package-lock.json would never actually reach the image.
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev && npm install -g @marp-team/marp-cli@4
 
 COPY server.js ./
 COPY themes ./themes

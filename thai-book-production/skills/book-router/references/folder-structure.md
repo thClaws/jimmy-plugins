@@ -9,6 +9,7 @@
 ```
 <book-slug>/                     ← Cowork working folder (1 เล่ม)
 ├── book.yaml                    ← manifest / single source of truth
+├── .gitignore                   ← จาก init-book (ignore build/ + *.bak เท่านั้น)
 │
 ├── outline/
 │   ├── outline.md               ← ภาค → บท → subtopics       (outline-planner)
@@ -78,3 +79,16 @@
 
 เพิ่มเฟส/artifact ใหม่ในอนาคต = เพิ่ม key ใน `layout:` + โฟลเดอร์ใหม่ ไม่กระทบของเดิม
 เพราะ skill อ่าน path จาก manifest ไม่ผูกกับชื่อโฟลเดอร์ตายตัว
+
+## Version control
+
+The folder is a git repo — `init-book` runs `git init` and drops a `.gitignore`.
+`chapters/`, `refs/`, `media/generated/` and `media/screenshots/` are all committed:
+AI figures cost money and never regenerate identically, and real screenshots cannot be
+regenerated once the app's UI moves on. Only `build/` and `*.bak` are ignored.
+
+This matters because several stages **rewrite chapter files in place** — `fix-chapter`,
+`proofread`, `translate`, and `generate-image`'s preview blocks. A commit before each of
+those is what makes an unwanted rewrite a one-command undo. `manage-previews.py` also
+leaves a `.bak` beside the file it edited, but that is one level deep and the next run
+overwrites it; git is the real net.
