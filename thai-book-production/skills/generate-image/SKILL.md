@@ -134,21 +134,27 @@ numbers, labels) wherever it aids understanding — that is the point of using t
    returned a different ext). Read the exact `output/…` path from the tool result — don't guess it.
 6. **Update the registry entry:** set `status: generated`, `file: <id>.png`, and store the **final
    prompt used** in `prompt` (so it's reproducible / editable next run).
-7. **Insert a review preview into the chapter markdown — keep the placeholder.** So the author can
-   see the figure while reading `{chapters}/chNN.md` in a normal markdown preview, add a standard
-   markdown image right after the `{{image:id|caption}}` line, tagged with an HTML-comment marker:
+7. **Insert a review preview into the chapter markdown — run the script, never edit by hand.** So the
+   author can see the figure while reading `{chapters}/chNN.md` in a normal markdown preview, a
+   standard markdown image tagged with an HTML-comment marker goes right after the placeholder:
    ```
    {{image:ch01-foo|caption}}
    <!-- gen-preview:ch01-foo -->
    ![caption](../media/generated/ch01-foo.png)
    ```
+   **Always produce it with the script** — it is idempotent (strips old previews, re-emits one per
+   placeholder), handles **multi-line captions**, and refuses to run on a damaged chapter:
+   ```
+   python3 {skill_dir}/scripts/manage-previews.py insert \
+       {chapters}/ch{NN}.md [--rel ../media/generated] [--ext .png]
+   ```
+   - **NEVER insert/replace a preview by hand or with a line-based edit.** Placeholder captions
+     routinely wrap across lines; "insert after the line starting with `{{image:`" splits the
+     placeholder in half, swallows the preview into it, and has already destroyed chapter prose.
    - **Never remove or edit the `{{image:id|caption}}` placeholder** — it is the source of truth the
      pipeline (create-slide-markdown, build-epub-pdf) keys off. The preview is an *addition* beside it.
-   - The `<!-- gen-preview:<id> -->` marker makes the preview auto-managed. On regeneration, find the
-     existing `gen-preview:<id>` block (the comment + its `![...]` line) and **replace it in place** —
-     never append a second copy.
-   - Compute the image path **relative to the chapter file** (default layout →
-     `../media/generated/<id>.png`; derive from `layout.generated` vs `layout.chapters` if customized).
+   - `--rel` defaults to `../media/generated` (path **relative to the chapter file**); pass it
+     explicitly if `layout.generated` / `layout.chapters` are customized. Batch: pass several files.
    - This preview is review-only. `build-epub-pdf` strips every `gen-preview` block before resolving
      the placeholder, so the figure is embedded exactly once — no double image.
 8. **Present** each result to the user (the image is returned inline), and offer variations/edits
@@ -164,6 +170,17 @@ numbers, labels) wherever it aids understanding — that is the point of using t
 - Writes under `{generated}/` + its `inventory.json`, and may add/refresh **only** its own
   `<!-- gen-preview:<id> -->` block in `{chapters}/chNN.md` right after the matching `{{image:id}}`
   placeholder. **Never** edits the placeholder itself, the chapter prose, or `{screenshots}/`.
+- **Preview blocks are written by `manage-previews.py` only** — no hand-editing, no Edit/sed on
+  `gen-preview` lines.
+- **Before reporting done, validate every chapter touched** — a broken placeholder makes
+  build-epub-pdf and create-slide-markdown misread the chapter:
+  ```
+  python3 {skill_dir}/scripts/manage-previews.py validate \
+      {chapters}/ch{NN}.md
+  ```
+  Exit 1 = fix it first (it reports unterminated placeholders, previews swallowed inside a
+  placeholder, duplicates, and orphans). Placeholders whose image isn't generated yet are counted
+  as pending, not as errors.
 - Keep one consistent `art_style` across the book — visual coherence matters more than per-image flair.
 - Show every generated image (returned inline) to the user; get sign-off before wide regeneration.
 - If `TextToImage` is unavailable (`imageToolsEnabled` off, or no provider key / gateway), report

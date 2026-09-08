@@ -52,15 +52,23 @@ Compile the whole book into shippable files. Last stage in the pipeline.
 - `style.fonts` (Sarabun) → embedded font. Chapter order from the `chapters:` registry.
 
 ## Assembly order
-1. Collect chapters in registry order from `{chapters}/chNN.md` + front matter (title
+1. **Copy chapters to a build workspace first** — `cp {chapters}/ch*.md {build}/src/` — and do every
+   transform below **there**. The source chapters are the author's working copy (previews +
+   placeholders) and must come out of a build byte-identical.
+   Collect chapters in registry order from `{build}/src/chNN.md` + front matter (title
    page, copyright, auto-TOC) + back matter (`{apparatus}/glossary.md`, `index.md`).
    **`kind: article`:** just the single `ch01.md` + minimal title/author front — **no auto-TOC,
    no back-matter** (drop `--toc` below). **`kind: mini-book`:** keep TOC; include back-matter
    only if `{apparatus}/` files exist, else skip it.
-2. **Strip review previews first:** delete every `<!-- gen-preview:<id> -->` marker and the
-   `![...](...)` line immediately after it (these are review-only aids generate-image inserts beside
-   the `{{image:}}` placeholder). Do this before resolving placeholders so the figure isn't embedded
-   twice. Then resolve **both** image placeholders and inline the real files:
+2. **Strip review previews first** — on the build copy, never the source chapters. These
+   `<!-- gen-preview:<id> -->` + `![...](...)` blocks are review-only aids generate-image inserts
+   beside the `{{image:}}` placeholder; drop them before resolving placeholders so the figure isn't
+   embedded twice. Use the script (handles multi-line captions — a hand-rolled regex does not):
+   ```
+   python3 {skill_dir}/../generate-image/scripts/manage-previews.py strip \
+       {build}/src/ch*.md
+   ```
+   Then resolve **both** image placeholders and inline the real files:
    - `{{screenshot:file.png|cap}}` → `{screenshots}/file.png` (real capture, or a mockup from
      mockup-screenshot)
    - `{{image:id|cap}}` → `{generated}/<id>.png` (AI illustration from generate-image)
@@ -73,7 +81,7 @@ Install if missing: `pandoc`, and for PDF `texlive-xetex` (xelatex) or `weasypri
 
 **epub** (reflowable):
 ```
-pandoc {chapters}/ch*.md \
+pandoc {build}/src/ch*.md \
   --metadata title="<title>" --metadata author="<author>" --metadata lang=<language> \
   --toc --toc-depth=2 \
   --epub-cover-image={assets}/cover-front.png \
@@ -82,7 +90,7 @@ pandoc {chapters}/ch*.md \
 ```
 **PDF** (paginated) — xelatex is Thai-safe:
 ```
-pandoc {chapters}/ch*.md --toc --pdf-engine=xelatex \
+pandoc {build}/src/ch*.md --toc --pdf-engine=xelatex \
   -V mainfont="Sarabun" -V geometry:paperwidth=6in,paperheight=9in,margin=0.75in \
   -o {build}/<slug>.pdf
 ```
@@ -99,6 +107,8 @@ pandoc {chapters}/ch*.md --toc --pdf-engine=xelatex \
   index against final pagination.
 
 ## Guardrails
+- **Never write to `{chapters}/`** — strip/resolve only under `{build}/src/`. A build must leave the
+  author's chapters untouched.
 - Do not build with unresolved image placeholders (`{{screenshot:...}}` or `{{image:...}}`) or
   open CRITICAL audit items — report and stop.
 - Publishing/uploading to a store is a separate permissioned action; build only

@@ -12,24 +12,18 @@ description: >
 
 ## Paths (thai-book-production layout)
 
-หนึ่ง working folder = หนังสือหนึ่งเล่ม Resolve ทุก path จาก `book.yaml → layout:` ที่ root
-ของ folder — **ห้าม hardcode** ถ้าไม่มี `book.yaml` แปลว่าไม่ได้อยู่ใน book folder ให้ให้
-`init-book` scaffold ก่อน ค่า default:
+Resolve every path from `book.yaml → layout:` at the project root. Defaults:
 
 | what | path |
 |------|------|
 | chapters | `chapters/chNN.md` |
 | outline | `outline/outline.md`, `outline/plan.md` |
 | references | `refs/docs/`, `refs/blogs/` |
-| slides | `media/slides/chNN.yaml` |
-| screenshots (จริง, จับจากโปรแกรม) | `media/screenshots/` (+ `inventory.json`) |
-| generated (AI, built-in TextToImage) | `media/generated/` (+ `inventory.json`) |
-| reports (QC ทุกชนิด) | `reports/chNN.audit.md`, `reports/chNN.proofread.md`, `reports/chNN.yaml-audit.md` |
-| apparatus | `apparatus/glossary.md`, `apparatus/index.md` |
-| translations | `translations/<lang>/chapters/chNN.md` |
-| assets | `assets/` |
-| build output | `build/` |
+| generated images (AI) | `media/generated/` (+ `inventory.json`) |
+| screenshots (real captures) | `media/screenshots/` (+ `inventory.json`) |
+| reports | `reports/chNN.audit.md` etc. |
 
+## Before writing — ALWAYS read these
 
 # Write Book Chapter
 
@@ -54,7 +48,8 @@ If `book.subject` or `book.audience` is empty, **ask the user once** rather than
 a chapter written for nobody in particular reads like filler. (`init-book` normally fills
 these in; an older `book.yaml` may predate them.)
 
-## Overview
+**Hard rule: never write without reading refs first.** Facts, numbers, quotes, and examples
+must be grounded in reference docs. If a ref is missing, say so and stop.
 
 This skill produces or improves chapters for the book described by `book.yaml`. Every chapter
 must be practical, friendly and figure-rich — written for `book.audience`, in `book.voice`,
@@ -372,52 +367,66 @@ For each section, ensure you include ALL of these elements:
 Every chapter follows this structure:
 
 ```markdown
-# บทที่ {N}: {ชื่อบท}
+# บทที่ {N}: {title}
 
 > {เรื่องเล่าเปิดบท — ย่อหน้าเดียวยาว ๆ 150-250 คำ เขียนเหมือนเล่าเรื่องให้เพื่อนฟัง
 > บรรยายสถานการณ์ที่ผู้อ่านน่าจะเคยเจอ แล้วแสดงให้เห็นว่า {subject} แก้ปัญหานี้ได้อย่างไร}
 
 ---
 
-## {N}.1 {ชื่อหัวข้อ}
+## {N}.1 {section title}
 
-{เนื้อหา 800-1,500 คำ}
+{content — aim for roughly page_target ÷ section_count per section}
 
-## {N}.2 {ชื่อหัวข้อ}
+### {subsection title}
 
-{เนื้อหา 800-1,500 คำ}
+{use H3 subsections to break up long sections into digestible chunks}
+
+## {N}.2 {section title}
 
 ...
-
-## {N}.{last} โปรเจกต์ลงมือทำ #{M}: {ชื่อโปรเจกต์}
-
-{ขั้นตอนแบบ step-by-step 800-1,200 คำ}
 
 ---
 
 ## สรุปบทที่ {N}
 
-{สรุป 200-300 คำ — bullet points ที่ครอบคลุมทุกประเด็นสำคัญ}
+{Bullet-point recap covering every key takeaway — 200-300 words}
 
 ## แหล่งอ้างอิง
 
-{รายการอ้างอิงจากเอกสารที่ใช้}
+- {Author/Publisher}, "{title}" — {one-line description}
+  - ที่มา: {real URL from the reference doc's Source line}
 ```
 
-### Screenshot Placeholders — MANDATORY
+### Page length
 
-**Every chapter MUST include screenshot placeholders.** These are NOT optional. A chapter without screenshots is incomplete and will be rejected. The downstream slide pipeline (create-slide-markdown → create-slide-yaml) depends on these placeholders to generate `type: screenshot` slides with the correct `screenshot:` filename field.
+Target is set per chapter in `book.yaml → chapters[id].page_target`. The standard
+word-per-page count is project-specific — check `outline/plan.md` for the agreed
+number (default 400 words/page for Thai prose). Aim for page_target ±20%.
 
-Use this exact format:
+### Opening story (blockquote)
 
+- One paragraph, 150-250 words, in a markdown blockquote (`> `)
+- Set a relatable scene — not abstract, not about a fictional character
+- Use second person ("คุณ") or role-based scenarios
+- Connect the scene to what the chapter teaches
+
+### Section structure
+
+- Every `###` subsection = one digestible idea
+- Introduce with a relatable scenario or question
+- Explain the concept thoroughly
+- Ground claims in reference docs (facts, numbers, quotes)
+- End with a transition to the next section
+
+### Images — two kinds
+
+**AI-generated figures** (`{{image:...}}`) — infographics, diagrams, flowcharts, comparisons:
 ```markdown
-{{screenshot:filename.png|คำอธิบายภาพเป็นภาษาไทย}}
+{{image:chNN-concept|คำอธิบายภาษาไทยว่าภาพนี้แสดงอะไร — จะถูกใช้เป็น prompt สำหรับสร้างภาพ}}
 ```
 
-Where `filename.png` is the exact screenshot filename (including subdirectory path if applicable). The filename **MUST end with `.png`**.
-
-Examples:
-
+**Screenshots / real captures** (`{{screenshot:...}}`):
 ```markdown
 {{screenshot:02-home-screen.png|หน้าจอแรกของ {subject} เมื่อเปิดครั้งแรก แสดงเมนูหลักด้านซ้าย}}
 
@@ -425,6 +434,8 @@ Examples:
 
 {{screenshot:setup/01-empty-state.png|หน้าจอตอนยังไม่มีข้อมูล พร้อมปุ่มเริ่มต้นตรงกลาง}}
 ```
+Use real filenames from `media/screenshots/inventory.json`. Placeholders go on their own
+lines with a blank line before and after.
 
 **Hard rules for screenshot placeholders:**
 1. **Search the screenshots directory FIRST** — Read info.md / index.md files in the media/screenshots/ directory and all subdirectories. Know what screenshots exist before writing.
@@ -442,32 +453,18 @@ Examples:
 - Match on the inventory `description`, never on a filename you remember from another book
 - Screenshots grouped in a subdirectory belong to that area — use them for that area's sections
 
-### AI Content Figures — `{{image:...}}`
-
-Not every figure is a UI capture. Concepts, comparisons, processes, and data are better shown as an
-**AI-generated content figure** — an **infographic, diagram, flowchart, chart/graph, comparison, or
-annotated illustration**. These are produced by `generate-image` (built-in `TextToImage`, model `pro`/nano-banana pro,
-which **renders Thai + English text in the image**), not screenshotted. Use a separate placeholder:
+Use these patterns consistently:
 
 ```markdown
 {{image:ch01-before-vs-after|ไดอะแกรมเปรียบเทียบวิธีเดิม กับวิธีที่ {subject} ทำให้ พร้อมป้ายกำกับ}}
 {{image:ch10-connector-flow|แผนภาพขั้นตอนการเชื่อม Connector: เลือก → อนุญาตสิทธิ์ → ใช้งาน (3 กล่องมีลูกศร)}}
 ```
 
-- Format: `{{image:<id>|คำอธิบายภาษาไทย}}` — `<id>` = stable kebab-case slug (prefix with the chapter,
-  e.g. `ch10-...`), **no `.png`**. `generate-image` resolves it to `media/generated/<id>.png` and
-  authors the image prompt from your caption + house art style.
-- **Make it teach, not decorate.** Prefer figures that carry real information: steps with arrows, A-vs-B
-  columns, labeled feature breakdowns, simple charts. Write the caption so it names the **structure and
-  the labels** you want drawn (in Thai/English), not a vague mood. The caption is the seed for the prompt.
-- **Choose the kind deliberately:** real app UI → `{{screenshot:file.png|...}}`; concept/diagram/chart →
-  `{{image:id|...}}`. Never reuse the same id across both kinds.
-- Reach for `{{image:...}}` whenever a concept has structure a diagram would clarify — that's often, in a
-  tutorial book. Screenshots still carry the click-by-click steps; content figures carry the mental model.
+> **ข้อควรระวัง:** {what could go wrong}
 
-### Expanding Thin Sections
+> **เคล็ดลับ:** {practical, specific advice}
 
-If the outline's bullet points for a section seem sparse, use these strategies to add depth:
+> **ลองคิดตาม:** {a question for the reader to reflect on}
 
 **Compare and contrast** — Show before/after, old way vs new way, wrong approach vs right approach. Each comparison needs full examples on both sides.
 
@@ -523,28 +520,27 @@ Use these callout patterns consistently:
 ```
 
 ### Tables
-Use Markdown tables for comparisons and quick references. Keep them readable — avoid tables wider than 3-4 columns.
 
-### Step-by-step Instructions
-For walkthrough steps, use numbered lists with bold step descriptions and explanatory text under each:
+Use markdown tables for comparisons and quick references. Keep to 3-4 columns max.
+
+### Examples
+
+- At least one concrete example per concept
+- Prefer real-world scenarios over abstract descriptions
+- Connect examples to the reader's likely experience
+- Use second person: "สมมติว่าคุณ..."
+- **No fake Thai character names** ("คุณนิด", "คุณสมชาย") — use situations, not characters
+
+### Cross-references
 
 ```markdown
-1. **เปิด Customize** — คลิกที่ "Customize" ในแถบด้านซ้าย
-   หน้า Customize จะแสดงตัวเลือก 3 หมวด: Skills, Connectors, และ Plugins
-   ตอนนี้เราสนใจ Connectors ก่อน
-
-2. **เลือก Connectors** — คลิกแท็บ "Connectors" ด้านบน
-   คุณจะเห็นรายการ Connector ที่มีให้เชื่อมต่อ เช่น Gmail, Google Drive,
-   Slack พร้อมคำอธิบายสั้น ๆ ว่าแต่ละตัวทำอะไรได้
-
-3. **คลิก Connect** — เลือก Gmail แล้วกดปุ่ม "Connect"
-   ระบบจะเปิดหน้าต่างใหม่ให้คุณล็อกอิน Google Account
-   เมื่อล็อกอินเสร็จ สถานะจะเปลี่ยนเป็น "Connected" พร้อมเครื่องหมายถูกสีเขียว
+(เราจะพูดถึงเรื่องนี้อย่างละเอียดในบทที่ {N})
+(จำจากบทที่ {N} ได้ไหม? ...)
 ```
 
-## Step 3: Quality Checklist
+Always reference by chapter number — never "บทก่อนหน้า" or "บทถัดไป".
 
-Before saving the chapter, verify:
+### Summary
 
 - [ ] **Word count is inside `scope.words_per_chapter`** — count the words. More than ~20% under the low end means the chapter is too thin: go back and add depth, don't pad.
 - [ ] ครอบคลุมทุกหัวข้อย่อยที่ระบุไว้ใน outline — ไม่ข้ามหัวข้อใด
@@ -599,6 +595,7 @@ The hands-on project at the end is the last numbered section in the outline.
 ### References Format
 At the end of each chapter, list the actual source documents used. **Every reference must include the real URL** — find the URL from the `> Source:` line at the top of each reference document (refs/docs/*.md, refs/blogs/*.md). Do NOT make up URLs or use placeholder text.
 
+Format:
 ```markdown
 ## แหล่งอ้างอิง
 
