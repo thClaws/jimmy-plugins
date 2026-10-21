@@ -1,14 +1,17 @@
 # slide-render — Marp + Chromium + Thai fonts. One image; not in the engine base.
-FROM node:20-bookworm-slim
+FROM node:20-bookworm-slim AS runtime
 
 # Chromium (Marp renders PDF + PNG via it) + Thai fonts (fallback to @font-face in theme)
 # libreoffice-impress + poppler-utils back the /pptx endpoint (view an
 # existing deck): Impress converts pptx→pdf, pdftoppm rasterises. Only the
-# Impress component is installed — the full libreoffice metapackage pulls
-# Writer/Calc/Base and roughly triples the layer for no gain here.
+# Impress component was installed until doc-render (dev-plan/69): /convert
+# needs Writer and Calc too. Base/Draw/Math stay out — the full libreoffice
+# metapackage pulls them and Java for nothing this service does.
+# tesseract-ocr + tha/eng traineddata back /ocr.
 RUN apt-get update && apt-get install -y --no-install-recommends \
       chromium fonts-thai-tlwg fonts-noto-core fontconfig ca-certificates tini \
-      libreoffice-impress libreoffice-core poppler-utils \
+      libreoffice-impress libreoffice-writer libreoffice-calc libreoffice-core poppler-utils \
+      tesseract-ocr tesseract-ocr-tha tesseract-ocr-eng \
     && rm -rf /var/lib/apt/lists/*
 
 # Marp uses the system Chromium (skip its bundled download).
@@ -52,3 +55,14 @@ ENV CHROME_NO_SANDBOX=1 \
 # tini reaps zombie Chromium procs.
 ENTRYPOINT ["/usr/bin/tini","--"]
 CMD ["node","server.js"]
+
+# Every route against the real binaries, Thai included (convert round-trip,
+# HTML→PDF→text, tha OCR). A failure fails the build, so a broken image is
+# never pushed. The final stage copies the marker to force this stage to run;
+# the test files themselves stay out of the shipped image.
+FROM runtime AS smoke
+COPY test ./test
+RUN SMOKE_SLIDES=1 node test/smoke.js && touch /tmp/smoke-passed
+
+FROM runtime
+COPY --from=smoke /tmp/smoke-passed /app/.smoke-passed

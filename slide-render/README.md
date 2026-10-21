@@ -19,6 +19,39 @@ POST /slides   (multipart)
    → 400 bad input / malformed upload · 401 unauthorized · 500 render failed
 ```
 
+### doc-render (dev-plan/69)
+
+Office documents for the engine's cloud-side tools. All multipart; every 2xx sets
+**`X-Page-Count`** and **`X-Slide-Count`** (same number — the gateway meters on the
+latter). Errors are JSON `{"error": …}`. `first`/`last` are 1-based inclusive; an
+explicit range wider than the cap is a 400, an omitted `last` is clamped to it.
+
+```
+POST /convert      file, to=pdf|docx|xlsx|pptx|odt|ods|odp|html|txt|csv
+   → the converted bytes + Content-Disposition: attachment; filename="<stem>.<to>"
+     input: doc docx odt rtf txt html | xls xlsx ods csv | ppt pptx odp
+     (Writer → pdf docx odt html txt · Calc → pdf xlsx ods html csv · Impress → pdf pptx odp;
+      any other pair is a 400). txt/csv in and out are UTF-8. Page count = PDF pages for to=pdf, else 1.
+POST /pdf/text     file, mode=layout|raw, first, last (≤ 500 pages)
+   → { page_count, pages: [{ n, text }] }                 (pdftotext -enc UTF-8)
+POST /pdf/pages    file, dpi (150, ≤ 300), first, last (≤ 20 pages)
+   → { page_count, pages: [{ n, png_base64 }] }           (pdftoppm)
+POST /ocr          file (pdf png jpg tiff webp), lang (tha+eng; installed traineddata only),
+                   dpi (300), first, last (≤ 20 pages)
+   → { page_count, pages: [{ n, text, confidence }] }     (tesseract 5; confidence = mean word conf)
+POST /html-to-pdf  file (.html), assets[] (by relative name), format=A4|Letter, landscape
+   → application/pdf                                      (headless Chromium)
+```
+
+`/html-to-pdf` serves the job dir from a loopback server (not `file://`, which would let
+the page read the container's files into the PDF) and points Chromium at a dead proxy
+plus a NOTFOUND resolver, so the page reaches nothing but its own assets. Heavy jobs
+queue behind `DOC_RENDER_CONCURRENCY` (default 2) per pod.
+
+`test/smoke.js` exercises every route against a live server, Thai included; the
+Dockerfile runs it in a build stage, so an image that fails it is never produced.
+Locally: `SMOKE_OCR_LANG=eng node test/smoke.js` (Homebrew tesseract ships no `tha`).
+
 The two routes do NOT name their PNGs the same way: Marp emits `slide.001.png`
 (dot, 3-digit) and pdftoppm emits `slide-N.png` with the width set by the page
 count (`slide-1` for a 2-page deck, `slide-01` for a 12-page one). Both sort
@@ -44,7 +77,9 @@ successful render is debited per page at `SLIDE_RENDER_MICROS_PER_PAGE`
 (micro-cents, pre-markup; `200000` = $0.002/page ⇒ a 20-page chapter deck is 5¢ at
 the default ×1.25). `/pptx` has its own rate, `SLIDE_RENDER_PPTX_MICROS_PER_PAGE`,
 defaulting to `0` — that route backs the Files-tab preview of a deck the user
-already owns, which has always been free.
+already owns, which has always been free. The doc-render routes are priced the same
+way, one env each (`SLIDE_RENDER_{CONVERT,PDF_TEXT,PDF_PAGES,OCR,HTML_TO_PDF}_MICROS_PER_PAGE`),
+all defaulting to `0`; a free call still writes its usage row.
 
 Running your own copy and pointing `SLIDE_RENDER_API` at it costs nothing, because
 it is your compute. That branch cannot reach the hosted service.
@@ -70,7 +105,7 @@ curl -sS -X POST localhost:8080/slides -F markdown=@deck.md -F theme=thai-tech -
 
 ## Build + deploy (cloud)
 ```
-docker build -t registry.artech.cloud/slide-render:v0.4.0 .
+docker build -t registry.artech.cloud/slide-render:v0.5.0 .   # runs test/smoke.js in a build stage
 # deploy as a k3s Deployment+Service in thclaws-cloud; expose via gateway /slide-render/*
 kubectl apply -f k8s.yaml      # Deployment + Service + HPA + PodDisruptionBudget
 ```
