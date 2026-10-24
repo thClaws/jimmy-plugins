@@ -1,5 +1,5 @@
 # slide-render — Marp + Chromium + Thai fonts. One image; not in the engine base.
-FROM node:20-bookworm-slim AS runtime
+FROM node:22.23.4-bookworm-slim AS runtime
 
 # Chromium (Marp renders PDF + PNG via it) + Thai fonts (fallback to @font-face in theme)
 # libreoffice-impress + poppler-utils back the /pptx endpoint (view an
