@@ -28,6 +28,22 @@ const path = require("path");
 const crypto = require("crypto");
 
 const run = promisify(execFile);
+
+// Every renderer runs offline and without the service token: a document or
+// deck that references http(s) URLs must not make the box (or the cloud pod)
+// fetch them, and a deck read through file:// must find no secret in the
+// child's environment. Chromium also gets hard flags via CHROME_PATH's
+// wrapper (Dockerfile); LibreOffice honours the proxy variables.
+const DEAD_PROXY = "http://127.0.0.1:9";
+function offlineEnv(extra = {}) {
+  const env = { ...process.env, ...extra };
+  delete env.SLIDE_RENDER_TOKEN;
+  for (const k of ["http_proxy", "https_proxy", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "all_proxy"]) {
+    env[k] = DEAD_PROXY;
+  }
+  env.no_proxy = env.NO_PROXY = "127.0.0.1,localhost";
+  return env;
+}
 const app = express();
 // /slides carries a Marp deck plus its figures — many small files.
 const upload = multer({ limits: { fileSize: 25 * 1024 * 1024, files: 60 } });
@@ -89,11 +105,12 @@ app.post("/slides", auth, upload.fields([{ name: "images" }]), async (req, res) 
       "--html", "--allow-local-files", "--no-stdin",
     ];
     const marp = process.env.MARP_BIN || "marp";
-    await run(marp, [...common, "--pdf", "-o", "deck.pdf"], { cwd: job, timeout: TIMEOUT_MS });
+    const marpEnv = offlineEnv({ HOME: job });
+    await run(marp, [...common, "--pdf", "-o", "deck.pdf"], { cwd: job, timeout: TIMEOUT_MS, env: marpEnv });
     const outDir = path.join(job, "png");
     await fs.mkdir(outDir, { recursive: true });
     await run(marp, [...common, "--images", "png", "-o", path.join("png", "slide.png")],
-      { cwd: job, timeout: TIMEOUT_MS });
+      { cwd: job, timeout: TIMEOUT_MS, env: marpEnv });
 
     // Count the pages BEFORE streaming: the gateway meters this render per
     // rendered page and reads the count off the response header, which can
@@ -157,7 +174,7 @@ app.post("/pptx", auth, uploadPptx.single("file"), async (req, res) => {
         job,
         src,
       ],
-      { cwd: job, timeout: TIMEOUT_MS },
+      { cwd: job, timeout: TIMEOUT_MS, env: offlineEnv({ HOME: job }) },
     );
 
     // LibreOffice names the output after the input stem, not "deck".
@@ -448,7 +465,7 @@ app.post("/convert", auth, uploadDoc.single("file"), docRoute("convert", async (
   ];
   if (CONVERT_INFILTERS[inExt]) args.push(`--infilter=${CONVERT_INFILTERS[inExt]}`);
   args.push("--convert-to", filter, "--outdir", outDir, src);
-  await run(process.env.SOFFICE_BIN || "soffice", args, { cwd: job, timeout: TIMEOUT_MS });
+  await run(process.env.SOFFICE_BIN || "soffice", args, { cwd: job, timeout: TIMEOUT_MS, env: offlineEnv({ HOME: job }) });
 
   const produced = (await fs.readdir(outDir)).filter((n) => n.toLowerCase().endsWith(`.${to}`));
   if (produced.length !== 1) {
@@ -639,7 +656,7 @@ app.post(
           `--print-to-pdf=${pdf}`,
           `http://${origin}/__index.html`,
         ],
-        { cwd: job, timeout: TIMEOUT_MS, env: { ...process.env, HOME: job } },
+        { cwd: job, timeout: TIMEOUT_MS, env: offlineEnv({ HOME: job }) },
       );
       if (!fss.existsSync(pdf)) throw new HttpError(422, "chromium produced no pdf");
       const pages = await pdfPageCount(pdf);

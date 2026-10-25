@@ -15,7 +15,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Marp uses the system Chromium (skip its bundled download).
-ENV CHROME_PATH=/usr/bin/chromium \
+# Chromium for Marp and /html-to-pdf never reaches the network: loopback is
+# implicitly bypassed by the proxy, and the resolver rule refuses DNS.
+RUN printf '#!/bin/sh\nexec /usr/bin/chromium --proxy-server=127.0.0.1:9 --host-resolver-rules="MAP * ~NOTFOUND , EXCLUDE 127.0.0.1" --force-webrtc-ip-handling-policy=disable_non_proxied_udp "$@"\n' > /usr/local/bin/chromium-offline \
+    && chmod 755 /usr/local/bin/chromium-offline
+ENV CHROME_PATH=/usr/local/bin/chromium-offline \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     MARP_BIN=marp \
     NODE_ENV=production
